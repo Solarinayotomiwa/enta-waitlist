@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "enta-waitlist",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "C:\\Users\\Green\\Desktop\\Enta waitlist website\\enta-waitlist"],
+      "port": 3000
+    }
+  ]
+}

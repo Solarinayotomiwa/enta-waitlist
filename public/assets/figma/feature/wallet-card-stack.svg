@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 441.746 254.484" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Card stack">
+<path id="Glow border" d="M418.698 4.80159H23.0476C12.9706 4.80159 4.80159 12.9706 4.80159 23.0476V231.436C4.80159 241.513 12.9706 249.683 23.0476 249.683H418.698C428.775 249.683 436.944 241.513 436.944 231.436V23.0476C436.944 12.9706 428.775 4.80159 418.698 4.80159Z" fill="var(--fill-0, #1C1C1C)" stroke="url(#paint0_linear_0_8)" stroke-width="9.60318"/>
+<path id="Stack line 1" d="M12.4841 72.9793C12.4841 60.8153 18.5661 54.7333 30.7301 54.7333H411.016C423.18 54.7333 429.262 60.8153 429.262 72.9793" stroke="var(--stroke-0, white)" stroke-opacity="0.13" stroke-width="0.720238"/>
+<path id="Stack line 2" d="M12.4841 129.639C12.4841 117.475 18.5661 111.393 30.7301 111.393H411.016C423.18 111.393 429.262 117.475 429.262 129.639" stroke="var(--stroke-0, white)" stroke-opacity="0.13" stroke-width="0.720238"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_8" x1="4.80159" y1="4.80159" x2="230.993" y2="263.082" gradientUnits="userSpaceOnUse">
+<stop stop-color="#B9CDFF"/>
+<stop offset="1" stop-color="#B4C9FF"/>
+</linearGradient>
+</defs>
+</svg>

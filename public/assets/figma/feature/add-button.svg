@@ -1,0 +1,15 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 72.0238 72.0238" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Add button">
+<path id="Vector" d="M36.0119 72.0238C55.9007 72.0238 72.0238 55.9007 72.0238 36.0119C72.0238 16.1231 55.9007 0 36.0119 0C16.1231 0 0 16.1231 0 36.0119C0 55.9007 16.1231 72.0238 36.0119 72.0238Z" fill="url(#paint0_linear_0_5)"/>
+<g id="Vector_2">
+<path d="M36.0134 24.0095V48.0174ZM24.0095 36.0134H48.0174Z" fill="var(--fill-0, black)"/>
+<path d="M36.0134 24.0095V48.0174M24.0095 36.0134H48.0174" stroke="var(--stroke-0, #15231A)" stroke-width="3.36111" stroke-linecap="round"/>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_5" x1="10.8036" y1="-7.1907e-07" x2="39.6131" y2="72.0238" gradientUnits="userSpaceOnUse">
+<stop stop-color="#B4C9FE"/>
+<stop offset="1" stop-color="#B8CCFF"/>
+</linearGradient>
+</defs>
+</svg>
