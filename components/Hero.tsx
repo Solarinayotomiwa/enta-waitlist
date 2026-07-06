@@ -400,7 +400,7 @@ export function Hero() {
           <HeroIntro />
         </div>
         <WaitlistForm />
-        <div className="relative z-40 mt-8 flex justify-center lg:absolute lg:bottom-8 lg:left-0 lg:right-0 lg:mt-0 lg:justify-start">
+        <div className="relative z-40 mt-8 flex justify-center lg:absolute lg:bottom-[calc(100%-100dvh+32px)] lg:left-0 lg:right-0 lg:mt-0 lg:justify-start">
           <ScrollCue shouldAnimate={shouldAnimate} />
         </div>
       </div>
