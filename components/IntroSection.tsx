@@ -52,7 +52,7 @@ export function IntroSection() {
   return (
     <section
       className={cn(
-        "intro-section relative isolate -mt-px overflow-hidden bg-[#0d101d] px-6 pb-24 pt-28 text-white sm:pb-[120px] sm:pt-36 lg:px-0 lg:pt-40",
+        "intro-section relative isolate -mt-px overflow-hidden bg-[#0d101d] px-6 pb-24 pt-28 text-white sm:pb-[120px] sm:pt-36 lg:px-0 lg:pt-[200px]",
         shouldAnimate && "motion-active",
       )}
       id="proof"

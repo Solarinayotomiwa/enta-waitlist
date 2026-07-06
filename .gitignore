@@ -10,3 +10,5 @@ dist/
 # local QA screenshots — not for deployment
 public/reference/
 .vercel
+
+.vercel
