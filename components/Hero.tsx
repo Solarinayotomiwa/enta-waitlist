@@ -17,7 +17,7 @@ const chipReveal = {
 
 const formFields = [
   { id: "name", label: "Name", type: "text", autoComplete: "name" },
-  { id: "email", label: "Email address", type: "email", autoComplete: "email" },
+  { id: "email", label: "Email address", type: "email", autoComplete: "email", required: true },
   {
     id: "contact",
     label: "WhatsApp or Telegram (optional)",
@@ -33,13 +33,14 @@ type FieldConfig = {
   type: string;
   autoComplete: string;
   helper?: string;
+  required?: boolean;
 };
 
 const businessFields = [
   { id: "contactName", label: "Contact name", type: "text", autoComplete: "name" },
   { id: "companyName", label: "Company name", type: "text", autoComplete: "organization" },
   { id: "role", label: "Your role or title", type: "text", autoComplete: "organization-title" },
-  { id: "businessEmail", label: "Email address", type: "email", autoComplete: "email" },
+  { id: "businessEmail", label: "Email address", type: "email", autoComplete: "email", required: true },
   { id: "whatsapp", label: "WhatsApp number", type: "text", autoComplete: "tel" },
 ] as const;
 
@@ -662,12 +663,29 @@ function HeroIntro() {
 
 function WaitlistForm() {
   const [audience, setAudience] = useState<"individual" | "business">("individual");
-  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const data = Object.fromEntries(new FormData(form).entries());
+
     setStatus("loading");
-    window.setTimeout(() => setStatus("success"), 650);
+
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, audience }),
+      });
+
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+
+      setStatus("success");
+      form.reset();
+    } catch {
+      setStatus("error");
+    }
   }
 
   return (
@@ -727,12 +745,27 @@ function WaitlistForm() {
         )}
       </div>
 
+      <input
+        aria-hidden="true"
+        autoComplete="off"
+        className="hidden"
+        name="website"
+        tabIndex={-1}
+        type="text"
+      />
+
       <button
         className="mt-[34px] flex h-[52px] w-full items-center justify-center rounded-lg bg-[#175cd3] px-5 text-[17px] font-semibold leading-[26px] text-white shadow-[0_1px_2px_rgba(16,24,40,0.05),inset_0_0_0_1px_rgba(16,24,40,0.18),inset_0_-2px_0_0_rgba(16,24,40,0.05)] transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-80"
         disabled={status === "loading"}
         type="submit"
       >
-        {status === "loading" ? "Joining..." : status === "success" ? "You're on the list" : "Join The Waitlist"}
+        {status === "loading"
+          ? "Joining..."
+          : status === "success"
+            ? "You're on the list ✓"
+            : status === "error"
+              ? "Something went wrong — try again"
+              : "Join The Waitlist"}
       </button>
     </motion.form>
   );
@@ -747,6 +780,7 @@ function FloatingTextField({ field }: { field: FieldConfig }) {
         id={field.id}
         name={field.id}
         placeholder=" "
+        required={field.required}
         type={field.type}
       />
       <span className="floating-label">{field.label}</span>
