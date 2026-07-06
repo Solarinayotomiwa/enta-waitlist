@@ -37,7 +37,8 @@ export async function POST(request: Request) {
     problem: field("problem"),
   };
 
-  const webhookUrl = process.env.SHEETS_WEBHOOK_URL;
+  // Strip BOM/whitespace that shell pipelines can smuggle into the env value.
+  const webhookUrl = process.env.SHEETS_WEBHOOK_URL?.replace(/^\uFEFF/, "").trim();
 
   if (!webhookUrl) {
     console.error("SHEETS_WEBHOOK_URL is not set");
