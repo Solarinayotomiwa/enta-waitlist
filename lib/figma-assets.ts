@@ -65,6 +65,7 @@ export const figmaAssets = {
   calculatorChartUsdt: "/assets/figma/calculator/chart-usdt.svg",
   calculatorChartBtc: "/assets/figma/calculator/chart-btc.svg",
   calculatorChartXaut: "/assets/figma/calculator/chart-xaut.svg",
+  calculatorChartDivider: "/assets/figma/calculator/vector-2777.svg",
   featureUsdtBg: "/assets/figma/feature/usdt-bg.png",
   featureUsdtToken: "/assets/figma/feature/usdt-token.png",
   featureBitcoinBg: "/assets/figma/feature/bitcoin-bg.png",

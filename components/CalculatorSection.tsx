@@ -11,6 +11,7 @@ type AssetOutcome = {
   multiplier: number;
   icon: string;
   accent: string;
+  barText: string;
   summary: string;
 };
 
@@ -20,7 +21,8 @@ const assetOutcomes: AssetOutcome[] = [
     label: "Held in naira",
     multiplier: 1,
     icon: figmaAssets.calculatorChartNaira,
-    accent: "#7ba7ff",
+    accent: "#e6e7e7",
+    barText: "#0d101d",
     summary: "Still ₦6M. But worth 63% less in purchasing power than when you saved it.",
   },
   {
@@ -28,7 +30,8 @@ const assetOutcomes: AssetOutcome[] = [
     label: "Held in USDT",
     multiplier: 2.71,
     icon: figmaAssets.calculatorChartUsdt,
-    accent: "#31c48d",
+    accent: "#00e56b",
+    barText: "#0d101d",
     summary:
       "A digital dollar that holds its value. Your savings, shielded from naira devaluation.",
   },
@@ -37,7 +40,8 @@ const assetOutcomes: AssetOutcome[] = [
     label: "Held in Bitcoin",
     multiplier: 3.15,
     icon: figmaAssets.calculatorChartBtc,
-    accent: "#f7931a",
+    accent: "#ec8503",
+    barText: "#0d101d",
     summary:
       "The hardest money ever made. 21 million forever — against a naira that only expands.",
   },
@@ -46,9 +50,10 @@ const assetOutcomes: AssetOutcome[] = [
     label: "Held in Gold",
     multiplier: 3.7666667,
     icon: figmaAssets.calculatorChartXaut,
-    accent: "#f2c94c",
+    accent: "#f9bd03",
+    barText: "#fffefe",
     summary:
-      "Five thousand years as the ultimate store of value. Now able to be held without the custody and counterfeit risks. The ultimate hedge against devaluation.",
+      "Five thousand years as the ultimate store of value. Now able to be held without the custody and counterfeit risks.",
   },
 ];
 
@@ -56,7 +61,6 @@ const defaultAmount = 6000000;
 const minAmount = 1;
 const maxAmount = 1000000000;
 const minVisibleBarScale = 0.08;
-const chartLabelReserveRem = 5.75;
 
 function formatNaira(value: number) {
   return new Intl.NumberFormat("en-NG", {
@@ -218,7 +222,7 @@ export function CalculatorSection() {
                 if (item.key === expandedKey) {
                   return (
                     <motion.div
-                      className="overflow-hidden rounded-2xl border border-[#2a2a49] px-5 py-6"
+                      className="min-h-[324px] overflow-hidden rounded-2xl border border-[#2a2a49] px-5 py-6"
                       key={item.key}
                       layout
                       transition={{ layout: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }}
@@ -231,7 +235,7 @@ export function CalculatorSection() {
                         <img
                           alt=""
                           className="h-[66px] w-auto object-contain drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
-                          src={item.key === "xaut" ? figmaAssets.calculatorGoldCoin : item.icon}
+                          src={item.icon}
                         />
                         <p className="mt-3 text-[2rem] font-medium leading-none tracking-[-0.576px] text-white">
                           {formatNaira(item.result)}
@@ -283,26 +287,27 @@ export function CalculatorSection() {
 
         <motion.div
           animate={contentVisible ? "visible" : "hidden"}
-          className="overflow-hidden rounded-2xl border border-[#eeaafd]/70 bg-[#0f1430] shadow-2xl shadow-black/25"
+          className="overflow-hidden rounded-2xl border-[3px] border-[#9f1ab1] bg-[#0f1430]"
           initial="hidden"
           transition={{ duration: 0.55, ease: "easeOut" }}
           variants={sectionReveal}
         >
-          <div className="grid gap-10 p-6 sm:p-10 lg:grid-cols-[397px_1fr] lg:p-16">
+          <div className="grid gap-10 p-6 sm:p-10 lg:h-[624px] lg:grid-cols-[397px_1fr] lg:items-center lg:gap-[50px] lg:py-0 lg:pl-16 lg:pr-[21px]">
             <div className="flex flex-col justify-center">
-              <h3 className="text-balance text-[2.35rem] font-semibold leading-[1.08] sm:text-5xl">
+              <h3 className="text-balance text-[2.35rem] font-semibold leading-[1.08] tracking-[-0.018em] sm:text-5xl sm:leading-[52px]">
                 What would your number look like?
               </h3>
-              <label className="mt-8 block">
-                <span className="mb-3 block text-sm font-medium text-white/70">Enter your amount</span>
+              <label className="mt-6 block">
                 <span
-                  className="flex min-h-[104px] items-center rounded-lg border border-white bg-transparent px-5 sm:px-6"
+                  className="flex items-center rounded-lg border border-white bg-black/20 py-4 pl-[23px] pr-5 sm:py-5"
                   data-calculator-amount-field
                 >
-                  <span className="mr-3 text-6xl font-semibold leading-none sm:text-[4rem]">₦</span>
+                  <span className="mr-1 text-4xl font-semibold leading-none sm:text-[48px] sm:leading-[60px] sm:tracking-[-0.96px]">
+                    ₦
+                  </span>
                   <input
                     aria-label="Amount saved in naira"
-                    className="w-full bg-transparent text-4xl font-semibold leading-none tracking-[-0.02em] text-white outline-none placeholder:text-white/30 sm:text-5xl"
+                    className="w-full bg-transparent text-4xl font-semibold leading-none tracking-[-0.96px] text-white outline-none placeholder:text-white/30 sm:text-[48px] sm:leading-[60px]"
                     data-calculator-amount-input
                     inputMode="numeric"
                     onChange={onAmountChange}
@@ -310,53 +315,62 @@ export function CalculatorSection() {
                   />
                 </span>
               </label>
-              <p className="mt-4 text-pretty text-lg leading-7 text-white/76">
-                Enter any amount. See the difference based on real 2021–2026 price movement.
+              <p className="mt-4 text-pretty text-xl leading-[27px] tracking-[-0.32px] text-white/80">
+                Enter any amount. See the difference based on real 2021–2026 prices.
               </p>
             </div>
 
-            <div className="relative min-h-[430px] overflow-hidden rounded-2xl bg-[#111a3a] p-5 sm:min-h-[462px] sm:p-8">
-              <div className="absolute inset-x-5 top-8 bottom-12 grid grid-cols-4 gap-3 border-b border-white/15 sm:inset-x-8 sm:gap-5">
-                {outcomes.map((item) => (
+            <div className="relative min-h-[430px] overflow-hidden rounded-[11px] bg-[#111a3a] lg:h-[430px]">
+              <div className="absolute inset-x-5 top-14 bottom-10 grid grid-cols-4 gap-3 sm:inset-x-[34px] sm:top-[81px] sm:bottom-[64px] sm:gap-[18px]">
+                {outcomes.map((item, index) => (
                   <div
                     className="relative flex h-full items-end justify-center"
                     data-chart-scale={item.chartScale.toFixed(4)}
                     key={item.key}
                   >
+                    {index > 0 ? (
+                      <img
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute -left-[7px] top-0 h-full w-px sm:-left-[10px]"
+                        src={figmaAssets.calculatorChartDivider}
+                      />
+                    ) : null}
                     <motion.div
                       animate={{
-                        bottom: `calc(${(item.chartScale * 100).toFixed(3)}% - ${(
-                          item.chartScale * chartLabelReserveRem
-                        ).toFixed(3)}rem + 0.25rem)`,
+                        bottom: `calc(${(item.chartScale * 100).toFixed(3)}% + 8px)`,
                       }}
-                      className="absolute left-1/2 z-20 flex w-[3.25rem] -translate-x-1/2 flex-col items-center text-center sm:w-max"
+                      className="absolute left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-1 text-center"
                       initial={false}
                       transition={{ duration: 0.55, ease: "easeOut" }}
                     >
-                      <div className="flex size-9 items-center justify-center rounded-full bg-white/90 shadow-[0_10px_30px_rgba(0,0,0,0.22)] ring-1 ring-white/35 sm:size-12">
-                        <img alt="" className="size-6 sm:size-8" src={item.icon} />
-                      </div>
-                      <p className="mt-1.5 text-[0.68rem] font-semibold leading-none text-white sm:mt-2 sm:text-sm">
-                        {item.label.replace("Held in ", "")}
+                      <p className="whitespace-nowrap text-[10.6px] font-normal leading-4 text-white">
+                        {item.label}
                       </p>
-                      <p className="mt-1 text-[0.66rem] font-semibold leading-none text-white/82 sm:text-xs">
-                        <span className="sm:hidden">{formatCompactNaira(item.result)}</span>
-                        <span className="hidden sm:inline">{formatNaira(item.result)}</span>
-                      </p>
+                      <img alt="" className="size-7" src={item.icon} />
                     </motion.div>
                     <motion.div
                       aria-label={`${item.label}: ${formatNaira(item.result)}`}
-                      className="calculator-bar relative h-[calc(100%-5.75rem)] w-full max-w-[123px] rounded-t-2xl"
-                      animate={{ scaleY: item.chartScale }}
-                      initial={{ scaleY: 0.18 }}
+                      animate={{ height: `${(item.chartScale * 100).toFixed(3)}%` }}
+                      className="relative w-full max-w-[123px] cursor-pointer overflow-hidden rounded-[11px]"
+                      initial={{ height: "18%" }}
                       style={
                         {
-                          "--bar-accent": item.accent,
+                          background: item.accent,
                           transformOrigin: "bottom",
                         } as CSSProperties
                       }
                       transition={{ duration: 0.55, ease: "easeOut" }}
-                    />
+                      whileHover={{ scale: 1.03, filter: "brightness(1.12)" }}
+                    >
+                      <p
+                        className="absolute inset-x-1 bottom-2 text-center text-[11px] font-medium tracking-[-0.31px] sm:bottom-[14px] sm:text-[17.25px]"
+                        style={{ color: item.barText }}
+                      >
+                        <span className="sm:hidden">{formatCompactNaira(item.result)}</span>
+                        <span className="hidden sm:inline">{formatNaira(item.result)}</span>
+                      </p>
+                    </motion.div>
                   </div>
                 ))}
               </div>

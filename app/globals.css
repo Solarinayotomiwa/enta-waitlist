@@ -30,6 +30,22 @@ select {
   font: inherit;
 }
 
+/* The global `font: inherit` reset above outranks Tailwind's layered
+   utilities, so the calculator amount input sizes live here. */
+[data-calculator-amount-input] {
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.96px;
+  line-height: 1;
+}
+
+@media (min-width: 640px) {
+  [data-calculator-amount-input] {
+    font-size: 48px;
+    line-height: 60px;
+  }
+}
+
 .hero-sky {
   transform: scale(1.04) translate3d(-1.4%, 0, 0);
   animation: sky-drift 20s linear infinite alternate;
@@ -272,14 +288,6 @@ select {
   top: 10rem;
   transform: translate3d(-50%, 0, 0);
   width: 36rem;
-}
-
-.calculator-bar {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--bar-accent) 72%, #ffffff 28%), var(--bar-accent)),
-    #2a2a49;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  height: 100%;
 }
 
 .feature-ambient-glow {
