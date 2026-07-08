@@ -171,11 +171,12 @@ export function CalculatorSection() {
             transition={{ duration: 0.55, ease: "easeOut" }}
             variants={sectionReveal}
           >
-            <h2 className="text-balance text-[2.35rem] font-semibold leading-[1.08] tracking-[-0.018em] sm:text-5xl sm:leading-[52px]">
-              <span className="font-normal">₦</span>6,000,000 saved over five years
+            <p className="mb-3 text-xl leading-[30px] text-[#4b8bff]">The savings problem</p>
+            <h2 className="text-balance text-[2.35rem] font-semibold leading-[1.12] tracking-[-0.018em] sm:text-5xl sm:leading-[54px]">
+              You saved ₦6,000,000. But did you really?
             </h2>
             <p className="mt-4 text-pretty text-lg leading-[26px] tracking-[-0.32px] text-white sm:text-xl">
-              The money is still there. The number hasn&apos;t changed. But what it can buy has been
+              The money is still there. The number has not changed. But what it can buy has been
               shrinking every single month.
             </p>
             <a
@@ -217,25 +218,31 @@ export function CalculatorSection() {
                 if (item.key === expandedKey) {
                   return (
                     <motion.div
-                      className="rounded-2xl border border-[#2a2a49] px-5 py-6"
+                      className="overflow-hidden rounded-2xl border border-[#2a2a49] px-5 py-6"
                       key={item.key}
                       layout
-                      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ layout: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }}
                     >
-                      <img
-                        alt=""
-                        className="h-[66px] w-auto object-contain drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
-                        src={item.key === "xaut" ? figmaAssets.calculatorGoldCoin : item.icon}
-                      />
-                      <p className="mt-3 text-[2rem] font-medium leading-none tracking-[-0.576px] text-white">
-                        {formatNaira(item.result)}
-                      </p>
-                      <p className="mt-6 text-base font-medium leading-[23px] tracking-[-0.32px] text-white/60">
-                        {item.label}
-                      </p>
-                      <p className="mt-3 text-pretty text-xl leading-[26px] tracking-[-0.32px] text-white">
-                        {item.summary}
-                      </p>
+                      <motion.div
+                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, y: 14 }}
+                        transition={{ delay: 0.16, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                      >
+                        <img
+                          alt=""
+                          className="h-[66px] w-auto object-contain drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
+                          src={item.key === "xaut" ? figmaAssets.calculatorGoldCoin : item.icon}
+                        />
+                        <p className="mt-3 text-[2rem] font-medium leading-none tracking-[-0.576px] text-white">
+                          {formatNaira(item.result)}
+                        </p>
+                        <p className="mt-6 text-base font-medium leading-[23px] tracking-[-0.32px] text-white/60">
+                          {item.label}
+                        </p>
+                        <p className="mt-3 text-pretty text-xl leading-[26px] tracking-[-0.32px] text-white">
+                          {item.summary}
+                        </p>
+                      </motion.div>
                     </motion.div>
                   );
                 }
@@ -251,15 +258,22 @@ export function CalculatorSection() {
                     onClick={() => setExpandedKey(item.key)}
                     onFocus={() => setExpandedKey(item.key)}
                     onMouseEnter={() => setExpandedKey(item.key)}
-                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ layout: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }}
                     type="button"
                   >
-                    <p className="text-base font-medium leading-[23px] tracking-[-0.32px] text-white/60">
-                      {item.label}
-                    </p>
-                    <p className="text-2xl font-medium tracking-[-0.432px] text-white">
-                      {formatNaira(item.result)}
-                    </p>
+                    <motion.span
+                      animate={{ opacity: 1 }}
+                      className="flex w-full items-start justify-between gap-6"
+                      initial={{ opacity: 0 }}
+                      transition={{ delay: 0.1, duration: 0.35, ease: "easeOut" }}
+                    >
+                      <p className="text-base font-medium leading-[23px] tracking-[-0.32px] text-white/60">
+                        {item.label}
+                      </p>
+                      <p className="text-2xl font-medium tracking-[-0.432px] text-white">
+                        {formatNaira(item.result)}
+                      </p>
+                    </motion.span>
                   </motion.button>
                 );
               })}
