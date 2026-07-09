@@ -166,7 +166,7 @@ export function CalculatorSection() {
     >
       <div aria-hidden="true" className="calculator-orb" />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-20">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-20 lg:gap-[200px]">
         <div className="grid gap-10 lg:grid-cols-[390px_1fr] lg:gap-12">
           <motion.div
             animate={contentVisible ? "visible" : "hidden"}
@@ -225,12 +225,12 @@ export function CalculatorSection() {
                       className="min-h-[324px] overflow-hidden rounded-2xl border border-[#2a2a49] px-5 py-6"
                       key={item.key}
                       layout
-                      transition={{ layout: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }}
+                      transition={{ layout: { duration: 0.38, ease: [0.32, 0.72, 0, 1] } }}
                     >
                       <motion.div
                         animate={{ opacity: 1, y: 0 }}
-                        initial={{ opacity: 0, y: 14 }}
-                        transition={{ delay: 0.16, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                        initial={{ opacity: 0, y: 8 }}
+                        transition={{ delay: 0.05, duration: 0.3, ease: "easeOut" }}
                       >
                         <img
                           alt=""
@@ -262,14 +262,14 @@ export function CalculatorSection() {
                     onClick={() => setExpandedKey(item.key)}
                     onFocus={() => setExpandedKey(item.key)}
                     onMouseEnter={() => setExpandedKey(item.key)}
-                    transition={{ layout: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }}
+                    transition={{ layout: { duration: 0.38, ease: [0.32, 0.72, 0, 1] } }}
                     type="button"
                   >
                     <motion.span
                       animate={{ opacity: 1 }}
                       className="flex w-full items-start justify-between gap-6"
                       initial={{ opacity: 0 }}
-                      transition={{ delay: 0.1, duration: 0.35, ease: "easeOut" }}
+                      transition={{ delay: 0.04, duration: 0.25, ease: "easeOut" }}
                     >
                       <p className="text-base font-medium leading-[23px] tracking-[-0.32px] text-white/60">
                         {item.label}
@@ -287,7 +287,7 @@ export function CalculatorSection() {
 
         <motion.div
           animate={contentVisible ? "visible" : "hidden"}
-          className="overflow-hidden rounded-2xl border-[3px] border-[#9f1ab1] bg-[#0f1430]"
+          className="overflow-hidden rounded-2xl border-[3px] border-[#eeaafd]"
           initial="hidden"
           transition={{ duration: 0.55, ease: "easeOut" }}
           variants={sectionReveal}

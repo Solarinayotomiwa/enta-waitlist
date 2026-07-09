@@ -5,73 +5,54 @@ import { motion, useInView, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/cn";
 import { figmaAssets } from "@/lib/figma-assets";
 
-type Step = {
-  title: string;
-  body: string;
+type StepWidget = {
   from: string;
   to: string;
   fromAmount: string;
   toAmount: string;
   metaFrom: string;
   metaTo: string;
+};
+
+type Step = {
+  title: string;
+  body: string;
   delay: number;
+  image?: string;
+  widget?: StepWidget;
 };
 
 const steps: Step[] = [
   {
-    title: "Fiat to USD₮",
-    body: "Convert your local currency into USD₮ in seconds. Preserve your purchasing power and move money across borders without correspondent banking.",
-    from: "NGN",
-    to: "USD₮",
-    fromAmount: "200,000",
-    toAmount: "125",
-    metaFrom: "$0 fee",
-    metaTo: "0.000625 rate",
+    title: "Fiat to USDT",
+    body: "Convert your local currency or any G7 currency into USDT. Maintain your purchasing power and make cross-border payments without the need for correspondent banking services.",
+    image: figmaAssets.howFiatUsdt,
     delay: 0,
   },
   {
-    title: "USD₮ to fiat",
-    body: "Cash out USD₮ to your local currency with direct payouts to bank accounts from virtual accounts in your own name. Fast settlement at transparent rates.",
-    from: "USD₮",
-    to: "NGN",
-    fromAmount: "125",
-    toAmount: "200,000",
-    metaFrom: "No hidden spread",
-    metaTo: "Local settlement",
+    title: "Purchase digital assets",
+    body: "Hold gold digitally, funded directly from your local currency. Real gold exposure without a vault, a broker, or a bank",
+    widget: {
+      from: "NGN",
+      to: "USDT",
+      fromAmount: "200,000",
+      toAmount: "125",
+      metaFrom: "$0 fee",
+      metaTo: "0.000625 rate",
+    },
     delay: 0.05,
   },
   {
-    title: "Purchase digital assets",
-    body: "Instantly buy and sell gold and Bitcoin straight from your local currency. Hold a store of value or take profit in one tap, no extra accounts required.",
-    from: "NGN",
-    to: "BTC",
-    fromAmount: "200,000",
-    toAmount: "0.0014",
-    metaFrom: "$0 fee",
-    metaTo: "Live quote",
+    title: "Embedded swaps",
+    body: "Move from USDT into bitcoin at market rates. No hidden markup. No middleman taking a cut.",
+    image: figmaAssets.howEmbeddedSwaps,
     delay: 0.1,
   },
   {
-    title: "Embedded swaps",
-    body: "Swap between digital assets across multiple chains without leaving the app. Move between USD₮, gold, and BTC with built-in multichain conversion at competitive rates.",
-    from: "USD₮",
-    to: "XAU₮",
-    fromAmount: "125",
-    toAmount: "0.040",
-    metaFrom: "Multichain",
-    metaTo: "Best route",
+    title: "Send money digitally",
+    body: "Send money across borders using the same account. Fast, traceable, and fully auditable from start to finish.",
+    image: figmaAssets.howSendMoney,
     delay: 0.15,
-  },
-  {
-    title: "Payment links",
-    body: "Accept crypto payments without ever holding crypto. Share a link, get paid, and receive settlement directly in the currency you choose.",
-    from: "USD₮",
-    to: "NGN",
-    fromAmount: "125",
-    toAmount: "200,000",
-    metaFrom: "Payment received",
-    metaTo: "Bank payout",
-    delay: 0.2,
   },
 ];
 
@@ -117,23 +98,23 @@ function ExchangeRow({
   );
 }
 
-function FlowPreview({ step }: { step: Step }) {
+function FlowPreview({ widget }: { widget: StepWidget }) {
   return (
     <div className="relative flex h-full items-center justify-center overflow-hidden rounded-xl">
       <img alt="" className="absolute inset-0 size-full object-cover" src={figmaAssets.howCardBg} />
       <div className="how-preview-panel relative z-10 flex w-[325px] max-w-[88%] flex-col gap-2">
         <ExchangeRow
-          amount={step.fromAmount}
-          icon={step.from === "NGN" ? figmaAssets.howFromCurrency : figmaAssets.howToCurrency}
-          label={step.from}
-          meta={step.metaFrom}
+          amount={widget.fromAmount}
+          icon={widget.from === "NGN" ? figmaAssets.howFromCurrency : figmaAssets.howToCurrency}
+          label={widget.from}
+          meta={widget.metaFrom}
           title="From"
         />
         <ExchangeRow
-          amount={step.toAmount}
-          icon={step.to === "NGN" ? figmaAssets.howFromCurrency : figmaAssets.howToCurrency}
-          label={step.to}
-          meta={step.metaTo}
+          amount={widget.toAmount}
+          icon={widget.to === "NGN" ? figmaAssets.howFromCurrency : figmaAssets.howToCurrency}
+          label={widget.to}
+          meta={widget.metaTo}
           title="To"
         />
         <motion.div
@@ -148,21 +129,26 @@ function FlowPreview({ step }: { step: Step }) {
   );
 }
 
-function StepCard({ step, visible }: { step: Step; visible: boolean }) {
+function StepCard({ index, step, visible }: { index: number; step: Step; visible: boolean }) {
   return (
     <motion.article
       animate={visible ? "visible" : "hidden"}
-      className="group relative overflow-hidden rounded-xl"
+      className="group relative overflow-hidden rounded-xl bg-[#0d101d] lg:sticky"
       initial="hidden"
+      style={{ top: `calc(112px + ${index * 28}px)` } as CSSProperties}
       transition={{ delay: step.delay, duration: 0.55, ease: "easeOut" }}
       variants={reveal}
     >
-      <div className="h-[220px] overflow-hidden rounded-xl sm:h-[240px]">
-        <FlowPreview step={step} />
+      <div className="h-[220px] overflow-hidden rounded-xl sm:h-[298px]">
+        {step.widget ? (
+          <FlowPreview widget={step.widget} />
+        ) : (
+          <img alt="" className="size-full rounded-xl object-cover" src={step.image} />
+        )}
       </div>
-      <div className="rounded-b-xl px-2 pb-2 pt-6">
-        <p className="text-base font-medium leading-[1.4] tracking-[-0.02em] text-[#53b1fd]">{step.title}</p>
-        <p className="mt-3 text-pretty text-lg leading-[1.32] tracking-[-0.014em] text-white sm:text-xl">
+      <div className="rounded-b-xl px-2 pb-4 pt-6">
+        <p className="text-base font-medium leading-[22.4px] tracking-[-0.32px] text-[#53b1fd]">{step.title}</p>
+        <p className="mt-3 text-pretty text-lg leading-[1.32] tracking-[-0.28px] text-white sm:text-xl sm:leading-[26px]">
           {step.body}
         </p>
       </div>
@@ -195,17 +181,17 @@ export function HowItWorksSection() {
           transition={{ duration: 0.55, ease: "easeOut" }}
           variants={reveal}
         >
-          <h2 className="text-balance text-[2.35rem] font-semibold leading-[1.08] tracking-[-0.018em] sm:text-5xl">
+          <h2 className="text-balance text-[2.35rem] font-semibold leading-[1.08] tracking-[-0.018em] sm:text-5xl sm:leading-[52px]">
             How it works
           </h2>
-          <p className="mt-4 max-w-[336px] text-pretty text-base leading-[1.4] tracking-[-0.02em] text-white/78">
-            Start with local fiat or USD₮ and move into any supported asset in a few steps.
+          <p className="mt-4 max-w-[336px] text-pretty text-base leading-[22.4px] tracking-[-0.32px] text-white">
+            Start with local fiat or USDT and move into any supported asset in a few steps.
           </p>
         </motion.div>
 
         <div className="flex flex-col gap-16">
-          {steps.map((step) => (
-            <StepCard key={step.title} step={step} visible={contentVisible} />
+          {steps.map((step, index) => (
+            <StepCard index={index} key={step.title} step={step} visible={contentVisible} />
           ))}
         </div>
       </div>

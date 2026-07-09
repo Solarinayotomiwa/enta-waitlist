@@ -43,7 +43,7 @@ function SecurityPointCard({ point, visible, index }: { index: number; point: Se
   return (
     <motion.article
       animate={visible ? "visible" : "hidden"}
-      className="security-point max-w-[280px] text-white"
+      className="security-point w-full rounded-xl border border-[#414167] px-5 py-6 text-white transition duration-300 ease-out hover:-translate-y-1 hover:border-[#4b8bff] lg:min-h-[226px]"
       initial="hidden"
       transition={{ delay: index * 0.06, duration: 0.5, ease: "easeOut" }}
       variants={reveal}
@@ -53,8 +53,8 @@ function SecurityPointCard({ point, visible, index }: { index: number; point: Se
         className="security-point-icon size-16"
         src={point.icon}
       />
-      <h3 className="mt-3 text-base font-semibold leading-[1.44] tracking-[-0.02em]">{point.title}</h3>
-      <p className="mt-3 text-pretty text-base leading-[1.44] tracking-[-0.02em] text-white/84">{point.body}</p>
+      <h3 className="mt-2.5 text-base font-semibold leading-[23px] tracking-[-0.32px]">{point.title}</h3>
+      <p className="mt-3 text-pretty text-base leading-[23px] tracking-[-0.32px] text-white">{point.body}</p>
     </motion.article>
   );
 }
@@ -125,7 +125,7 @@ function BalanceCard({
 
 function SecurityVisual({ active }: { active: boolean }) {
   return (
-    <div className="relative mx-auto size-[330px] overflow-hidden rounded-3xl sm:size-[534px]">
+    <div className="relative mx-auto h-[306px] w-[330px] overflow-hidden rounded-xl sm:h-[496px] sm:w-[534px]">
       <img alt="" className="absolute inset-0 size-full object-cover" src={figmaAssets.securityPhoneBg} />
 
       <motion.img
@@ -136,7 +136,7 @@ function SecurityVisual({ active }: { active: boolean }) {
         transition={{ duration: 6.2, ease: "easeInOut", repeat: Infinity }}
       />
 
-      <div className="security-balance-stage absolute left-1/2 top-[47.6%] z-10 flex -translate-x-1/2 items-center gap-[9.5px] sm:gap-[15.36px]">
+      <div className="security-balance-stage absolute left-1/2 top-[51.2%] z-10 flex -translate-x-1/2 items-center gap-[9.5px] sm:gap-[15.36px]">
         <BalanceCard
           asset="usdt"
           icon={figmaAssets.securityCoin}
@@ -180,17 +180,17 @@ export function SecuritySection() {
           transition={{ duration: 0.55, ease: "easeOut" }}
           variants={reveal}
         >
-          <h2 className="text-balance text-[2.35rem] font-semibold leading-[1.08] tracking-[-0.018em] sm:text-5xl">
+          <h2 className="text-balance text-[2.35rem] font-semibold leading-[1.08] tracking-[-0.018em] sm:text-5xl sm:leading-[52px]">
             Only you can touch it
           </h2>
-          <p className="mx-auto mt-3 max-w-[520px] text-pretty text-base leading-[1.44] tracking-[-0.02em] text-white/80">
+          <p className="mx-auto mt-3 max-w-[469px] text-pretty text-base leading-[23px] tracking-[-0.32px] text-white">
             Protected by your biometrics. No platform, no government, no third party can freeze,
             block, or access your assets. Ever.
           </p>
         </motion.div>
 
-        <div className="mt-16 grid w-full items-center gap-8 lg:grid-cols-[258px_534px_258px] lg:gap-[75px]">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-1 lg:gap-[69px]">
+        <div className="mt-16 grid w-full items-center gap-8 lg:grid-cols-[309px_534px_309px] lg:gap-6">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-1 lg:gap-5">
             <SecurityPointCard index={0} point={securityPoints[0]} visible={contentVisible} />
             <SecurityPointCard index={2} point={securityPoints[2]} visible={contentVisible} />
           </div>
@@ -204,7 +204,7 @@ export function SecuritySection() {
             <SecurityVisual active={motionActive} />
           </motion.div>
 
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-1 lg:gap-[69px]">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-1 lg:gap-5">
             <SecurityPointCard index={1} point={securityPoints[1]} visible={contentVisible} />
             <SecurityPointCard index={3} point={securityPoints[3]} visible={contentVisible} />
           </div>

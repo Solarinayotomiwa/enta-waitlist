@@ -18,25 +18,25 @@ const assetCards: AssetCard[] = [
   {
     title: "USD₮",
     description:
-      "Holds the value of a dollar. Moves like a text message. The fastest way to true financial flexibility",
+      "The value of a dollar, accessible from your local currency. The fastest way to protect your purchasing power without touching a bank.",
     background: figmaAssets.featureUsdtBg,
     token: figmaAssets.featureUsdtToken,
-    className: "lg:translate-y-4",
+    className: "lg:translate-y-4 lg:hover:translate-y-2",
     tokenClassName: "translate-y-5 scale-[1.08] object-[50%_58%]",
   },
   {
     title: "Bitcoin",
     description:
-      "Access it from Naira, dirhams, Kenyan shillings or USD₮ at the best rates, with the deepest liquidity in the market.",
+      "Access it from your local currency or USDT at the best rates, with the deepest liquidity in the market. No markup. No runaround.",
     background: figmaAssets.featureBitcoinBg,
     token: figmaAssets.featureBitcoinToken,
-    className: "lg:translate-y-[7.25rem]",
+    className: "lg:translate-y-32 lg:hover:translate-y-[120px]",
     tokenClassName: "translate-y-4 scale-[1.04] object-[50%_56%]",
   },
   {
     title: "Gold",
     description:
-      "Now accessible from your phone, bought directly from your local currency. Real gold. Digital access. No vault required.",
+      "Five thousand years of value storage. Now accessible from your phone, from your local currency, with no vault required.",
     background: figmaAssets.featureGoldBg,
     token: figmaAssets.featureGoldToken,
     className: "",
@@ -70,34 +70,34 @@ function FeatureAssetCard({ card, index, animate }: { animate: boolean; card: As
     <motion.article
       animate={animate ? "visible" : "hidden"}
       className={cn(
-        "group relative w-full overflow-hidden rounded-xl border border-[#303650] bg-[#0c111d] shadow-2xl shadow-black/20 transition duration-300 ease-out hover:-translate-y-1 hover:border-[#6b7fd0]/70 hover:shadow-blue-950/30 lg:w-[332px]",
+        "group relative w-full overflow-hidden rounded-xl border border-[#00030a] bg-gradient-to-b from-[#0c111d] to-[rgba(12,17,29,0.1)] transition duration-300 ease-out hover:-translate-y-2 hover:border-[#6b7fd0]/70 hover:shadow-[0_24px_60px_rgba(6,10,24,0.45)] lg:w-[332px]",
         card.className,
       )}
       initial="hidden"
       transition={{ delay: 0.08 * index, duration: 0.55, ease: "easeOut" }}
       variants={reveal}
     >
-      <div className="relative h-[234px] overflow-hidden bg-white sm:h-[253px]">
+      <div className="relative h-[234px] overflow-hidden bg-[#0c111d] sm:h-[253px]">
         <img
           alt=""
-          className="absolute inset-0 size-full object-cover transition duration-700 ease-out group-hover:scale-[1.04]"
+          className="absolute inset-0 size-full object-cover"
           src={card.background}
         />
         <img
           alt=""
           className={cn(
-            "feature-card-token absolute inset-0 size-full origin-top object-cover transition duration-700 ease-out group-hover:scale-[1.1]",
+            "feature-card-token absolute inset-0 size-full origin-top object-cover",
             card.tokenClassName,
           )}
           src={card.token}
         />
-        <div className="absolute inset-x-0 bottom-[-1px] h-28 bg-gradient-to-b from-transparent to-[#0c111d]" />
+        <div className="absolute inset-x-0 bottom-[-1px] h-[90px] bg-gradient-to-b from-[rgba(56,79,130,0)] to-[#0c111c] to-[75%]" />
       </div>
-      <div className="min-h-[146px] px-5 pb-8 pt-4 text-white">
-        <h3 className="text-[2.45rem] font-medium leading-[1.05] tracking-[-0.03em] sm:text-[2.8rem]">
+      <div className="min-h-[146px] px-5 pb-8 pt-[31px] text-white">
+        <h3 className="text-[2.45rem] font-medium leading-[1.15] tracking-[-0.018em] sm:text-[45px] sm:leading-[52px]">
           {card.title}
         </h3>
-        <p className="mt-3 text-pretty text-sm font-medium leading-[1.3] tracking-[-0.02em] text-white/88">
+        <p className="mt-2 text-pretty text-sm font-medium leading-[18.2px] tracking-[-0.28px] text-white">
           {card.description}
         </p>
       </div>
@@ -115,7 +115,7 @@ export function FeatureSection() {
   return (
     <section
       className={cn(
-        "feature-section relative isolate overflow-hidden bg-[#0d101d] px-6 py-24 text-white sm:py-[120px] lg:px-0",
+        "feature-section relative isolate overflow-x-clip bg-[#0d101d] px-6 py-24 text-white sm:py-[120px] lg:px-0 lg:pb-[349px]",
         shouldAnimate && "motion-active",
       )}
       id="assets"
@@ -124,7 +124,7 @@ export function FeatureSection() {
       <img
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-0 z-0 h-[48rem] max-w-none -translate-x-1/2 opacity-45"
+        className="pointer-events-none absolute left-1/2 -top-40 z-0 h-[48rem] max-w-none -translate-x-1/2 opacity-45"
         src={figmaAssets.featureAmbientFrame}
       />
       <div aria-hidden="true" className="feature-ambient-glow" />
@@ -140,19 +140,19 @@ export function FeatureSection() {
           <h2 className="text-balance text-[2.35rem] font-semibold leading-[1.08] tracking-[-0.018em] sm:text-5xl">
             Three assets. One account.
           </h2>
-          <p className="mx-auto mt-4 max-w-[404px] text-pretty text-base leading-[1.4] tracking-[-0.01em] text-white/76">
-            Hold value in the form that works for your situation — stable, hard, or appreciating.
+          <p className="mx-auto mt-4 max-w-[404px] text-pretty text-base leading-[22.4px] tracking-[-0.16px] text-white">
+            Hold value in the form that works for your situation. Stable, hard, or appreciating.
           </p>
         </motion.div>
 
-        <div className="relative mt-12 w-full lg:mt-10">
+        <div className="relative mt-12 w-full lg:mt-[26px]">
           <div className="relative z-20 mx-auto w-full max-w-[520px]">
             <WalletIllustration animate={shouldAnimate} />
           </div>
 
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-[355px] z-10 hidden w-[760px] -translate-x-1/2 lg:block"
+            className="pointer-events-none absolute left-1/2 top-[377px] z-10 hidden w-[760px] -translate-x-1/2 lg:block"
           >
             <img
               alt=""
@@ -161,10 +161,10 @@ export function FeatureSection() {
             />
             <img
               alt=""
-              className="absolute left-1/2 top-0 h-16 w-[377px] opacity-80"
+              className="absolute left-1/2 top-0 h-16 w-[377px] -scale-y-100 opacity-80"
               src={figmaAssets.featureConnectorRight}
             />
-            <span className="absolute left-1/2 top-0 h-[170px] w-px -translate-x-1/2 bg-[#414167]/70" />
+            <span className="absolute left-1/2 top-0 h-[180px] w-px -translate-x-1/2 bg-[#414167]/70" />
           </div>
 
           <div className="relative z-20 mt-8 grid gap-5 sm:grid-cols-3 lg:mt-0 lg:flex lg:h-[420px] lg:items-start lg:justify-between">
