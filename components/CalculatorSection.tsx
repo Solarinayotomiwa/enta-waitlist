@@ -210,7 +210,7 @@ export function CalculatorSection() {
               <img
                 alt=""
                 className="absolute inset-0 size-full object-cover"
-                src={figmaAssets.calculatorHandMoney}
+                src={figmaAssets.calculatorHandMoneyMulti}
               />
             </motion.div>
 

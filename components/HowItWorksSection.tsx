@@ -51,7 +51,6 @@ const steps: Step[] = [
   {
     title: "Send money digitally",
     body: "Send money across borders using the same account. Fast, traceable, and fully auditable from start to finish.",
-    image: figmaAssets.howSendMoney,
     delay: 0.15,
   },
 ];
@@ -129,6 +128,60 @@ function FlowPreview({ widget }: { widget: StepWidget }) {
   );
 }
 
+const globeArcs = [
+  { color: "#6db5ff", path: "M155,188 C215,58 355,23 485,88", delay: 0 },
+  { color: "#f2a3dc", path: "M100,153 C235,8 435,28 530,178", delay: 2 },
+  { color: "#ffffff", path: "M305,188 C335,108 405,118 445,198", delay: 4 },
+];
+
+function GlobeAnimation() {
+  return (
+    <div className="relative h-full overflow-hidden rounded-xl bg-[#0d101d]">
+      <img
+        alt=""
+        className="absolute inset-0 size-full object-cover"
+        src={figmaAssets.howGlobeBg}
+      />
+      <div className="absolute left-1/2 top-[52px] size-[610px] -translate-x-1/2">
+        <div className="absolute inset-0">
+          <div className="globe-sphere absolute inset-0 overflow-hidden rounded-full">
+            <div className="globe-map absolute inset-y-[7%] left-0 right-0" />
+            <div className="globe-shade absolute inset-0 rounded-full" />
+          </div>
+          <svg
+            aria-hidden="true"
+            className="absolute inset-0 size-full"
+            fill="none"
+            viewBox="0 0 610 610"
+          >
+            {globeArcs.map((arc) => {
+              const [, startX, startY] = arc.path.match(/^M([\d.]+),([\d.]+)/) ?? [];
+              const [endX, endY] = arc.path.split(" ").pop()?.split(",") ?? [];
+              const delayStyle = { animationDelay: `${arc.delay}s` };
+
+              return (
+                <g key={arc.color}>
+                  <path
+                    className="globe-arc"
+                    d={arc.path}
+                    pathLength={1}
+                    stroke={arc.color}
+                    strokeLinecap="round"
+                    strokeWidth="1.6"
+                    style={delayStyle}
+                  />
+                  <circle className="globe-dot globe-dot-start" cx={startX} cy={startY} fill={arc.color} r="4" style={delayStyle} />
+                  <circle className="globe-dot globe-dot-end" cx={endX} cy={endY} fill={arc.color} r="4" style={delayStyle} />
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function StepCard({ index, step, visible }: { index: number; step: Step; visible: boolean }) {
   return (
     <motion.article
@@ -142,11 +195,13 @@ function StepCard({ index, step, visible }: { index: number; step: Step; visible
       <div className="h-[220px] overflow-hidden rounded-xl sm:h-[298px]">
         {step.widget ? (
           <FlowPreview widget={step.widget} />
-        ) : (
+        ) : step.image ? (
           <img alt="" className="size-full rounded-xl object-cover" src={step.image} />
+        ) : (
+          <GlobeAnimation />
         )}
       </div>
-      <div className="rounded-b-xl px-2 pb-4 pt-6">
+      <div className="min-h-[182px] rounded-b-xl px-2 pb-4 pt-6">
         <p className="text-base font-medium leading-[22.4px] tracking-[-0.32px] text-[#53b1fd]">{step.title}</p>
         <p className="mt-3 text-pretty text-lg leading-[1.32] tracking-[-0.28px] text-white sm:text-xl sm:leading-[26px]">
           {step.body}
@@ -166,7 +221,7 @@ export function HowItWorksSection() {
   return (
     <section
       className={cn(
-        "how-section relative isolate overflow-hidden bg-[#0d101d] px-6 py-24 text-white sm:py-[120px] lg:overflow-visible lg:px-0",
+        "how-section relative isolate overflow-x-clip bg-[#0d101d] px-6 py-24 text-white sm:py-[120px] lg:overflow-visible lg:px-0",
         motionActive && "motion-active",
       )}
       id="how-it-works"

@@ -124,7 +124,7 @@ export function FeatureSection() {
       <img
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 -top-40 z-0 h-[48rem] max-w-none -translate-x-1/2 opacity-45"
+        className="feature-ambient-frame pointer-events-none absolute left-1/2 -top-64 z-0 h-[674px] w-[1369px] max-w-none -translate-x-1/2 opacity-45"
         src={figmaAssets.featureAmbientFrame}
       />
       <div aria-hidden="true" className="feature-ambient-glow" />
