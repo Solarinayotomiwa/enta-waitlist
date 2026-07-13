@@ -140,7 +140,7 @@ export function FeatureSection() {
           <h2 className="text-balance text-[2.35rem] font-semibold leading-[1.08] tracking-[-0.018em] sm:text-5xl">
             Three assets. One account.
           </h2>
-          <p className="mx-auto mt-4 max-w-[404px] text-pretty text-base leading-[22.4px] tracking-[-0.16px] text-white">
+          <p className="mx-auto mt-4 max-w-[404px] text-pretty text-xl leading-7 tracking-[-0.16px] text-white">
             Hold value in the form that works for your situation. Stable, hard, or appreciating.
           </p>
         </motion.div>

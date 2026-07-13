@@ -239,7 +239,7 @@ export function HowItWorksSection() {
           <h2 className="text-balance text-[2.35rem] font-semibold leading-[1.08] tracking-[-0.018em] sm:text-5xl sm:leading-[52px]">
             How it works
           </h2>
-          <p className="mt-4 max-w-[336px] text-pretty text-base leading-[22.4px] tracking-[-0.32px] text-white">
+          <p className="mt-4 max-w-[336px] text-pretty text-xl leading-7 tracking-[-0.32px] text-white">
             Start with local fiat or USDT and move into any supported asset in a few steps.
           </p>
         </motion.div>

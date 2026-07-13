@@ -4,6 +4,8 @@ import { CalculatorSection } from "@/components/CalculatorSection";
 import { FeatureSection } from "@/components/FeatureSection";
 import { HowItWorksSection } from "@/components/HowItWorksSection";
 import { SecuritySection } from "@/components/SecuritySection";
+import { WaitlistSection } from "@/components/WaitlistSection";
+import { HistorySection } from "@/components/HistorySection";
 import { FooterSection } from "@/components/FooterSection";
 
 export default function Home() {
@@ -15,6 +17,8 @@ export default function Home() {
       <FeatureSection />
       <HowItWorksSection />
       <SecuritySection />
+      <WaitlistSection />
+      <HistorySection />
       <FooterSection />
     </main>
   );

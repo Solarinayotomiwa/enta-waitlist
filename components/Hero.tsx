@@ -23,7 +23,6 @@ const formFields = [
     label: "WhatsApp or Telegram (optional)",
     type: "text",
     autoComplete: "tel",
-    helper: "Number or Telegram username",
   },
 ] as const;
 
@@ -399,8 +398,7 @@ export function Hero() {
           <HeroHeadline />
           <HeroIntro />
         </div>
-        <WaitlistForm />
-        <div className="relative z-40 mt-8 flex justify-center lg:absolute lg:bottom-[calc(100%-100dvh+32px)] lg:left-0 lg:right-0 lg:mt-0 lg:justify-start">
+        <div className="relative z-40 mt-8 flex justify-center lg:absolute lg:left-0 lg:right-0 lg:top-[calc(100dvh-32px)] lg:mt-0 lg:-translate-y-full">
           <ScrollCue shouldAnimate={shouldAnimate} />
         </div>
       </div>
@@ -440,7 +438,7 @@ function HeroScene() {
         src={figmaAssets.heroSky}
       />
       <CloudDriftLayer />
-      <div className="hero-logo-float absolute bottom-[-164px] left-[-36px] w-[min(768px,58vw)] min-w-[468px] max-w-none select-none max-lg:bottom-[-64px] max-lg:left-[-150px] max-lg:min-w-[440px]">
+      <div className="hero-logo-float absolute bottom-[-51px] left-[3px] w-[min(685px,52vw)] min-w-[425px] max-w-none select-none max-lg:bottom-[-64px] max-lg:left-[-150px] max-lg:min-w-[440px]">
         <img
           alt=""
           className="hero-logo-image size-full object-contain"
@@ -518,8 +516,8 @@ function Header() {
           </span>
         </a>
         <div className="hidden flex-1 items-center justify-center gap-4 text-sm font-medium tracking-[-0.14px] text-white [font-family:var(--font-inter),Inter,sans-serif] md:flex lg:absolute lg:left-1/2 lg:top-1/2 lg:flex-none lg:-translate-x-1/2 lg:-translate-y-1/2">
-          <a className="nav-glass-link" href="#assets">
-            Assets
+          <a className="nav-glass-link" href="#how-it-works">
+            Learn More
           </a>
           <a className="nav-glass-link" href="#how-it-works">
             How it works
@@ -548,13 +546,13 @@ function HeroHeadline() {
       transition={{ staggerChildren: 0.11, delayChildren: 0.16 }}
     >
       <motion.span className="block" variants={reveal}>
-        Your money is losing
+        Buy it. Send it. Hold it.
       </motion.span>
       <motion.span className="block" variants={reveal}>
-        value, but you can’t
+        Your money on your
       </motion.span>
       <motion.span className="block" variants={reveal}>
-        see it happening.
+        terms.
       </motion.span>
     </motion.h1>
   );
@@ -640,14 +638,16 @@ function HeroIntro() {
   return (
     <motion.div
       animate="visible"
-      className="max-w-[476px] pt-2 lg:pt-6"
+      className="max-w-[476px] pt-2 lg:pt-3"
       initial="hidden"
       transition={{ staggerChildren: 0.12, delayChildren: 0.48 }}
     >
       <motion.p className="text-2xl leading-[33px] tracking-[-0.32px] text-white text-pretty" variants={reveal}>
-        Send it across borders. Hold it in bitcoin. Store it in gold. Enta protects your earnings, no matter where or what currency you hold.
+        Receive to your local bank account. Send it across borders. Hold it in bitcoin. Store it in
+        gold. Enta gives you the tools to protect what you earn, wherever you are and whatever
+        currency you hold it in.
       </motion.p>
-      <motion.div className="mt-8 flex items-center gap-1" variants={reveal}>
+      <motion.div className="mt-8 flex items-center gap-2" variants={reveal}>
         <img
           alt=""
           className="h-8 w-[76px] object-contain"
@@ -657,11 +657,103 @@ function HeroIntro() {
           Join 500+ others on the waitlist
         </p>
       </motion.div>
+      <motion.div className="mt-12 flex w-full max-w-[453px] gap-4" variants={reveal}>
+        <a
+          className="flex h-12 flex-1 items-center justify-center rounded-lg bg-white px-[18px] text-base font-semibold capitalize leading-6 text-[#0c111d] transition duration-150 ease-out hover:bg-white/90 active:scale-[0.99]"
+          href="#waitlist"
+        >
+          Join our waitlist
+        </a>
+        <a
+          className="flex h-12 flex-1 items-center justify-center rounded-lg bg-white/30 px-6 text-base font-semibold capitalize leading-6 text-white backdrop-blur-[2px] transition duration-150 ease-out hover:bg-white/40 active:scale-[0.99]"
+          href="#how-it-works"
+        >
+          Learn more
+        </a>
+      </motion.div>
     </motion.div>
   );
 }
 
-function WaitlistForm() {
+function WaitlistSuccessDialog({ onClose, open }: { onClose: () => void; open: boolean }) {
+  useEffect(() => {
+    if (!open) return;
+
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    const previousOverflow = document.body.style.overflow;
+
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [onClose, open]);
+
+  return (
+    <AnimatePresence>
+      {open ? (
+        <motion.div
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center px-6"
+          exit={{ opacity: 0 }}
+          initial={{ opacity: 0 }}
+        >
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-[#0d101d]/60 backdrop-blur-sm"
+            onClick={onClose}
+          />
+          <motion.div
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            aria-labelledby="waitlist-success-title"
+            aria-modal="true"
+            className="relative w-full max-w-[420px] rounded-[17px] bg-white p-8 text-center text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.2)]"
+            exit={{ opacity: 0, scale: 0.98, y: 12 }}
+            initial={{ opacity: 0, scale: 0.96, y: 24 }}
+            role="dialog"
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#eff8ff]">
+              <svg
+                aria-hidden="true"
+                className="size-8"
+                fill="none"
+                stroke="#175cd3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2.5"
+                viewBox="0 0 24 24"
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </span>
+            <h3 className="mt-5 text-2xl font-semibold text-[#101828]" id="waitlist-success-title">
+              You&rsquo;re on the waitlist!
+            </h3>
+            <p className="mt-3 text-base leading-6 text-[#475467]">
+              Thanks for joining. We&rsquo;ll be in touch with all the onboarding information you
+              need to get started.
+            </p>
+            <button
+              autoFocus
+              className="mt-8 flex h-12 w-full items-center justify-center rounded-lg bg-[#175cd3] text-base font-semibold text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.99]"
+              onClick={onClose}
+              type="button"
+            >
+              Done
+            </button>
+          </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
+  );
+}
+
+export function WaitlistForm() {
   const [audience, setAudience] = useState<"individual" | "business">("individual");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
@@ -689,14 +781,11 @@ function WaitlistForm() {
   }
 
   return (
+    <>
+    <WaitlistSuccessDialog onClose={() => setStatus("idle")} open={status === "success"} />
     <motion.form
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      className={cn(
-        "hero-form z-30 mt-12 w-full max-w-[480px] rounded-[17px] border border-[#f6f7fa] bg-white p-6 text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.5)] sm:p-8 lg:absolute lg:right-[38px] lg:mt-0",
-        audience === "business"
-          ? "lg:top-[max(424px,calc(100%-649px))]"
-          : "lg:top-[max(424px,calc(100%-531px))]",
-      )}
+      className="hero-form z-30 w-full max-w-[480px] rounded-[17px] border border-[#f6f7fa] bg-white p-6 text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.5)] sm:p-8"
       id="waitlist"
       initial={{ opacity: 0, y: 34, scale: 0.985 }}
       onSubmit={onSubmit}
@@ -719,13 +808,14 @@ function WaitlistForm() {
         />
       </div>
 
-      <div className="space-y-[13px]">
+      <div className="space-y-[21px]">
         {audience === "individual" ? (
           <>
             <FloatingTextField field={formFields[0]} />
             <CountryCombobox />
             <FloatingTextField field={formFields[1]} />
             <FloatingTextField field={formFields[2]} />
+            <FrustrationField />
           </>
         ) : (
           <>
@@ -768,6 +858,7 @@ function WaitlistForm() {
               : "Join The Waitlist"}
       </button>
     </motion.form>
+    </>
   );
 }
 
@@ -804,6 +895,24 @@ function VolumeSelect() {
       </select>
       <span className="floating-label">Monthly cross-border transaction volume</span>
       <span aria-hidden="true" className="country-chevron" />
+    </label>
+  );
+}
+
+function FrustrationField() {
+  return (
+    <label className="floating-field" htmlFor="frustration">
+      <span className="floating-label !text-[14px] !leading-5">
+        What is your biggest frustration with sending or holding money across borders?{" "}
+        <span className="text-[#a9b4c8]">(optional)</span>
+      </span>
+      <textarea
+        className="floating-input floating-textarea !min-h-[62px] !text-[14px] placeholder:text-[#667085]"
+        id="frustration"
+        name="problem"
+        placeholder="Short text"
+        rows={2}
+      />
     </label>
   );
 }

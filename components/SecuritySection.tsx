@@ -18,9 +18,9 @@ const securityPoints: SecurityPoint[] = [
     icon: figmaAssets.securityFaceId,
   },
   {
-    title: "On-chain ownership",
-    body: "Every asset you hold is recorded on the blockchain — publicly verifiable, permanently yours.",
-    icon: figmaAssets.securityGlobe,
+    title: "Roles that match how you work",
+    body: "Roles like super admin, admin, and viewer have access based on responsibilities.",
+    icon: figmaAssets.securityUsersThree,
   },
   {
     title: "True self-custody",
@@ -28,9 +28,9 @@ const securityPoints: SecurityPoint[] = [
     icon: figmaAssets.securityWallet,
   },
   {
-    title: "No third-party access",
-    body: "Your assets cannot be moved, frozen, or used without your permission.",
-    icon: figmaAssets.securityProhibit,
+    title: "Activate in minutes",
+    body: "One controlling owner verifies, sets a passkey, and the wallet is live, ready to send and receive.",
+    icon: figmaAssets.securityHandWithdraw,
   },
 ];
 
@@ -76,7 +76,7 @@ function BalanceCard({
     <div
       data-security-balance-card={asset}
       className={cn(
-        "security-balance-card relative shrink-0 origin-center overflow-hidden border border-white/45 text-white backdrop-blur-[2px]",
+        "security-balance-card relative shrink-0 origin-center overflow-hidden text-white",
         isCenter
           ? "h-[110px] w-[243px] rounded-[11.4px] bg-white/[0.1] sm:h-[177.408px] sm:w-[392.832px] sm:rounded-[18.432px]"
           : "h-[91px] w-[202px] rounded-[9.5px] bg-white/[0.15] sm:h-[147.84px] sm:w-[327.36px] sm:rounded-[15.36px]",
@@ -183,7 +183,7 @@ export function SecuritySection() {
           <h2 className="text-balance text-[2.35rem] font-semibold leading-[1.08] tracking-[-0.018em] sm:text-5xl sm:leading-[52px]">
             Only you can touch it
           </h2>
-          <p className="mx-auto mt-3 max-w-[469px] text-pretty text-base leading-[23px] tracking-[-0.32px] text-white">
+          <p className="mx-auto mt-3 max-w-[530px] text-pretty text-xl leading-[23px] tracking-[-0.32px] text-white">
             Protected by your biometrics. No platform, no government, no third party can freeze,
             block, or access your assets. Ever.
           </p>
