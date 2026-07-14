@@ -683,6 +683,8 @@ type WaitlistInfo = {
 
 const referralShareText =
   "I just joined the Enta waitlist — one account for USDT, Bitcoin, and gold, straight from your local currency. Join me:";
+const fallbackShareLink = "https://www.entashiga.io";
+const telegramChannelUrl = "https://t.me/AfriSignal";
 
 function WaitlistSuccessDialog({
   info,
@@ -694,16 +696,15 @@ function WaitlistSuccessDialog({
   open: boolean;
 }) {
   const [copied, setCopied] = useState(false);
+  const shareLink = info?.referralLink ?? fallbackShareLink;
 
   useEffect(() => {
     if (!open) setCopied(false);
   }, [open]);
 
   async function copyReferralLink() {
-    if (!info?.referralLink) return;
-
     try {
-      await navigator.clipboard.writeText(info.referralLink);
+      await navigator.clipboard.writeText(shareLink);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2200);
     } catch {
@@ -772,44 +773,60 @@ function WaitlistSuccessDialog({
                 : "You're on the waitlist!"}
             </h3>
             <p className="mt-3 text-base leading-6 text-[#475467]">
-              {info?.referralLink
-                ? "Thanks for joining. Share your personal link — every friend who signs up moves you up the list."
-                : "Thanks for joining. We'll be in touch with all the onboarding information you need to get started."}
+              Thanks for joining — we&rsquo;ll be in touch with your onboarding details.{" "}
+              <span className="font-semibold text-[#101828]">
+                Want to move up the waitlist? Copy your link below and share it — every friend who
+                joins bumps you up.
+              </span>
             </p>
-            {info?.referralLink ? (
-              <div className="mt-6">
-                <div className="flex items-center gap-2 rounded-lg border border-[#d0d5dd] bg-[#f9fafb] p-1.5 pl-3">
-                  <span className="min-w-0 flex-1 truncate text-left text-sm text-[#475467]">
-                    {info.referralLink}
-                  </span>
-                  <button
-                    className="shrink-0 rounded-md bg-[#175cd3] px-3.5 py-2 text-sm font-semibold text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.98]"
-                    onClick={copyReferralLink}
-                    type="button"
-                  >
-                    {copied ? "Copied!" : "Copy"}
-                  </button>
-                </div>
-                <div className="mt-3 flex justify-center gap-2">
-                  <a
-                    className="flex h-10 flex-1 items-center justify-center rounded-lg bg-[#e7f6ec] text-sm font-semibold text-[#067647] transition duration-150 ease-out hover:bg-[#d3f0dd]"
-                    href={`https://wa.me/?text=${encodeURIComponent(`${referralShareText} ${info.referralLink}`)}`}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    Share on WhatsApp
-                  </a>
-                  <a
-                    className="flex h-10 flex-1 items-center justify-center rounded-lg bg-[#f2f4f7] text-sm font-semibold text-[#101828] transition duration-150 ease-out hover:bg-[#e4e7ec]"
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(referralShareText)}&url=${encodeURIComponent(info.referralLink)}`}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    Share on X
-                  </a>
-                </div>
+            <div className="mt-6">
+              <div className="flex items-center gap-2 rounded-lg border border-[#d0d5dd] bg-[#f9fafb] p-1.5 pl-3">
+                <span className="min-w-0 flex-1 truncate text-left text-sm text-[#475467]">
+                  {shareLink}
+                </span>
+                <button
+                  className="shrink-0 rounded-md bg-[#175cd3] px-3.5 py-2 text-sm font-semibold text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.98]"
+                  onClick={copyReferralLink}
+                  type="button"
+                >
+                  {copied ? "Copied!" : "Copy link"}
+                </button>
               </div>
-            ) : null}
+              <div className="mt-3 flex justify-center gap-2">
+                <a
+                  className="flex h-10 flex-1 items-center justify-center rounded-lg bg-[#e7f6ec] text-sm font-semibold text-[#067647] transition duration-150 ease-out hover:bg-[#d3f0dd]"
+                  href={`https://wa.me/?text=${encodeURIComponent(`${referralShareText} ${shareLink}`)}`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Share on WhatsApp
+                </a>
+                <a
+                  className="flex h-10 flex-1 items-center justify-center rounded-lg bg-[#f2f4f7] text-sm font-semibold text-[#101828] transition duration-150 ease-out hover:bg-[#e4e7ec]"
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(referralShareText)}&url=${encodeURIComponent(shareLink)}`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Share on X
+                </a>
+              </div>
+              <div className="mt-5 flex items-center gap-3" aria-hidden="true">
+                <span className="h-px flex-1 bg-[#e4e7ec]" />
+                <span className="text-xs font-medium uppercase tracking-wide text-[#98a2b3]">or</span>
+                <span className="h-px flex-1 bg-[#e4e7ec]" />
+              </div>
+              <a
+                className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#229ed9] text-base font-semibold text-white transition duration-150 ease-out hover:bg-[#1d8bc0] active:scale-[0.99]"
+                href={telegramChannelUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <svg aria-hidden="true" className="size-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M21.9 4.4 18.7 19.5c-.24 1.06-.87 1.32-1.76.82l-4.87-3.59-2.35 2.26c-.26.26-.48.48-.98.48l.35-4.95L18.1 6.4c.39-.35-.09-.54-.61-.2L6.35 13.23l-4.8-1.5c-1.04-.33-1.06-1.04.22-1.54L20.55 3.1c.87-.32 1.63.2 1.35 1.3Z" />
+                </svg>
+                Join our Telegram — AfriSignal
+              </a>
+            </div>
             <button
               autoFocus
               className="mt-8 flex h-12 w-full items-center justify-center rounded-lg bg-[#175cd3] text-base font-semibold text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.99]"
