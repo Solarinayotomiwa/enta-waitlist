@@ -24,6 +24,16 @@ const attributionKeys = [
 export function captureAttribution(): Attribution {
   try {
     const params = new URLSearchParams(window.location.search);
+    // GetWaitlist referral links put the query after the hash
+    // (e.g. /#waitlist?ref_id=XYZ), where location.search can't see it.
+    const hashQuery = window.location.hash.split("?")[1];
+
+    if (hashQuery) {
+      for (const [key, value] of new URLSearchParams(hashQuery)) {
+        if (!params.has(key)) params.set(key, value);
+      }
+    }
+
     const stored = getAttribution();
     let changed = false;
 
