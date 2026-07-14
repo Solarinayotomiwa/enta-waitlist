@@ -4,6 +4,7 @@ import { CSSProperties, FormEvent, KeyboardEvent, useEffect, useMemo, useRef, us
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/cn";
 import { figmaAssets } from "@/lib/figma-assets";
+import { getAttribution } from "@/lib/tracking";
 
 const reveal = {
   hidden: { opacity: 0, y: 22, filter: "blur(10px)" },
@@ -675,7 +676,41 @@ function HeroIntro() {
   );
 }
 
-function WaitlistSuccessDialog({ onClose, open }: { onClose: () => void; open: boolean }) {
+type WaitlistInfo = {
+  position?: number;
+  referralLink?: string;
+};
+
+const referralShareText =
+  "I just joined the Enta waitlist — one account for USDT, Bitcoin, and gold, straight from your local currency. Join me:";
+
+function WaitlistSuccessDialog({
+  info,
+  onClose,
+  open,
+}: {
+  info: WaitlistInfo | null;
+  onClose: () => void;
+  open: boolean;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!open) setCopied(false);
+  }, [open]);
+
+  async function copyReferralLink() {
+    if (!info?.referralLink) return;
+
+    try {
+      await navigator.clipboard.writeText(info.referralLink);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      // Clipboard can be unavailable (permissions/older browsers); the link stays selectable.
+    }
+  }
+
   useEffect(() => {
     if (!open) return;
 
@@ -732,12 +767,49 @@ function WaitlistSuccessDialog({ onClose, open }: { onClose: () => void; open: b
               </svg>
             </span>
             <h3 className="mt-5 text-2xl font-semibold text-[#101828]" id="waitlist-success-title">
-              You&rsquo;re on the waitlist!
+              {info?.position
+                ? `You're #${info.position.toLocaleString("en-US")} on the waitlist!`
+                : "You're on the waitlist!"}
             </h3>
             <p className="mt-3 text-base leading-6 text-[#475467]">
-              Thanks for joining. We&rsquo;ll be in touch with all the onboarding information you
-              need to get started.
+              {info?.referralLink
+                ? "Thanks for joining. Share your personal link — every friend who signs up moves you up the list."
+                : "Thanks for joining. We'll be in touch with all the onboarding information you need to get started."}
             </p>
+            {info?.referralLink ? (
+              <div className="mt-6">
+                <div className="flex items-center gap-2 rounded-lg border border-[#d0d5dd] bg-[#f9fafb] p-1.5 pl-3">
+                  <span className="min-w-0 flex-1 truncate text-left text-sm text-[#475467]">
+                    {info.referralLink}
+                  </span>
+                  <button
+                    className="shrink-0 rounded-md bg-[#175cd3] px-3.5 py-2 text-sm font-semibold text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.98]"
+                    onClick={copyReferralLink}
+                    type="button"
+                  >
+                    {copied ? "Copied!" : "Copy"}
+                  </button>
+                </div>
+                <div className="mt-3 flex justify-center gap-2">
+                  <a
+                    className="flex h-10 flex-1 items-center justify-center rounded-lg bg-[#e7f6ec] text-sm font-semibold text-[#067647] transition duration-150 ease-out hover:bg-[#d3f0dd]"
+                    href={`https://wa.me/?text=${encodeURIComponent(`${referralShareText} ${info.referralLink}`)}`}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Share on WhatsApp
+                  </a>
+                  <a
+                    className="flex h-10 flex-1 items-center justify-center rounded-lg bg-[#f2f4f7] text-sm font-semibold text-[#101828] transition duration-150 ease-out hover:bg-[#e4e7ec]"
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(referralShareText)}&url=${encodeURIComponent(info.referralLink)}`}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Share on X
+                  </a>
+                </div>
+              </div>
+            ) : null}
             <button
               autoFocus
               className="mt-8 flex h-12 w-full items-center justify-center rounded-lg bg-[#175cd3] text-base font-semibold text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.99]"
@@ -756,6 +828,7 @@ function WaitlistSuccessDialog({ onClose, open }: { onClose: () => void; open: b
 export function WaitlistForm() {
   const [audience, setAudience] = useState<"individual" | "business">("individual");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [waitlistInfo, setWaitlistInfo] = useState<WaitlistInfo | null>(null);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -768,11 +841,14 @@ export function WaitlistForm() {
       const response = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, audience }),
+        body: JSON.stringify({ ...data, ...getAttribution(), audience }),
       });
 
       if (!response.ok) throw new Error(`Request failed: ${response.status}`);
 
+      const payload = (await response.json()) as { waitlist?: WaitlistInfo | null };
+
+      setWaitlistInfo(payload.waitlist ?? null);
       setStatus("success");
       form.reset();
     } catch {
@@ -782,7 +858,11 @@ export function WaitlistForm() {
 
   return (
     <>
-    <WaitlistSuccessDialog onClose={() => setStatus("idle")} open={status === "success"} />
+    <WaitlistSuccessDialog
+      info={waitlistInfo}
+      onClose={() => setStatus("idle")}
+      open={status === "success"}
+    />
     <motion.form
       animate={{ opacity: 1, y: 0, scale: 1 }}
       className="hero-form z-30 w-full max-w-[480px] rounded-[17px] border border-[#f6f7fa] bg-white p-6 text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.5)] sm:p-8"
