@@ -88,6 +88,8 @@ export async function POST(request: Request) {
     utm_source: field("utm_source"),
     utm_medium: field("utm_medium"),
     utm_campaign: field("utm_campaign"),
+    utm_content: field("utm_content"),
+    utm_term: field("utm_term"),
     ref_id: field("ref_id"),
   };
 
@@ -117,6 +119,8 @@ export async function POST(request: Request) {
           utm_source: row.utm_source,
           utm_medium: row.utm_medium,
           utm_campaign: row.utm_campaign,
+          utm_content: row.utm_content,
+          utm_term: row.utm_term,
         },
       }),
     ]);
