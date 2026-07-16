@@ -121,7 +121,7 @@ export function BuiltForSection() {
           animate={contentVisible ? "visible" : "hidden"}
           className="mt-12 flex flex-col gap-6 lg:flex-row"
           initial="hidden"
-          transition={{ delay: 0.1, duration: 0.55, ease: "easeOut" }}
+          transition={{ delay: 0.06, duration: 0.55, ease: "easeOut" }}
           variants={reveal}
         >
           {audiences.map((audience, index) => (

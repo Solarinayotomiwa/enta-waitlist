@@ -1,7 +1,9 @@
 export const figmaAssets = {
   heroSky: "/assets/figma/hero-sky.png",
   heroEntaLogo: "/assets/figma/hero-enta-logo.png",
-  heroGrass: "/assets/figma/hero-grass-cover.png",
+  heroGrass: "/images/hero/meadow.png",
+  featureWalletHd: "/images/three-assets/wallet.png",
+  accountDashboardHd: "/images/one-account/account-dashboard.jpg",
   waitlistProofAvatars: "/assets/figma/waitlist-proof-avatars.png",
   bitcoinCurrencyOne: "/assets/figma/currency-bitcoin-1.svg",
   bitcoinCurrencyTwo: "/assets/figma/currency-bitcoin-2.svg",

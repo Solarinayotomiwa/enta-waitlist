@@ -100,7 +100,7 @@ export function BlogSection() {
           animate={contentVisible ? "visible" : "hidden"}
           className="flex flex-col gap-14"
           initial="hidden"
-          transition={{ delay: 0.1, duration: 0.55, ease: "easeOut" }}
+          transition={{ delay: 0.06, duration: 0.55, ease: "easeOut" }}
           variants={reveal}
         >
           <article className="flex flex-col gap-10 border-b border-[#344054] pb-12 lg:flex-row lg:gap-14">

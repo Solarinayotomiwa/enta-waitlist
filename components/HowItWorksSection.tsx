@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/cn";
 import { figmaAssets } from "@/lib/figma-assets";
@@ -25,7 +25,8 @@ const steps: Step[] = [
   },
 ];
 
-const AUTO_ADVANCE_MS = 7000;
+const STEP_DURATION_MS = 7000;
+const COMPLETE_HOLD_MS = 150;
 
 const reveal = {
   hidden: { opacity: 0, y: 26 },
@@ -38,21 +39,18 @@ const entryCards = [
     body: "Turn your naira, cedis, or shillings into dollars, Bitcoin, or gold in a few taps.",
     image: figmaAssets.howEntryLocal,
     panelBg: "#dcfae6",
-    emphasized: false,
   },
   {
     heading: "Already hold dollars?",
     body: "Bring your USDT or USDC straight in and put it to work right away.",
     image: figmaAssets.howEntryDollars,
     panelBg: "#ebe9fe",
-    emphasized: true,
   },
   {
     heading: "Own Bitcoin?",
     body: "Move it in and manage it alongside everything else, in one place.",
     image: figmaAssets.howEntryBitcoin,
     panelBg: "#fbe8ff",
-    emphasized: false,
   },
 ] as const;
 
@@ -85,62 +83,45 @@ const panelSwap = {
   exit: { opacity: 0, y: -14 },
 };
 
+/* "Start anywhere": the middle card rests at the highlighted scale (1.135 =
+   the 554/488 emphasized-card ratio from the Figma frame); hovering or
+   focusing another card hands the highlight to it. */
 function EntryPointsPanel() {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const active = hovered ?? 1;
+
   return (
     <div className="flex size-full items-center justify-center p-5 lg:p-0">
-      <div className="flex w-full flex-col items-center justify-center gap-4 lg:w-[554px] lg:gap-6">
-        {entryCards.map((card) => (
+      <div
+        className="flex w-full flex-col items-center justify-center gap-4 lg:w-[554px] lg:gap-7"
+        onMouseLeave={() => setHovered(null)}
+      >
+        {entryCards.map((card, index) => (
           <div
             className={cn(
-              "flex items-stretch overflow-hidden bg-white",
-              card.emphasized
-                ? "w-full gap-6 rounded-xl"
-                : "w-full gap-[21.12px] rounded-[10.56px] lg:w-[487.52px]",
+              "flex w-full items-stretch overflow-hidden rounded-[10.56px] bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:w-[487.52px]",
+              index === active ? "z-10 lg:scale-[1.135]" : "lg:scale-100",
             )}
             key={card.heading}
+            onFocus={() => setHovered(index)}
+            onMouseEnter={() => setHovered(index)}
+            tabIndex={0}
           >
             <div
-              className={cn(
-                "relative shrink-0 self-stretch overflow-hidden",
-                card.emphasized ? "w-[104px] sm:w-[142px]" : "w-[92px] sm:w-[124.96px]",
-              )}
+              className="relative w-[92px] shrink-0 self-stretch overflow-hidden sm:w-[124.96px]"
               style={{ backgroundColor: card.panelBg }}
             >
               <img
                 alt=""
-                className={cn(
-                  "absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2 object-cover",
-                  card.emphasized
-                    ? "h-[169px] w-[136px] -translate-x-[calc(50%+2.5px)]"
-                    : "h-[148.72px] w-[119.35px] -translate-x-[calc(50%+2.4px)]",
-                )}
+                className="absolute left-1/2 top-1/2 h-[148.72px] w-[119.35px] max-w-none -translate-x-[calc(50%+2.4px)] -translate-y-1/2 object-cover"
                 src={card.image}
               />
             </div>
-            <div
-              className={cn(
-                "flex min-w-0 flex-1 flex-col",
-                card.emphasized ? "gap-1 py-6 pr-6" : "gap-[3.52px] py-[21.12px] pr-[21.12px]",
-              )}
-            >
-              <p
-                className={cn(
-                  "font-medium text-[#53b1fd]",
-                  card.emphasized
-                    ? "text-lg leading-[27px] sm:text-xl sm:leading-[30px]"
-                    : "text-base leading-6 sm:text-[17.6px] sm:leading-[26.4px]",
-                )}
-              >
+            <div className="flex min-w-0 flex-1 flex-col gap-[3.52px] py-[21.12px] pr-[21.12px]">
+              <p className="text-base font-medium leading-6 text-[#53b1fd] sm:text-[17.6px] sm:leading-[26.4px]">
                 {card.heading}
               </p>
-              <p
-                className={cn(
-                  "font-medium text-[#101828]",
-                  card.emphasized
-                    ? "text-lg leading-[27px] sm:text-xl sm:leading-[30px]"
-                    : "text-base leading-6 sm:text-[17.6px] sm:leading-[26.4px]",
-                )}
-              >
+              <p className="text-base font-medium leading-6 text-[#101828] sm:text-[17.6px] sm:leading-[26.4px]">
                 {card.body}
               </p>
             </div>
@@ -156,8 +137,8 @@ function DashboardPanel() {
     <div className="size-full p-5 lg:p-0">
       <img
         alt="Enta account dashboard showing wallet balances and recent activity"
-        className="size-full rounded-lg object-cover object-left-top lg:absolute lg:left-[42px] lg:top-[44px] lg:h-[576px] lg:w-[678px] lg:max-w-none lg:rounded-none lg:object-contain"
-        src={figmaAssets.howDashboard}
+        className="size-full rounded-lg object-cover object-left-top lg:absolute lg:left-[42px] lg:top-[44px] lg:h-[576px] lg:w-[678px] lg:max-w-none lg:rounded-none"
+        src={figmaAssets.accountDashboardHd}
       />
     </div>
   );
@@ -169,8 +150,9 @@ function ActionsPanel() {
       <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:absolute lg:left-[38px] lg:top-[94px] lg:h-[432px] lg:w-[643px] lg:gap-x-3 lg:gap-y-4">
         {actionCards.map((card) => (
           <div
-            className="flex min-h-[160px] flex-col justify-between rounded-[9.862px] bg-white px-5 py-6 lg:h-[208px] lg:min-h-0"
+            className="flex min-h-[160px] flex-col justify-between rounded-[9.862px] bg-white px-5 py-6 outline-none transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.025] focus-visible:-translate-y-1 focus-visible:scale-[1.025] focus-visible:ring-2 focus-visible:ring-[#53b1fd] lg:h-[208px] lg:min-h-0"
             key={card.title}
+            tabIndex={0}
           >
             <img alt="" className="size-8" src={card.icon} />
             <div>
@@ -188,25 +170,33 @@ const stepPanels = [EntryPointsPanel, DashboardPanel, ActionsPanel] as const;
 
 function StepRow({
   active,
+  fillRef,
   index,
   onSelect,
   step,
 }: {
   active: boolean;
+  fillRef: (node: HTMLSpanElement | null) => void;
   index: number;
   onSelect: () => void;
   step: Step;
 }) {
   return (
-    <div
-      className={cn(
-        "w-full border-t pb-1 pt-[23px] transition-colors duration-300",
-        active ? "border-t-white" : "border-t-[0.5px] border-t-[#667085]",
+    <div className="w-full pb-1">
+      {active ? (
+        <span aria-hidden="true" className="relative block h-px w-full bg-white/30">
+          <span
+            className="absolute inset-0 origin-left bg-white"
+            ref={fillRef}
+            style={{ transform: "scaleX(0)" }}
+          />
+        </span>
+      ) : (
+        <span aria-hidden="true" className="block h-px w-full bg-transparent shadow-[0_0.5px_0_0_#667085]" />
       )}
-    >
       <button
         aria-expanded={active}
-        className="flex w-full items-center gap-2 text-left"
+        className="mt-[22px] flex w-full items-center gap-2 text-left"
         onClick={onSelect}
         type="button"
       >
@@ -255,20 +245,61 @@ export function HowItWorksSection() {
   const motionActive = isInView && !reducedMotion;
 
   const [activeStep, setActiveStep] = useState(0);
-  const [autoAdvance, setAutoAdvance] = useState(true);
+  const fillRef = useRef<HTMLSpanElement | null>(null);
+  const progressRef = useRef(0);
+  const pausedRef = useRef(false);
 
+  const setFillNode = useCallback((node: HTMLSpanElement | null) => {
+    fillRef.current = node;
+    if (node) node.style.transform = `scaleX(${progressRef.current})`;
+  }, []);
+
+  /* One rAF-driven timer owns the progress value, the fill visual, and the
+     step switch, so the counter and the displayed content can never drift
+     apart. rAF stops in hidden tabs (auto-pause); hover/focus set pausedRef;
+     progress resumes from its current value. */
   useEffect(() => {
-    if (!autoAdvance || !inViewNow || reducedMotion) return;
+    if (reducedMotion) return;
 
-    const interval = window.setInterval(() => {
-      setActiveStep((current) => (current + 1) % steps.length);
-    }, AUTO_ADVANCE_MS);
+    progressRef.current = 0;
+    let raf = 0;
+    let last: number | null = null;
+    let holdUntil: number | null = null;
 
-    return () => window.clearInterval(interval);
-  }, [autoAdvance, inViewNow, reducedMotion]);
+    const tick = (now: number) => {
+      raf = requestAnimationFrame(tick);
+      if (last === null) {
+        last = now;
+        return;
+      }
+      const dt = Math.min(now - last, 100);
+      last = now;
+
+      if (pausedRef.current || !inViewNow) return;
+
+      if (holdUntil !== null) {
+        if (now >= holdUntil) {
+          setActiveStep((current) => (current + 1) % steps.length);
+        }
+        return;
+      }
+
+      progressRef.current = Math.min(1, progressRef.current + dt / STEP_DURATION_MS);
+      if (fillRef.current) {
+        fillRef.current.style.transform = `scaleX(${progressRef.current})`;
+      }
+      if (progressRef.current >= 1) {
+        holdUntil = now + COMPLETE_HOLD_MS;
+      }
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [activeStep, inViewNow, reducedMotion]);
 
   function selectStep(index: number) {
-    setAutoAdvance(false);
+    progressRef.current = 0;
+    if (fillRef.current) fillRef.current.style.transform = "scaleX(0)";
     setActiveStep(index);
   }
 
@@ -284,7 +315,21 @@ export function HowItWorksSection() {
       ref={sectionRef}
     >
       <div aria-hidden="true" className="how-section-glow" />
-      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-14 lg:h-[620px] lg:flex-row lg:gap-14">
+      <div
+        className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-14 lg:h-[620px] lg:flex-row lg:gap-14"
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node)) pausedRef.current = false;
+        }}
+        onFocus={() => {
+          pausedRef.current = true;
+        }}
+        onMouseEnter={() => {
+          pausedRef.current = true;
+        }}
+        onMouseLeave={() => {
+          pausedRef.current = false;
+        }}
+      >
         <motion.div
           animate={contentVisible ? "visible" : "hidden"}
           className="flex w-full flex-col justify-between pt-4 lg:w-[424px] lg:shrink-0"
@@ -304,6 +349,7 @@ export function HowItWorksSection() {
             {steps.map((step, index) => (
               <StepRow
                 active={index === activeStep}
+                fillRef={setFillNode}
                 index={index}
                 key={step.title}
                 onSelect={() => selectStep(index)}
@@ -317,7 +363,7 @@ export function HowItWorksSection() {
           animate={contentVisible ? "visible" : "hidden"}
           className="relative min-h-[420px] w-full flex-1 overflow-hidden rounded-2xl bg-white lg:min-h-0"
           initial="hidden"
-          transition={{ delay: 0.1, duration: 0.55, ease: "easeOut" }}
+          transition={{ delay: 0.06, duration: 0.55, ease: "easeOut" }}
           variants={reveal}
         >
           <img
@@ -333,7 +379,7 @@ export function HowItWorksSection() {
               exit="exit"
               initial="hidden"
               key={activeStep}
-              transition={{ duration: reducedMotion ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: reducedMotion ? 0 : 0.35, ease: [0.22, 1, 0.36, 1] }}
               variants={panelSwap}
             >
               <ActivePanel />

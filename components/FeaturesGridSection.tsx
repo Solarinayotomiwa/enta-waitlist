@@ -118,7 +118,7 @@ export function FeaturesGridSection() {
           animate={contentVisible ? "visible" : "hidden"}
           className="grid gap-4 lg:grid-cols-3"
           initial="hidden"
-          transition={{ delay: 0.1, duration: 0.55, ease: "easeOut" }}
+          transition={{ delay: 0.06, duration: 0.55, ease: "easeOut" }}
           variants={reveal}
         >
           {featureCards.map((card) => (

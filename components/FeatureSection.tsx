@@ -22,7 +22,7 @@ const assetCards: AssetCard[] = [
     background: figmaAssets.featureUsdtBg,
     token: figmaAssets.featureUsdtToken,
     className: "lg:translate-y-4 lg:hover:translate-y-2",
-    tokenClassName: "translate-y-5 scale-[1.08] object-[50%_58%]",
+    tokenClassName: "",
   },
   {
     title: "Bitcoin",
@@ -31,7 +31,7 @@ const assetCards: AssetCard[] = [
     background: figmaAssets.featureBitcoinBg,
     token: figmaAssets.featureBitcoinToken,
     className: "lg:translate-y-32 lg:hover:translate-y-[120px]",
-    tokenClassName: "translate-y-4 scale-[1.04] object-[50%_56%]",
+    tokenClassName: "",
   },
   {
     title: "Gold",
@@ -40,7 +40,7 @@ const assetCards: AssetCard[] = [
     background: figmaAssets.featureGoldBg,
     token: figmaAssets.featureGoldToken,
     className: "",
-    tokenClassName: "translate-y-5 scale-[1.04] object-[50%_58%]",
+    tokenClassName: "",
   },
 ];
 
@@ -59,7 +59,7 @@ function WalletIllustration({ animate }: { animate: boolean }) {
       <img
         alt=""
         className="block h-auto w-full drop-shadow-[0_28px_70px_rgba(6,10,24,0.5)]"
-        src={figmaAssets.featureWalletBalanceCard}
+        src={figmaAssets.featureWalletHd}
       />
     </motion.div>
   );
@@ -83,14 +83,16 @@ function FeatureAssetCard({ card, index, animate }: { animate: boolean; card: As
           className="absolute inset-0 size-full object-cover"
           src={card.background}
         />
-        <img
-          alt=""
-          className={cn(
-            "feature-card-token absolute inset-0 size-full origin-top object-cover",
-            card.tokenClassName,
-          )}
-          src={card.token}
-        />
+        <div className="absolute inset-0 grid place-items-center">
+          <img
+            alt=""
+            className={cn(
+              "feature-card-token h-[85%] w-[85%] object-contain object-center",
+              card.tokenClassName,
+            )}
+            src={card.token}
+          />
+        </div>
         <div className="absolute inset-x-0 bottom-[-1px] h-[90px] bg-gradient-to-b from-[rgba(56,79,130,0)] to-[#0c111c] to-[75%]" />
       </div>
       <div className="min-h-[146px] px-5 pb-8 pt-[31px] text-white">

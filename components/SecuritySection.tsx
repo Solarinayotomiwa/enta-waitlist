@@ -210,7 +210,7 @@ export function SecuritySection() {
             animate={contentVisible ? "visible" : "hidden"}
             className="min-w-0 flex-1"
             initial="hidden"
-            transition={{ delay: 0.1, duration: 0.55, ease: "easeOut" }}
+            transition={{ delay: 0.06, duration: 0.55, ease: "easeOut" }}
             variants={reveal}
           >
             <SecurityVisual active={motionActive} />

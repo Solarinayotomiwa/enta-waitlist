@@ -393,11 +393,20 @@ export function Hero() {
       ref={heroRef}
     >
       <HeroScene />
-      <MeadowLayer />
       <GlassLayer />
+      <MeadowLayer />
       <Header />
       <div className="hero-content-root relative z-30 mx-auto flex h-full w-full flex-col">
         <div className="hero-grid grid">
+          <motion.div
+            animate="visible"
+            className="flex items-center gap-2 lg:hidden"
+            initial="hidden"
+            transition={{ duration: 0.6 }}
+            variants={reveal}
+          >
+            <ProofRowContent />
+          </motion.div>
           <HeroHeadline />
           <HeroIntro />
         </div>
@@ -417,7 +426,7 @@ function ScrollCue({ shouldAnimate }: { shouldAnimate: boolean }) {
       href="#proof"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 1.05, duration: 0.45, ease: "easeOut" }}
+      transition={{ delay: 0.35, duration: 0.45, ease: "easeOut" }}
     >
       <span>See why Enta is trusted</span>
       <motion.span
@@ -447,7 +456,7 @@ function HeroScene() {
 
 function MeadowLayer() {
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
       <div className="hero-grass-wrap absolute inset-x-0 overflow-hidden">
         <div className="hero-meadow-entrance size-full">
           <img
@@ -464,7 +473,7 @@ function MeadowLayer() {
 
 function GlassLayer() {
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
       <div className="hero-glass-overlay-inner relative mx-auto h-full w-full">
         <div className="hero-glass-position absolute max-w-none select-none">
           <div className="hero-glass-entrance">
@@ -522,13 +531,40 @@ function GrassBladeField() {
   );
 }
 
+const navLinks = [
+  { label: "Learn More", href: "/#how-it-works" },
+  { label: "How it works", href: "/#how-it-works" },
+  { label: "About", href: "/#about" },
+] as const;
+
 export function Header() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    const previousOverflow = document.body.style.overflow;
+
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+      menuButtonRef.current?.focus();
+    };
+  }, [menuOpen]);
+
   return (
     <motion.header
       animate={{ opacity: 1, y: 0 }}
       className="absolute inset-x-0 top-0 z-40 px-5 pt-[calc(env(safe-area-inset-top)+18px)] sm:px-6 lg:px-0 lg:pt-[env(safe-area-inset-top)]"
       initial={{ opacity: 0, y: -12 }}
-      transition={{ delay: 0.12, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ delay: 0.03, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
     >
       <nav className="hero-nav-inner relative mx-auto flex h-11 max-w-[1200px] items-center gap-3 sm:h-12 sm:gap-4 lg:h-[84px]">
         <a aria-label="Enta home" className="flex min-w-0 items-center gap-3" href="/">
@@ -541,16 +577,12 @@ export function Header() {
             Early access
           </span>
         </a>
-        <div className="hidden flex-1 items-center justify-center gap-4 text-sm font-medium tracking-[-0.14px] text-white [font-family:var(--font-inter),Inter,sans-serif] md:flex lg:absolute lg:left-1/2 lg:top-1/2 lg:flex-none lg:-translate-x-1/2 lg:-translate-y-1/2">
-          <a className="nav-glass-link" href="/#how-it-works">
-            Learn More
-          </a>
-          <a className="nav-glass-link" href="/#how-it-works">
-            How it works
-          </a>
-          <a className="nav-glass-link" href="/#about">
-            About
-          </a>
+        <div className="hidden flex-1 items-center justify-center gap-4 text-sm font-medium tracking-[-0.14px] text-white [font-family:var(--font-inter),Inter,sans-serif] lg:absolute lg:left-1/2 lg:top-1/2 lg:flex lg:flex-none lg:-translate-x-1/2 lg:-translate-y-1/2">
+          {navLinks.map((link) => (
+            <a className="nav-glass-link" href={link.href} key={link.label}>
+              {link.label}
+            </a>
+          ))}
         </div>
         <a
           className="ml-auto shrink-0 whitespace-nowrap rounded-lg bg-[#eff8ff] px-3 py-1.5 text-xs font-semibold capitalize leading-5 text-[#0e2243] transition duration-150 ease-out hover:bg-white active:scale-[0.98] sm:text-sm"
@@ -558,8 +590,115 @@ export function Header() {
         >
           Join Waitlist
         </a>
+        <button
+          aria-controls="mobile-navigation"
+          aria-expanded={menuOpen}
+          aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg text-white transition duration-150 ease-out hover:bg-white/10 lg:hidden"
+          onClick={() => setMenuOpen((open) => !open)}
+          ref={menuButtonRef}
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            className="size-6"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeWidth="1.8"
+            viewBox="0 0 24 24"
+          >
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
       </nav>
+
+      <AnimatePresence>
+        {menuOpen ? (
+          <>
+            <motion.div
+              animate={{ opacity: 1 }}
+              aria-hidden="true"
+              className="fixed inset-0 z-[90] bg-[#0d101d]/60 backdrop-blur-sm lg:hidden"
+              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }}
+              onClick={() => setMenuOpen(false)}
+              transition={{ duration: 0.28 }}
+            />
+            <motion.div
+              animate={{ x: 0 }}
+              aria-label="Navigation menu"
+              aria-modal="true"
+              className="fixed inset-y-0 right-0 z-[95] flex w-[300px] max-w-[85vw] flex-col bg-[#0d101d] px-6 pb-8 pt-5 lg:hidden"
+              exit={{ x: "100%" }}
+              id="mobile-navigation"
+              initial={{ x: "100%" }}
+              role="dialog"
+              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="flex items-center justify-between">
+                <img
+                  alt="Enta"
+                  className="h-7 w-[104px] object-contain"
+                  src={figmaAssets.entaLogoWhite}
+                />
+                <button
+                  aria-label="Close navigation menu"
+                  autoFocus
+                  className="flex size-9 items-center justify-center rounded-lg text-white transition duration-150 ease-out hover:bg-white/10"
+                  onClick={() => setMenuOpen(false)}
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="size-6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeWidth="1.8"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              </div>
+              <nav className="mt-8 flex flex-col">
+                {navLinks.map((link) => (
+                  <a
+                    className="border-b border-white/10 py-4 text-lg font-medium text-white transition duration-150 ease-out hover:text-[#a9e0fb]"
+                    href={link.href}
+                    key={link.label}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </nav>
+              <a
+                className="mt-8 flex h-12 items-center justify-center rounded-lg bg-[#eff8ff] text-base font-semibold capitalize text-[#0e2243] transition duration-150 ease-out hover:bg-white"
+                href="/#waitlist"
+                onClick={() => setMenuOpen(false)}
+              >
+                Join Waitlist
+              </a>
+            </motion.div>
+          </>
+        ) : null}
+      </AnimatePresence>
     </motion.header>
+  );
+}
+
+function ProofRowContent() {
+  return (
+    <>
+      <img
+        alt=""
+        className="hero-proof-avatars object-contain"
+        src={figmaAssets.waitlistProofAvatars}
+      />
+      <p className="hero-proof-text font-medium text-white">Join 2000+ users on the waitlist</p>
+    </>
   );
 }
 
@@ -569,7 +708,7 @@ function HeroHeadline() {
       animate="visible"
       className="hero-title relative max-w-[682px] text-[56px] font-bold leading-[1.08] tracking-[-0.031em] text-white text-balance max-[380px]:text-[48px] md:text-[64px] md:leading-[70px] md:tracking-[-1.5px]"
       initial="hidden"
-      transition={{ staggerChildren: 0.11, delayChildren: 0.16 }}
+      transition={{ staggerChildren: 0.05, delayChildren: 0.02 }}
     >
       <motion.span className="block" variants={reveal}>
         Preserve it. Move it.
@@ -669,22 +808,15 @@ function HeroIntro() {
       animate="visible"
       className="max-w-[476px] pt-2 lg:pt-3"
       initial="hidden"
-      transition={{ staggerChildren: 0.12, delayChildren: 0.48 }}
+      transition={{ staggerChildren: 0.04, delayChildren: 0.04 }}
     >
       <motion.p className="hero-body text-2xl leading-[33px] tracking-[-0.32px] text-white text-pretty" variants={reveal}>
         Receive to your local bank account. Send it across borders. Hold it in Bitcoin. Store it in
         gold. ENTA gives you the tools to preserve what you own and spend against it &mdash; without
         selling, and without giving up control.
       </motion.p>
-      <motion.div className="hero-proof-row mt-8 flex items-center gap-2" variants={reveal}>
-        <img
-          alt=""
-          className="h-8 w-[76px] object-contain"
-          src={figmaAssets.waitlistProofAvatars}
-        />
-        <p className="text-base font-medium leading-[18.5px] text-white">
-          Join 500+ others on the waitlist
-        </p>
+      <motion.div className="hero-proof-row mt-8 hidden items-center gap-2 lg:flex" variants={reveal}>
+        <ProofRowContent />
       </motion.div>
       <motion.div className="hero-cta-row mt-12 flex w-full max-w-[453px] gap-4" variants={reveal}>
         <a

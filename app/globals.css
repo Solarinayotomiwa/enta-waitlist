@@ -63,16 +63,15 @@ select {
   animation-play-state: paused;
 }
 
-/* High-res meadow export (3432x3432, pre-mirrored like the Figma node, with
-   the tilt and transparent margins baked in). Sized to Figma's meadow node:
-   119vw wide (1715px at a 1440 frame), nudged -3.2vw left, bottom-anchored.
+/* High-res meadow export (/images/hero/meadow.png, 3066x3432, transparent
+   above the hill, correctly oriented). Full-bleed width, bottom-anchored.
    No flip, no vertical stretch. */
 .hero-grass-primary {
   bottom: 0;
   height: auto;
-  left: -3.2vw;
+  left: 0;
   position: absolute;
-  width: 119vw;
+  width: 100vw;
 }
 
 /* ---------------------------------------------------------------------------
@@ -83,11 +82,11 @@ select {
    mobile) plus viewport-height refinements for short screens. The two Figma
    frames (703-9063 desktop, 796-4371 compact) are the fixed endpoints.
 
-   Meadow crop math: the asset's grass crest sits 21.4% of the image height
-   above its bottom edge; at the 119vw display width the rendered crest height
-   is 25.47vw, so bottom = desired-crest − 25.47vw keeps the crest at a fixed
-   distance from the hero bottom at EVERY width — the visible meadow height
-   stops growing on wide screens.
+   Meadow crop math: the asset (3066x3432) shows its grass crest 22% of the
+   image height above the bottom edge; displayed full-bleed (height 111.9vw)
+   the rendered crest height is 24.62vw, so bottom = desired-crest − 24.62vw
+   keeps the crest at a fixed distance from the hero bottom at EVERY width —
+   the visible meadow height stops growing on wide screens.
    --------------------------------------------------------------------------- */
 .hero-root {
   height: 100svh;
@@ -103,14 +102,17 @@ select {
   --content-gap: 40px;
   --gap-proof: 32px;
   --gap-cta: 48px;
+  --proof-avatar-h: 32px;
+  --proof-text-size: 16px;
+  --proof-text-lh: 22px;
   --glass-w: min(590px, 41vw);
   /* -110px is the Figma desktop offset at 1024px height; below that the glass
      slides down 1:1 with the missing height so the title gap never collapses. */
   --glass-bottom: min(-110px, calc(100svh - 1134px));
   --meadow-crest: 194px;
-  /* The 13.45vw cap keeps the artwork's diagonal lower edge below the hero
-     bottom at every width, so no sky sliver appears under the grass. */
-  --meadow-bottom: calc(min(var(--meadow-crest), 13.45vw) - 25.47vw);
+  /* The 23vw cap keeps the artwork's lower edge below the hero bottom at
+     every width, so no sky sliver appears under the grass. */
+  --meadow-bottom: calc(min(var(--meadow-crest), 23vw) - 24.62vw);
   --meadow-height: 50vw;
   --meadow-rise-y: 110px;
 }
@@ -142,6 +144,16 @@ select {
 
 .hero-proof-row {
   margin-top: var(--gap-proof);
+}
+
+.hero-proof-avatars {
+  height: var(--proof-avatar-h);
+  width: calc(var(--proof-avatar-h) * 2.375);
+}
+
+.hero-proof-text {
+  font-size: var(--proof-text-size);
+  line-height: var(--proof-text-lh);
 }
 
 .hero-cta-row {
@@ -230,6 +242,9 @@ select {
     --glass-bottom: -153px;
     --meadow-crest: 46px;
     --content-top: 210px;
+    --proof-avatar-h: 28px;
+    --proof-text-size: 14px;
+    --proof-text-lh: 20px;
   }
 }
 
@@ -265,6 +280,9 @@ select {
     --glass-bottom: -40px;
     --meadow-crest: 110px;
     --meadow-rise-y: 80px;
+    --proof-avatar-h: 26px;
+    --proof-text-size: 13px;
+    --proof-text-lh: 18px;
   }
 
   /* The overlay container already provides the page gutter, so the glass box
@@ -300,12 +318,15 @@ select {
     --hero-body-size: 17px;
     --hero-body-lh: 25px;
     --content-top: 116px;
-    --content-gap: 28px;
+    --content-gap: 24px;
     --gap-proof: 24px;
     --gap-cta: 32px;
     --meadow-bottom: -30px;
     --meadow-height: 78vw;
     --meadow-rise-y: 70px;
+    --proof-avatar-h: 24px;
+    --proof-text-size: 12px;
+    --proof-text-lh: 16px;
   }
 
   .hero-glass-position {
@@ -366,20 +387,23 @@ select {
    immediately. Sequence: hero clip reveal → meadow rises → glass "e" rises →
    float loop takes over (delayed past the entrance). */
 @media (prefers-reduced-motion: no-preference) {
+  /* No fill mode: the delay is 0 so the first keyframe applies from the first
+     frame, and dropping the retained clip-path after the animation keeps the
+     fixed-position mobile menu from being clipped to the hero's bounds. */
   .hero-root {
-    animation: hero-reveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: hero-reveal 0.9s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .hero-meadow-entrance {
-    animation: meadow-rise 1s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+    animation: meadow-rise 1s cubic-bezier(0.22, 1, 0.36, 1) 0.02s both;
   }
 
   .hero-glass-entrance {
-    animation: glass-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+    animation: glass-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
   }
 
   .hero-logo-float {
-    animation-delay: 1.35s;
+    animation-delay: 1s;
   }
 }
 
