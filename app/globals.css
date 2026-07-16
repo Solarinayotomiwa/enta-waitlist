@@ -202,6 +202,14 @@ select {
   }
 }
 
+/* Wide desktops (>=1440px): the meadow sits 15% lower (194px crest * 0.85).
+   Declared before the height tiers so short screens still win. */
+@media (min-width: 1440px) {
+  .hero-root {
+    --meadow-crest: 164.9px;
+  }
+}
+
 /* Large desktop (>=1330px), shorter heights: reduce type + artwork instead of
    letting anything overlap. */
 @media (min-width: 1330px) and (max-height: 899px) {
