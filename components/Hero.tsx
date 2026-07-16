@@ -872,11 +872,32 @@ function WaitlistSuccessDialog({
     }
   }
 
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     if (!open) return;
 
     const onKey = (event: globalThis.KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      // Keep keyboard focus inside the dialog while it is open.
+      if (event.key === "Tab" && dialogRef.current) {
+        const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
     };
     const previousOverflow = document.body.style.overflow;
 
@@ -886,6 +907,7 @@ function WaitlistSuccessDialog({
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = previousOverflow;
+      document.querySelector<HTMLElement>("[data-waitlist-submit]")?.focus();
     };
   }, [onClose, open]);
 
@@ -894,7 +916,7 @@ function WaitlistSuccessDialog({
       {open ? (
         <motion.div
           animate={{ opacity: 1 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center px-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center px-4 sm:px-6"
           exit={{ opacity: 0 }}
           initial={{ opacity: 0 }}
         >
@@ -907,12 +929,32 @@ function WaitlistSuccessDialog({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             aria-labelledby="waitlist-success-title"
             aria-modal="true"
-            className="relative w-full max-w-[420px] rounded-[17px] bg-white p-8 text-center text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.2)]"
-            exit={{ opacity: 0, scale: 0.98, y: 12 }}
-            initial={{ opacity: 0, scale: 0.96, y: 24 }}
+            className="relative flex max-h-[calc(100dvh-40px)] w-full max-w-[960px] overflow-hidden rounded-[17px] bg-white text-center text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.2)]"
+            exit={{ opacity: 0, scale: 0.985, y: 12 }}
+            initial={{ opacity: 0, scale: 0.985, y: 18 }}
+            ref={dialogRef}
             role="dialog"
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
           >
+            <button
+              aria-label="Close dialog"
+              className="absolute right-4 top-4 z-10 flex size-9 items-center justify-center rounded-full bg-black/10 text-[#101828] transition duration-150 ease-out hover:bg-black/20 lg:bg-white/40 lg:hover:bg-white/60"
+              onClick={onClose}
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                className="size-5"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+            <div className="w-full overflow-y-auto p-6 sm:p-8 lg:w-[55%]">
             <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#eff8ff]">
               <svg
                 aria-hidden="true"
@@ -995,6 +1037,19 @@ function WaitlistSuccessDialog({
             >
               Done
             </button>
+            </div>
+            <div aria-hidden="true" className="relative hidden lg:block lg:w-[45%]">
+              <img
+                alt=""
+                className="absolute inset-0 size-full object-cover"
+                src={figmaAssets.howGradientBg}
+              />
+              <img
+                alt=""
+                className="absolute left-1/2 top-1/2 w-[75%] -translate-x-1/2 -translate-y-1/2 object-contain"
+                src={figmaAssets.heroEntaLogo}
+              />
+            </div>
           </motion.div>
         </motion.div>
       ) : null}
@@ -1103,6 +1158,7 @@ export function WaitlistForm() {
 
       <button
         className="mt-[34px] flex h-[52px] w-full items-center justify-center rounded-lg bg-[#175cd3] px-5 text-[17px] font-semibold leading-[26px] text-white shadow-[0_1px_2px_rgba(16,24,40,0.05),inset_0_0_0_1px_rgba(16,24,40,0.18),inset_0_-2px_0_0_rgba(16,24,40,0.05)] transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-80"
+        data-waitlist-submit
         disabled={status === "loading"}
         type="submit"
       >

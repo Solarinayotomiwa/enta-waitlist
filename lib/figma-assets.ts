@@ -78,6 +78,7 @@ export const figmaAssets = {
   waitlistPanelClouds: "/assets/figma/waitlist/panel-clouds.png",
   historySky: "/assets/figma/history/history-sky.png",
   historyPlaceholder: "/assets/figma/history/history-placeholder.png",
+  historyPhoto: "/assets/figma/history/history-photo.png",
   howGlobeFull: "/assets/figma/how/how-globe-full.png",
   featureUsdtBg: "/assets/figma/feature/usdt-bg.png",
   featureUsdtToken: "/assets/figma/feature/usdt-token.png",

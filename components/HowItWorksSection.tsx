@@ -177,11 +177,16 @@ function EntryPointsPanel() {
 function DashboardPanel() {
   return (
     <div className="size-full p-5 lg:p-0">
-      <img
-        alt="Enta account dashboard showing wallet balances and recent activity"
-        className="size-full rounded-lg object-cover object-left-top lg:absolute lg:left-[42px] lg:top-[44px] lg:h-[576px] lg:w-[678px] lg:max-w-none lg:rounded-none"
-        src={figmaAssets.accountDashboardHd}
-      />
+      <div
+        className="size-full outline-none transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.015] focus-visible:-translate-y-1 focus-visible:scale-[1.015] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 lg:absolute lg:left-[42px] lg:top-[44px] lg:h-[576px] lg:w-[678px]"
+        tabIndex={0}
+      >
+        <img
+          alt="Enta account dashboard showing wallet balances and recent activity"
+          className="size-full rounded-lg object-cover object-left-top"
+          src={figmaAssets.accountDashboardHd}
+        />
+      </div>
     </div>
   );
 }
@@ -281,7 +286,7 @@ function StepRow({
 export function HowItWorksSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const reducedMotion = useReducedMotion();
-  const isInView = useInView(sectionRef, { margin: "220px", once: true });
+  const isInView = useInView(sectionRef, { margin: "0px 0px -35% 0px", once: true });
   const inViewNow = useInView(sectionRef, { amount: 0.35 });
   const contentVisible = Boolean(reducedMotion || isInView);
   const motionActive = isInView && !reducedMotion;

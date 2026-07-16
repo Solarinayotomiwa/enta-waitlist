@@ -5,6 +5,13 @@ import { useRef } from "react";
 import { cn } from "@/lib/cn";
 import { figmaAssets } from "@/lib/figma-assets";
 
+type AssetLoop = {
+  duration: number;
+  delay: number;
+  y: number[];
+  rotate: number[];
+};
+
 type AssetCard = {
   title: string;
   description: string;
@@ -12,8 +19,11 @@ type AssetCard = {
   token: string;
   className: string;
   tokenClassName: string;
+  loop: AssetLoop;
 };
 
+/* Deterministic, offset ambient loops so the three artworks never move in
+   sync — no Math.random(), so SSR and client stay consistent. */
 const assetCards: AssetCard[] = [
   {
     title: "USD₮",
@@ -23,6 +33,7 @@ const assetCards: AssetCard[] = [
     token: figmaAssets.featureUsdtToken,
     className: "lg:translate-y-4 lg:hover:translate-y-2",
     tokenClassName: "",
+    loop: { duration: 6.2, delay: 0, y: [0, -8, 0], rotate: [-0.2, 0.2, -0.2] },
   },
   {
     title: "Bitcoin",
@@ -32,6 +43,7 @@ const assetCards: AssetCard[] = [
     token: figmaAssets.featureBitcoinToken,
     className: "lg:translate-y-32 lg:hover:translate-y-[120px]",
     tokenClassName: "",
+    loop: { duration: 7.6, delay: 1.25, y: [0, -11, 0], rotate: [0.35, -0.25, 0.35] },
   },
   {
     title: "Gold",
@@ -41,6 +53,7 @@ const assetCards: AssetCard[] = [
     token: figmaAssets.featureGoldToken,
     className: "",
     tokenClassName: "",
+    loop: { duration: 5.8, delay: 2.1, y: [0, -7, 0], rotate: [-0.3, 0.15, -0.3] },
   },
 ];
 
@@ -65,7 +78,17 @@ function WalletIllustration({ animate }: { animate: boolean }) {
   );
 }
 
-function FeatureAssetCard({ card, index, animate }: { animate: boolean; card: AssetCard; index: number }) {
+function FeatureAssetCard({
+  card,
+  index,
+  animate,
+  loopActive,
+}: {
+  animate: boolean;
+  card: AssetCard;
+  index: number;
+  loopActive: boolean;
+}) {
   return (
     <motion.article
       animate={animate ? "visible" : "hidden"}
@@ -84,14 +107,25 @@ function FeatureAssetCard({ card, index, animate }: { animate: boolean; card: As
           src={card.background}
         />
         <div className="absolute inset-0 grid place-items-center">
-          <img
-            alt=""
-            className={cn(
-              "feature-card-token h-[91.8%] w-[91.8%] object-contain object-center",
-              card.tokenClassName,
-            )}
-            src={card.token}
-          />
+          <motion.div
+            animate={loopActive ? { y: card.loop.y, rotate: card.loop.rotate } : undefined}
+            className="flex size-full items-center justify-center"
+            transition={{
+              delay: card.loop.delay,
+              duration: card.loop.duration,
+              ease: "easeInOut",
+              repeat: Infinity,
+            }}
+          >
+            <img
+              alt=""
+              className={cn(
+                "feature-card-token h-[91.8%] w-[91.8%] object-contain object-center",
+                card.tokenClassName,
+              )}
+              src={card.token}
+            />
+          </motion.div>
         </div>
         <div className="absolute inset-x-0 bottom-[-1px] h-[90px] bg-gradient-to-b from-[rgba(56,79,130,0)] to-[#0c111c] to-[75%]" />
       </div>
@@ -110,9 +144,11 @@ function FeatureAssetCard({ card, index, animate }: { animate: boolean; card: As
 export function FeatureSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const reducedMotion = useReducedMotion();
-  const isInView = useInView(sectionRef, { margin: "180px", once: true });
+  const isInView = useInView(sectionRef, { margin: "0px 0px -35% 0px", once: true });
+  const inViewNow = useInView(sectionRef, { amount: 0.15 });
   const contentVisible = Boolean(reducedMotion || isInView);
   const shouldAnimate = isInView && !reducedMotion;
+  const loopActive = inViewNow && !reducedMotion;
 
   return (
     <section
@@ -152,26 +188,46 @@ export function FeatureSection() {
             <WalletIllustration animate={shouldAnimate} />
           </div>
 
-          <div
+          {/* One responsive connector diagram: a stem from the wallet's bottom
+              centre reaches a branch line, rounded elbows drop into the USDT
+              and Gold cards, and a straight run continues to the Bitcoin card.
+              Endpoints extend ~2px under the artwork/cards to hide seams. */}
+          <svg
             aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-[377px] z-10 hidden w-[760px] -translate-x-1/2 lg:block"
+            className="pointer-events-none absolute inset-0 z-10 hidden size-full lg:block"
+            preserveAspectRatio="none"
+            viewBox="0 0 1200 861"
           >
-            <img
-              alt=""
-              className="absolute right-1/2 top-0 h-16 w-[377px] opacity-80"
-              src={figmaAssets.featureConnectorLeft}
-            />
-            <img
-              alt=""
-              className="absolute left-1/2 top-0 h-16 w-[377px] -scale-y-100 opacity-80"
-              src={figmaAssets.featureConnectorRight}
-            />
-            <span className="absolute left-1/2 top-0 h-[180px] w-px -translate-x-1/2 bg-[#414167]/70" />
-          </div>
+            <g
+              fill="none"
+              stroke="#414167"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeOpacity="0.75"
+              strokeWidth="1.5"
+            >
+              <path d="M600 408 L600 435" vectorEffect="non-scaling-stroke" />
+              <path
+                d="M600 435 L178 435 Q166 435 166 447 L166 461"
+                vectorEffect="non-scaling-stroke"
+              />
+              <path
+                d="M600 435 L1022 435 Q1034 435 1034 440 L1034 445"
+                vectorEffect="non-scaling-stroke"
+              />
+              <path d="M600 435 L600 572" vectorEffect="non-scaling-stroke" />
+            </g>
+          </svg>
 
           <div className="relative z-20 mt-8 grid gap-5 sm:grid-cols-3 lg:mt-0 lg:flex lg:h-[420px] lg:items-start lg:justify-between">
             {assetCards.map((card, index) => (
-              <FeatureAssetCard animate={contentVisible} card={card} index={index} key={card.title} />
+              <FeatureAssetCard
+                animate={contentVisible}
+                card={card}
+                index={index}
+                key={card.title}
+                loopActive={loopActive}
+              />
             ))}
           </div>
         </div>

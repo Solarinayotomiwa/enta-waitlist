@@ -25,7 +25,7 @@ const audiences: Audience[] = [
     title: "For your business",
     icon: figmaAssets.builtForUsersThree,
     bullets: [
-      "Settle cross-border payments without correspondent banks or the runaround.",
+      "Settle cross-border payments without correspondent banks",
       "Choose the best asset for your treasury and switch instantly.",
       "Assign role-based access: owner, admin, viewer based on responsibility.",
     ],
@@ -97,7 +97,7 @@ function AudienceCard({
 export function BuiltForSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const reducedMotion = useReducedMotion();
-  const isInView = useInView(sectionRef, { margin: "220px", once: true });
+  const isInView = useInView(sectionRef, { margin: "0px 0px -35% 0px", once: true });
   const contentVisible = Boolean(reducedMotion || isInView);
   const [activeIndex, setActiveIndex] = useState(0);
 

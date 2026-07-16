@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/Hero";
+import { FooterSection } from "@/components/FooterSection";
 import { figmaAssets } from "@/lib/figma-assets";
 
 export const metadata: Metadata = {
@@ -366,6 +367,7 @@ export default function BlogPage() {
         </div>
       </section>
 
+      <FooterSection />
     </main>
   );
 }

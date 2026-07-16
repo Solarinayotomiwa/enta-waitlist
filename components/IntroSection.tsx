@@ -45,7 +45,7 @@ const introReveal = {
 export function IntroSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const reducedMotion = useReducedMotion();
-  const isInView = useInView(sectionRef, { margin: "220px", once: true });
+  const isInView = useInView(sectionRef, { margin: "0px 0px -35% 0px", once: true });
   const contentVisible = Boolean(reducedMotion || isInView);
   const shouldAnimate = isInView && !reducedMotion;
 
