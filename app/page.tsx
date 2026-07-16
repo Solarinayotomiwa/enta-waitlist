@@ -3,10 +3,12 @@ import { IntroSection } from "@/components/IntroSection";
 import { CalculatorSection } from "@/components/CalculatorSection";
 import { FeatureSection } from "@/components/FeatureSection";
 import { HowItWorksSection } from "@/components/HowItWorksSection";
+import { BuiltForSection } from "@/components/BuiltForSection";
+import { FeaturesGridSection } from "@/components/FeaturesGridSection";
 import { SecuritySection } from "@/components/SecuritySection";
 import { WaitlistSection } from "@/components/WaitlistSection";
 import { HistorySection } from "@/components/HistorySection";
-import { FooterSection } from "@/components/FooterSection";
+import { BlogSection } from "@/components/BlogSection";
 
 export default function Home() {
   return (
@@ -16,10 +18,12 @@ export default function Home() {
       <CalculatorSection />
       <FeatureSection />
       <HowItWorksSection />
+      <BuiltForSection />
+      <FeaturesGridSection />
       <SecuritySection />
       <WaitlistSection />
       <HistorySection />
-      <FooterSection />
+      <BlogSection />
     </main>
   );
 }

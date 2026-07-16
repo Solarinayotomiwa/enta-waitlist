@@ -53,7 +53,7 @@ select {
 }
 
 .hero-logo-float {
-  animation: logo-float-loop 9.5s ease-in-out infinite;
+  animation: logo-float-loop 6.5s ease-in-out infinite;
   animation-play-state: paused;
   transform-origin: 46% 42%;
 }
@@ -63,8 +63,355 @@ select {
   animation-play-state: paused;
 }
 
+/* High-res meadow export (3432x3432, pre-mirrored like the Figma node, with
+   the tilt and transparent margins baked in). Sized to Figma's meadow node:
+   119vw wide (1715px at a 1440 frame), nudged -3.2vw left, bottom-anchored.
+   No flip, no vertical stretch. */
 .hero-grass-primary {
-  transform: translate3d(0, 0, 0);
+  bottom: 0;
+  height: auto;
+  left: -3.2vw;
+  position: absolute;
+  width: 119vw;
+}
+
+/* ---------------------------------------------------------------------------
+   Hero responsive system.
+   The hero always occupies exactly 100svh; one set of custom properties on
+   .hero-root drives typography, spacing, the glass "e", and the meadow crop
+   for four art-directed states (large desktop / compact desktop / tablet /
+   mobile) plus viewport-height refinements for short screens. The two Figma
+   frames (703-9063 desktop, 796-4371 compact) are the fixed endpoints.
+
+   Meadow crop math: the asset's grass crest sits 21.4% of the image height
+   above its bottom edge; at the 119vw display width the rendered crest height
+   is 25.47vw, so bottom = desired-crest − 25.47vw keeps the crest at a fixed
+   distance from the hero bottom at EVERY width — the visible meadow height
+   stops growing on wide screens.
+   --------------------------------------------------------------------------- */
+.hero-root {
+  height: 100svh;
+  min-height: 100svh;
+
+  --page-gutter: 120px;
+  --content-max-width: 1200px;
+  --hero-title-size: 64px;
+  --hero-title-lh: 70px;
+  --hero-body-size: 24px;
+  --hero-body-lh: 33px;
+  --content-top: 194px;
+  --content-gap: 40px;
+  --gap-proof: 32px;
+  --gap-cta: 48px;
+  --glass-w: min(590px, 41vw);
+  /* -110px is the Figma desktop offset at 1024px height; below that the glass
+     slides down 1:1 with the missing height so the title gap never collapses. */
+  --glass-bottom: min(-110px, calc(100svh - 1134px));
+  --meadow-crest: 194px;
+  /* The 13.45vw cap keeps the artwork's diagonal lower edge below the hero
+     bottom at every width, so no sky sliver appears under the grass. */
+  --meadow-bottom: calc(min(var(--meadow-crest), 13.45vw) - 25.47vw);
+  --meadow-height: 50vw;
+  --meadow-rise-y: 110px;
+}
+
+/* Shared plumbing — every width derives layout from the same variables. */
+.hero-content-root,
+.hero-glass-overlay-inner {
+  max-width: min(var(--content-max-width), 100% - 2 * var(--page-gutter));
+}
+
+.hero-content-root {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-top: var(--content-top);
+}
+
+.hero-grid {
+  gap: var(--content-gap);
+}
+
+.hero-title {
+  font-size: var(--hero-title-size);
+  line-height: var(--hero-title-lh);
+}
+
+.hero-body {
+  font-size: var(--hero-body-size);
+  line-height: var(--hero-body-lh);
+}
+
+.hero-proof-row {
+  margin-top: var(--gap-proof);
+}
+
+.hero-cta-row {
+  margin-top: var(--gap-cta);
+}
+
+.hero-scroll-cue {
+  bottom: max(env(safe-area-inset-bottom), 20px);
+}
+
+.hero-grass-wrap {
+  bottom: var(--meadow-bottom);
+  height: var(--meadow-height);
+}
+
+/* The glass PNG carries ~20% transparent padding on its left; shifting the
+   box by -0.2 x width puts the visible artwork's left edge on the container
+   (= title) left edge, matching both Figma frames (-80px at 404, -118px at 590). */
+.hero-glass-position {
+  aspect-ratio: 1 / 1;
+  bottom: var(--glass-bottom);
+  left: calc(var(--glass-w) * -0.2);
+  width: var(--glass-w);
+}
+
+.hero-glass-entrance,
+.hero-glass-position .hero-logo-float {
+  height: 100%;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .hero-nav-inner {
+    max-width: min(var(--content-max-width), 100% - 2 * var(--page-gutter));
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: auto 476px;
+    justify-content: space-between;
+  }
+
+  .hero-scroll-cue {
+    bottom: 32px;
+  }
+}
+
+/* Large desktop (>=1330px), shorter heights: reduce type + artwork instead of
+   letting anything overlap. */
+@media (min-width: 1330px) and (max-height: 899px) {
+  .hero-root {
+    --hero-title-size: 56px;
+    --hero-title-lh: 61px;
+    --hero-body-size: 22px;
+    --hero-body-lh: 30px;
+    --glass-w: min(480px, 36vw);
+    --glass-bottom: -170px;
+    --meadow-crest: 67px;
+    --content-top: 202px;
+  }
+}
+
+@media (min-width: 1330px) and (max-height: 740px) {
+  .hero-root {
+    --hero-title-size: 52px;
+    --hero-title-lh: 57px;
+    --hero-body-size: 20px;
+    --hero-body-lh: 27px;
+    --glass-w: min(404px, 31.6vw);
+    --glass-bottom: -153px;
+    --meadow-crest: -121px;
+    --content-top: 210px;
+  }
+}
+
+/* Compact desktop: 1024px-1329px — 80px gutter, Figma 796-4371 typography. */
+@media (min-width: 1024px) and (max-width: 1329px) {
+  .hero-root {
+    --page-gutter: 80px;
+    --hero-title-size: 52px;
+    --hero-title-lh: 57px;
+    --hero-body-size: 20px;
+    --hero-body-lh: 27px;
+    --glass-w: min(404px, 31.6vw);
+    --glass-bottom: -153px;
+    --meadow-crest: 46px;
+    --content-top: 210px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1329px) and (max-height: 740px) {
+  .hero-root {
+    --meadow-crest: -121px;
+  }
+}
+
+/* Narrow end of compact desktop: the heading wraps taller here, so the glass
+   shrinks further and sits lower to stay clear of it. */
+@media (min-width: 1024px) and (max-width: 1229px) {
+  .hero-root {
+    --content-gap: 32px;
+    --glass-w: min(300px, 29vw);
+    --glass-bottom: -220px;
+  }
+}
+
+/* Tablet: 768px-1023px — single column, glass "e" moves to the lower-right. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hero-root {
+    --page-gutter: 40px;
+    --hero-title-size: 42px;
+    --hero-title-lh: 48px;
+    --hero-body-size: 18px;
+    --hero-body-lh: 26px;
+    --content-top: 140px;
+    --content-gap: 32px;
+    --gap-proof: 24px;
+    --gap-cta: 32px;
+    --glass-w: clamp(190px, 28vw, 280px);
+    --glass-bottom: -40px;
+    --meadow-crest: 110px;
+    --meadow-rise-y: 80px;
+  }
+
+  /* The overlay container already provides the page gutter, so the glass box
+     sits at its right edge — i.e. right: var(--page-gutter) from the viewport. */
+  .hero-glass-position {
+    left: auto;
+    right: 0;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1023px) and (orientation: landscape) {
+  .hero-root {
+    --hero-title-size: 46px;
+    --hero-title-lh: 52px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) and (max-height: 800px) {
+  .hero-root {
+    --glass-w: clamp(170px, 24vw, 240px);
+    --glass-bottom: -70px;
+    --meadow-crest: 60px;
+  }
+}
+
+/* Mobile: below 768px — the glass "e" is hidden entirely (its lazy image never
+   enters the viewport, so it is not fetched). */
+@media (max-width: 767px) {
+  .hero-root {
+    --page-gutter: 24px;
+    --hero-title-size: 38px;
+    --hero-title-lh: 43px;
+    --hero-body-size: 17px;
+    --hero-body-lh: 25px;
+    --content-top: 116px;
+    --content-gap: 28px;
+    --gap-proof: 24px;
+    --gap-cta: 32px;
+    --meadow-bottom: -30px;
+    --meadow-height: 78vw;
+    --meadow-rise-y: 70px;
+  }
+
+  .hero-glass-position {
+    display: none;
+  }
+
+  .hero-logo-float,
+  .hero-glass-entrance {
+    animation: none;
+  }
+}
+
+@media (max-width: 479px) {
+  .hero-root {
+    --page-gutter: 20px;
+    --hero-title-size: 34px;
+    --hero-title-lh: 39px;
+    --hero-body-size: 16px;
+    --hero-body-lh: 24px;
+    --content-top: 100px;
+    --content-gap: 20px;
+    --gap-proof: 20px;
+    --gap-cta: 24px;
+    --meadow-bottom: -40px;
+  }
+}
+
+@media (max-width: 359px) {
+  .hero-root {
+    --hero-title-size: 32px;
+    --hero-title-lh: 37px;
+  }
+}
+
+/* Very short phones: compress further and drop the scroll cue so the CTA row
+   never clips inside the fixed 100svh hero. */
+@media (max-width: 767px) and (max-height: 640px) {
+  .hero-root {
+    --hero-title-size: 30px;
+    --hero-title-lh: 35px;
+    --hero-body-size: 15px;
+    --hero-body-lh: 22px;
+    --content-top: 84px;
+    --content-gap: 16px;
+    --gap-proof: 16px;
+    --gap-cta: 20px;
+  }
+
+  .hero-scroll-cue {
+    display: none;
+  }
+}
+
+/* Entrance choreography. Pure CSS with `both` fill: initial hidden states
+   exist from first paint (no hydration dependency, no flash), animations run
+   without JavaScript, and every element resolves directly into its responsive
+   position. Wrapped in no-preference so reduced-motion users see everything
+   immediately. Sequence: hero clip reveal → meadow rises → glass "e" rises →
+   float loop takes over (delayed past the entrance). */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-root {
+    animation: hero-reveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .hero-meadow-entrance {
+    animation: meadow-rise 1s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  }
+
+  .hero-glass-entrance {
+    animation: glass-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+  }
+
+  .hero-logo-float {
+    animation-delay: 1.35s;
+  }
+}
+
+@keyframes hero-reveal {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes meadow-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--meadow-rise-y, 110px));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes glass-rise {
+  from {
+    opacity: 0;
+    transform: translateY(84px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .hero-cloud-layer {
@@ -658,16 +1005,16 @@ select {
 
 @keyframes logo-float-loop {
   0% {
-    transform: translate3d(-4px, 8px, 0) rotate(-0.55deg) scale(0.996);
+    transform: translate3d(-2px, 3px, 0) rotate(-0.3deg) scale(0.999);
   }
   35% {
-    transform: translate3d(9px, -18px, 0) rotate(0.7deg) scale(1.01);
+    transform: translate3d(4px, -4px, 0) rotate(0.4deg) scale(1.004);
   }
   70% {
-    transform: translate3d(4px, -5px, 0) rotate(-0.15deg) scale(1.004);
+    transform: translate3d(2px, -1px, 0) rotate(-0.1deg) scale(1.001);
   }
   100% {
-    transform: translate3d(-4px, 8px, 0) rotate(-0.55deg) scale(0.996);
+    transform: translate3d(-2px, 3px, 0) rotate(-0.3deg) scale(0.999);
   }
 }
 
@@ -772,13 +1119,6 @@ select {
     opacity: 0.12;
     top: 32%;
     width: 22rem;
-  }
-
-  .hero-grass-wrap {
-    top: auto;
-    bottom: -300px;
-    transform: scale(0.9);
-    transform-origin: left bottom;
   }
 
   .hero-form {

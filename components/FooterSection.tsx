@@ -88,7 +88,7 @@ export function FooterSection() {
                 </p>
                 <a
                   className="inline-flex h-10 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-[#0c111d] transition duration-150 ease-out hover:-translate-y-0.5 hover:bg-white/90"
-                  href="#waitlist"
+                  href="/#waitlist"
                 >
                   Join Our Waitlist
                 </a>

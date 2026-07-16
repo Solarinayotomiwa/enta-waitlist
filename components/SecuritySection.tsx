@@ -13,24 +13,14 @@ type SecurityPoint = {
 
 const securityPoints: SecurityPoint[] = [
   {
-    title: "Biometric security",
-    body: "Your face. Your fingerprint. Your device. The only keys that unlock your account are ones only you carry.",
-    icon: figmaAssets.securityFaceId,
-  },
-  {
-    title: "Roles that match how you work",
-    body: "Roles like super admin, admin, and viewer have access based on responsibilities.",
-    icon: figmaAssets.securityUsersThree,
+    title: "Biometric, passwordless security",
+    body: "No passwords, no email links. Your face, fingerprint, or device signs in and approves every transaction.",
+    icon: figmaAssets.securityIconPassword,
   },
   {
     title: "True self-custody",
     body: "True self-custody means you control your assets completely. Enta offers the framework, but you remain in charge.",
-    icon: figmaAssets.securityWallet,
-  },
-  {
-    title: "Activate in minutes",
-    body: "One controlling owner verifies, sets a passkey, and the wallet is live, ready to send and receive.",
-    icon: figmaAssets.securityHandWithdraw,
+    icon: figmaAssets.securityIconEntaWallet,
   },
 ];
 
@@ -43,7 +33,7 @@ function SecurityPointCard({ point, visible, index }: { index: number; point: Se
   return (
     <motion.article
       animate={visible ? "visible" : "hidden"}
-      className="security-point w-full rounded-xl border border-[#414167] px-5 py-6 text-white transition duration-300 ease-out hover:-translate-y-1 hover:border-[#4b8bff] lg:min-h-[226px]"
+      className="security-point flex w-full flex-col gap-2.5 rounded-xl border border-[#414167] px-5 py-6 text-white transition duration-300 ease-out hover:-translate-y-1 hover:border-[#4b8bff]"
       initial="hidden"
       transition={{ delay: index * 0.06, duration: 0.5, ease: "easeOut" }}
       variants={reveal}
@@ -53,8 +43,10 @@ function SecurityPointCard({ point, visible, index }: { index: number; point: Se
         className="security-point-icon size-16"
         src={point.icon}
       />
-      <h3 className="mt-2.5 text-base font-semibold leading-[23px] tracking-[-0.32px]">{point.title}</h3>
-      <p className="mt-3 text-pretty text-base leading-[23px] tracking-[-0.32px] text-white">{point.body}</p>
+      <div className="flex flex-col gap-3">
+        <h3 className="text-xl font-semibold leading-[30px]">{point.title}</h3>
+        <p className="text-pretty text-xl leading-[30px] text-white">{point.body}</p>
+      </div>
     </motion.article>
   );
 }
@@ -125,30 +117,54 @@ function BalanceCard({
 
 function SecurityVisual({ active }: { active: boolean }) {
   return (
-    <div className="relative mx-auto h-[306px] w-[330px] overflow-hidden rounded-xl sm:h-[496px] sm:w-[534px]">
-      <img alt="" className="absolute inset-0 size-full object-cover" src={figmaAssets.securityPhoneBg} />
-
-      <motion.img
+    <div className="relative h-[420px] w-full overflow-hidden rounded-xl bg-[#1f242f] sm:h-[534px]">
+      <img
         alt=""
-        animate={active ? { y: [0, -8, 0], rotate: [0, -0.4, 0.4, 0] } : undefined}
-        className="absolute left-1/2 top-[4.4%] z-20 h-[158px] w-[235px] -translate-x-1/2 object-cover sm:h-[256px] sm:w-[379px]"
-        src={figmaAssets.securityPhoneDevice}
-        transition={{ duration: 6.2, ease: "easeInOut", repeat: Infinity }}
+        aria-hidden="true"
+        className="absolute inset-0 size-full rounded-xl object-cover"
+        src={figmaAssets.securityPanelBgOne}
+      />
+      <img
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 size-full rounded-xl object-cover"
+        src={figmaAssets.securityPanelBgTwo}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[#0e52c8] opacity-[0.69] mix-blend-hue"
       />
 
-      <div className="security-balance-stage absolute left-1/2 top-[51.2%] z-10 flex -translate-x-1/2 items-center gap-[9.5px] sm:gap-[15.36px]">
+      <motion.div
+        animate={active ? { y: [0, -8, 0], rotate: [0, -0.4, 0.4, 0] } : undefined}
+        className="absolute left-1/2 top-[23px] z-20 h-[164px] w-[246px] -translate-x-[calc(50%+3.84px)] sm:h-[246px] sm:w-[369px]"
+        transition={{ duration: 6.2, ease: "easeInOut", repeat: Infinity }}
+      >
+        <img
+          alt=""
+          className="absolute left-[40.4%] top-[11.6%] h-[24%] w-[19%]"
+          src={figmaAssets.securityPadlockBack}
+        />
+        <img
+          alt=""
+          className="absolute inset-0 size-full object-cover [filter:drop-shadow(0_4px_4.8px_rgba(0,0,0,0.1))]"
+          src={figmaAssets.securityPadlock}
+        />
+      </motion.div>
+
+      <div className="security-balance-stage absolute left-1/2 top-[254px] z-10 flex -translate-x-1/2 items-center gap-[9.5px] max-sm:top-[210px] sm:gap-[15.36px]">
         <BalanceCard
           asset="usdt"
-          icon={figmaAssets.securityCoin}
+          icon={figmaAssets.securityTokenUsdt}
         />
         <BalanceCard
           asset="btc"
-          icon={figmaAssets.securityCardIconOne}
+          icon={figmaAssets.securityTokenBtc}
           scale="center"
         />
         <BalanceCard
           asset="xaut"
-          icon={figmaAssets.calculatorChartXaut}
+          icon={figmaAssets.securityTokenXaut}
         />
       </div>
     </div>
@@ -172,31 +188,27 @@ export function SecuritySection() {
       ref={sectionRef}
     >
       <div aria-hidden="true" className="security-section-glow" />
-      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col items-center">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col items-center gap-16">
         <motion.div
           animate={contentVisible ? "visible" : "hidden"}
-          className="max-w-[844px] text-center"
+          className="flex max-w-[844px] flex-col items-center gap-3 text-center"
           initial="hidden"
           transition={{ duration: 0.55, ease: "easeOut" }}
           variants={reveal}
         >
-          <h2 className="text-balance text-[2.35rem] font-semibold leading-[1.08] tracking-[-0.018em] sm:text-5xl sm:leading-[52px]">
+          <h2 className="text-balance text-[2.35rem] font-semibold leading-[1.08] tracking-[-0.018em] sm:text-5xl sm:leading-[52px] sm:tracking-[-0.864px]">
             Only you can touch it
           </h2>
-          <p className="mx-auto mt-3 max-w-[530px] text-pretty text-xl leading-[23px] tracking-[-0.32px] text-white">
+          <p className="mx-auto max-w-[530px] text-pretty text-xl leading-[23px] tracking-[-0.32px] text-white">
             Protected by your biometrics. No platform, no government, no third party can freeze,
             block, or access your assets. Ever.
           </p>
         </motion.div>
 
-        <div className="mt-16 grid w-full items-center gap-8 lg:grid-cols-[309px_534px_309px] lg:gap-6">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-1 lg:gap-5">
-            <SecurityPointCard index={0} point={securityPoints[0]} visible={contentVisible} />
-            <SecurityPointCard index={2} point={securityPoints[2]} visible={contentVisible} />
-          </div>
-
+        <div className="flex w-full flex-col items-stretch gap-6 lg:flex-row">
           <motion.div
             animate={contentVisible ? "visible" : "hidden"}
+            className="min-w-0 flex-1"
             initial="hidden"
             transition={{ delay: 0.1, duration: 0.55, ease: "easeOut" }}
             variants={reveal}
@@ -204,9 +216,10 @@ export function SecuritySection() {
             <SecurityVisual active={motionActive} />
           </motion.div>
 
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-1 lg:gap-5">
-            <SecurityPointCard index={1} point={securityPoints[1]} visible={contentVisible} />
-            <SecurityPointCard index={3} point={securityPoints[3]} visible={contentVisible} />
+          <div className="flex flex-col gap-5 lg:w-[397.33px] lg:shrink-0">
+            {securityPoints.map((point, index) => (
+              <SecurityPointCard index={index} key={point.title} point={point} visible={contentVisible} />
+            ))}
           </div>
         </div>
       </div>

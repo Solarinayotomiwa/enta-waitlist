@@ -387,19 +387,21 @@ export function Hero() {
   return (
     <section
       className={cn(
-        "relative isolate min-h-dvh overflow-hidden bg-sky-700 text-white lg:z-10 lg:h-[108dvh] lg:min-h-[864px] lg:overflow-visible",
+        "hero-root relative isolate overflow-hidden bg-sky-700 text-white lg:z-10",
         shouldAnimate && "motion-active",
       )}
       ref={heroRef}
     >
       <HeroScene />
+      <MeadowLayer />
+      <GlassLayer />
       <Header />
-      <div className="relative z-20 mx-auto flex min-h-dvh w-full max-w-[1200px] flex-col px-6 pb-20 pt-36 lg:h-full lg:min-h-0 lg:px-0 lg:pb-0 lg:pt-[194px]">
-        <div className="grid gap-10 lg:grid-cols-[682px_476px] lg:gap-10">
+      <div className="hero-content-root relative z-30 mx-auto flex h-full w-full flex-col">
+        <div className="hero-grid grid">
           <HeroHeadline />
           <HeroIntro />
         </div>
-        <div className="relative z-40 mt-8 flex justify-center lg:absolute lg:left-0 lg:right-0 lg:top-[calc(100dvh-32px)] lg:mt-0 lg:-translate-y-full">
+        <div className="hero-scroll-cue absolute inset-x-0 z-40 flex justify-center">
           <ScrollCue shouldAnimate={shouldAnimate} />
         </div>
       </div>
@@ -439,20 +441,43 @@ function HeroScene() {
         src={figmaAssets.heroSky}
       />
       <CloudDriftLayer />
-      <div className="hero-logo-float absolute bottom-[-51px] left-[3px] w-[min(685px,52vw)] min-w-[425px] max-w-none select-none max-lg:bottom-[-64px] max-lg:left-[-150px] max-lg:min-w-[440px]">
-        <img
-          alt=""
-          className="hero-logo-image size-full object-contain"
-          src={figmaAssets.heroEntaLogo}
-        />
+    </div>
+  );
+}
+
+function MeadowLayer() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
+      <div className="hero-grass-wrap absolute inset-x-0 overflow-hidden">
+        <div className="hero-meadow-entrance size-full">
+          <img
+            alt=""
+            className="hero-grass-primary size-full max-w-none"
+            src={figmaAssets.heroGrass}
+          />
+          <GrassBladeField />
+        </div>
       </div>
-      <div className="hero-grass-wrap absolute left-0 top-[-234px] h-[1441px] w-full lg:top-auto lg:bottom-[-183px]">
-        <img
-          alt=""
-          className="hero-grass-primary absolute left-[-1px] top-0 size-[1441px] max-w-none object-cover"
-          src={figmaAssets.heroGrass}
-        />
-        <GrassBladeField />
+    </div>
+  );
+}
+
+function GlassLayer() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+      <div className="hero-glass-overlay-inner relative mx-auto h-full w-full">
+        <div className="hero-glass-position absolute max-w-none select-none">
+          <div className="hero-glass-entrance">
+            <div className="hero-logo-float">
+              <img
+                alt=""
+                className="hero-logo-image size-full object-contain"
+                loading="lazy"
+                src={figmaAssets.heroEntaLogo}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -497,16 +522,16 @@ function GrassBladeField() {
   );
 }
 
-function Header() {
+export function Header() {
   return (
     <motion.header
       animate={{ opacity: 1, y: 0 }}
       className="absolute inset-x-0 top-0 z-40 px-5 pt-[calc(env(safe-area-inset-top)+18px)] sm:px-6 lg:px-0 lg:pt-[env(safe-area-inset-top)]"
-      initial={{ opacity: 0, y: -14 }}
-      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      initial={{ opacity: 0, y: -12 }}
+      transition={{ delay: 0.12, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
     >
-      <nav className="relative mx-auto flex h-11 max-w-[1200px] items-center gap-3 sm:h-12 sm:gap-4 lg:h-[84px]">
-        <a aria-label="Enta home" className="flex min-w-0 items-center gap-3" href="#">
+      <nav className="hero-nav-inner relative mx-auto flex h-11 max-w-[1200px] items-center gap-3 sm:h-12 sm:gap-4 lg:h-[84px]">
+        <a aria-label="Enta home" className="flex min-w-0 items-center gap-3" href="/">
           <img
             alt=""
             className="h-7 w-[104px] shrink-0 object-contain sm:h-8 sm:w-[120px]"
@@ -517,19 +542,19 @@ function Header() {
           </span>
         </a>
         <div className="hidden flex-1 items-center justify-center gap-4 text-sm font-medium tracking-[-0.14px] text-white [font-family:var(--font-inter),Inter,sans-serif] md:flex lg:absolute lg:left-1/2 lg:top-1/2 lg:flex-none lg:-translate-x-1/2 lg:-translate-y-1/2">
-          <a className="nav-glass-link" href="#how-it-works">
+          <a className="nav-glass-link" href="/#how-it-works">
             Learn More
           </a>
-          <a className="nav-glass-link" href="#how-it-works">
+          <a className="nav-glass-link" href="/#how-it-works">
             How it works
           </a>
-          <a className="nav-glass-link" href="#about">
+          <a className="nav-glass-link" href="/#about">
             About
           </a>
         </div>
         <a
           className="ml-auto shrink-0 whitespace-nowrap rounded-lg bg-[#eff8ff] px-3 py-1.5 text-xs font-semibold capitalize leading-5 text-[#0e2243] transition duration-150 ease-out hover:bg-white active:scale-[0.98] sm:text-sm"
-          href="#waitlist"
+          href="/#waitlist"
         >
           Join Waitlist
         </a>
@@ -542,18 +567,21 @@ function HeroHeadline() {
   return (
     <motion.h1
       animate="visible"
-      className="relative max-w-[682px] text-[56px] font-bold leading-[1.08] tracking-[-0.031em] text-white text-balance max-[380px]:text-[48px] md:text-[64px] md:leading-[72px] md:tracking-[-2px]"
+      className="hero-title relative max-w-[682px] text-[56px] font-bold leading-[1.08] tracking-[-0.031em] text-white text-balance max-[380px]:text-[48px] md:text-[64px] md:leading-[70px] md:tracking-[-1.5px]"
       initial="hidden"
       transition={{ staggerChildren: 0.11, delayChildren: 0.16 }}
     >
       <motion.span className="block" variants={reveal}>
-        Buy it. Send it. Hold it.
+        Preserve it. Move it.
       </motion.span>
       <motion.span className="block" variants={reveal}>
-        Your money on your
+        Own it. <span className="text-[#a9e0fb]">Money that</span>
       </motion.span>
-      <motion.span className="block" variants={reveal}>
-        terms.
+      <motion.span className="block text-[#a9e0fb]" variants={reveal}>
+        works everywhere
+      </motion.span>
+      <motion.span className="block text-[#a9e0fb]" variants={reveal}>
+        you do.
       </motion.span>
     </motion.h1>
   );
@@ -643,12 +671,12 @@ function HeroIntro() {
       initial="hidden"
       transition={{ staggerChildren: 0.12, delayChildren: 0.48 }}
     >
-      <motion.p className="text-2xl leading-[33px] tracking-[-0.32px] text-white text-pretty" variants={reveal}>
-        Receive to your local bank account. Send it across borders. Hold it in bitcoin. Store it in
-        gold. Enta gives you the tools to protect what you earn, wherever you are and whatever
-        currency you hold it in.
+      <motion.p className="hero-body text-2xl leading-[33px] tracking-[-0.32px] text-white text-pretty" variants={reveal}>
+        Receive to your local bank account. Send it across borders. Hold it in Bitcoin. Store it in
+        gold. ENTA gives you the tools to preserve what you own and spend against it &mdash; without
+        selling, and without giving up control.
       </motion.p>
-      <motion.div className="mt-8 flex items-center gap-2" variants={reveal}>
+      <motion.div className="hero-proof-row mt-8 flex items-center gap-2" variants={reveal}>
         <img
           alt=""
           className="h-8 w-[76px] object-contain"
@@ -658,7 +686,7 @@ function HeroIntro() {
           Join 500+ others on the waitlist
         </p>
       </motion.div>
-      <motion.div className="mt-12 flex w-full max-w-[453px] gap-4" variants={reveal}>
+      <motion.div className="hero-cta-row mt-12 flex w-full max-w-[453px] gap-4" variants={reveal}>
         <a
           className="flex h-12 flex-1 items-center justify-center rounded-lg bg-white px-[18px] text-base font-semibold capitalize leading-6 text-[#0c111d] transition duration-150 ease-out hover:bg-white/90 active:scale-[0.99]"
           href="#waitlist"
