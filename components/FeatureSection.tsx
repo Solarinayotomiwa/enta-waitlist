@@ -87,7 +87,7 @@ function FeatureAssetCard({ card, index, animate }: { animate: boolean; card: As
           <img
             alt=""
             className={cn(
-              "feature-card-token h-[85%] w-[85%] object-contain object-center",
+              "feature-card-token h-[91.8%] w-[91.8%] object-contain object-center",
               card.tokenClassName,
             )}
             src={card.token}

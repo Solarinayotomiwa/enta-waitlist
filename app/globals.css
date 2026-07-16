@@ -264,6 +264,15 @@ select {
   }
 }
 
+/* Short desktop heights (<700px): pull the hero text block 15% closer to the
+   navbar (210px * 0.85 = 178.5px). Height-based only — the navbar and the
+   bottom-anchored meadow/glass "e" stay where they are. */
+@media (min-width: 1024px) and (max-height: 699px) {
+  .hero-root {
+    --content-top: 178.5px;
+  }
+}
+
 /* Tablet: 768px-1023px — single column, glass "e" moves to the lower-right. */
 @media (min-width: 768px) and (max-width: 1023px) {
   .hero-root {
@@ -405,6 +414,33 @@ select {
   .hero-logo-float {
     animation-delay: 1s;
   }
+}
+
+/* Rounded 1px gradient stroke (sampled from the Figma active card: bright
+   blue at the top-right/bottom-left corners, dark slate at the others). The
+   mask keeps the card's own background untouched. */
+.gradient-stroke {
+  --stroke-width: 1px;
+  --stroke-gradient: linear-gradient(45deg, #4a86f4 0%, #2c3560 50%, #4a86f4 100%);
+  position: relative;
+}
+
+.gradient-stroke::before {
+  border-radius: inherit;
+  background: var(--stroke-gradient);
+  content: "";
+  inset: 0;
+  padding: var(--stroke-width);
+  pointer-events: none;
+  position: absolute;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
 }
 
 @keyframes hero-reveal {

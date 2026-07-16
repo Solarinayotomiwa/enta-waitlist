@@ -1,28 +1,23 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
+import { cn } from "@/lib/cn";
 import { figmaAssets } from "@/lib/figma-assets";
+import { DottedGlobe } from "@/components/DottedGlobe";
 
 const reveal = {
   hidden: { opacity: 0, y: 26 },
   visible: { opacity: 1, y: 0 },
 };
 
+const cardHover =
+  "transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.015] focus-within:-translate-y-1";
+
 function PasskeyVisual() {
   return (
-    <div className="relative min-h-[297px] flex-1 overflow-hidden rounded-xl">
-      <img
-        alt=""
-        aria-hidden="true"
-        className="absolute left-[-15.18%] top-[-11.49%] h-[119.12%] w-[130.37%] max-w-none"
-        src={figmaAssets.featuresPasskeyBg}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 rounded-xl bg-[#961c7c] mix-blend-color"
-      />
-      <div className="absolute left-[20.67px] top-[82px] flex w-[315px] max-w-[calc(100%-32px)] flex-col gap-[15.5px] rounded-[7.75px] bg-white p-[15.5px]">
+    <div className="relative min-h-[297px] flex-1 overflow-hidden rounded-xl bg-[#dcfae6] lg:min-h-0">
+      <div className="absolute left-1/2 top-1/2 flex w-[315px] max-w-[calc(100%-32px)] -translate-x-1/2 -translate-y-1/2 flex-col gap-[15.5px] rounded-[7.75px] bg-white p-[15.5px]">
         <div className="flex items-start gap-[15.5px]">
           <img alt="" className="size-[25.8px] shrink-0" src={figmaAssets.featuresIconLaptop} />
           <div className="flex flex-col gap-[10.33px]">
@@ -50,31 +45,53 @@ function PasskeyVisual() {
   );
 }
 
-const featureCards = [
+function GlobeVisual() {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      className="relative min-h-[297px] flex-1 overflow-hidden rounded-xl bg-[#fce7f6] lg:min-h-0"
+      onBlur={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      tabIndex={-1}
+    >
+      <DottedGlobe hovered={hovered} />
+    </div>
+  );
+}
+
+type FeatureCard = {
+  title: string;
+  body: string;
+  visual: ReactNode;
+};
+
+const featureCards: FeatureCard[] = [
   {
     title: "Only you can move it",
     body: "Only you can access your account using your device and biometrics. Shiga cannot freeze or transfer your assets.",
     visual: (
-      <div className="relative min-h-[297px] flex-1 overflow-hidden rounded-xl">
+      <div className="relative min-h-[297px] flex-1 overflow-hidden rounded-xl lg:min-h-0">
         <img
           alt="Enta dashboard shown in dark mode"
           className="absolute inset-0 size-full rounded-xl object-cover"
-          src={figmaAssets.featuresMoveDashboard}
+          src={figmaAssets.featuresMoveDashboardV2}
         />
       </div>
     ),
   },
   {
     title: "Never lose access",
-    body: "Self-custody without a seed phrase to memorise or lose. If you lose your device, you can recover your account safely — securely, and on your terms.",
+    body: "Self-custody without a seed phrase. If you lose your device, recover your account securely.",
     visual: <PasskeyVisual />,
   },
   {
     title: "Regulated, not a workaround",
-    body: "Built on regulated infrastructure and backed by Tether. Over $350M already moved for individuals and businesses across Africa and the GCC.",
-    visual: <div className="min-h-[297px] flex-1 rounded-xl bg-[#fce7f6]" />,
+    body: "Built on regulated infrastructure, backed by Tether. Over $350M moved for individuals and businesses in Africa and the GCC.",
+    visual: <GlobeVisual />,
   },
-] as const;
+];
 
 export function FeaturesGridSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -91,13 +108,16 @@ export function FeaturesGridSection() {
       <div className="mx-auto flex w-full max-w-[1224px] flex-col gap-4">
         <motion.div
           animate={contentVisible ? "visible" : "hidden"}
-          className="flex flex-col gap-10 rounded-2xl bg-[#182230] p-5 lg:flex-row lg:gap-12"
+          className={cn(
+            "flex flex-col gap-10 rounded-2xl bg-[#182230] p-5 lg:h-[495px] lg:flex-row lg:items-center lg:gap-12",
+            cardHover,
+          )}
           initial="hidden"
           transition={{ duration: 0.55, ease: "easeOut" }}
           variants={reveal}
         >
-          <div className="flex flex-col justify-center pt-4 lg:w-[424px] lg:shrink-0">
-            <div className="flex flex-col gap-2 pb-6">
+          <div className="flex flex-col justify-center lg:w-[424px] lg:shrink-0">
+            <div className="flex flex-col gap-2">
               <p className="text-[22px] font-medium leading-[30px] text-white sm:text-2xl sm:leading-8 lg:whitespace-nowrap">
                 The rate you see is the rate you get
               </p>
@@ -108,9 +128,9 @@ export function FeaturesGridSection() {
             </div>
           </div>
           <img
-            alt="Enta dashboard showing balances, transactions, and deposits"
-            className="w-full rounded-xl object-cover lg:h-[604px] lg:w-[712px]"
-            src={figmaAssets.featuresRateDashboard}
+            alt="Enta buy widget converting naira in a few taps"
+            className="w-full rounded-xl object-cover lg:h-[455px] lg:w-[712px]"
+            src={figmaAssets.featuresBuyWidget}
           />
         </motion.div>
 
@@ -123,16 +143,12 @@ export function FeaturesGridSection() {
         >
           {featureCards.map((card) => (
             <div
-              className="flex flex-col gap-8 rounded-2xl bg-[#182230] p-5 lg:h-[529px]"
+              className={cn("flex flex-col gap-8 rounded-2xl bg-[#182230] p-5 lg:h-[529px]", cardHover)}
               key={card.title}
             >
-              <div className="flex flex-col gap-2">
-                <p className="text-[22px] font-medium leading-[30px] text-white sm:text-2xl sm:leading-8">
-                  {card.title}
-                </p>
-                <p className="text-lg leading-[27px] text-[#d0d5dd] sm:text-xl sm:leading-[30px]">
-                  {card.body}
-                </p>
+              <div className="flex min-h-[150px] flex-col gap-2">
+                <p className="text-[20px] font-medium leading-[30px] text-white">{card.title}</p>
+                <p className="text-lg leading-[28px] text-[#d0d5dd]">{card.body}</p>
               </div>
               {card.visual}
             </div>

@@ -83,9 +83,11 @@ const panelSwap = {
   exit: { opacity: 0, y: -14 },
 };
 
-/* "Start anywhere": the middle card rests at the highlighted scale (1.135 =
-   the 554/488 emphasized-card ratio from the Figma frame); hovering or
-   focusing another card hands the highlight to it. */
+/* "Start anywhere": cards render at their exact Figma sizes — the highlighted
+   card is the full-width 554px variant (142px icon panel, 20px text, 12px
+   radius), the resting cards the 487.52px variant. Framer's layout animation
+   moves the emphasis between cards; hovering or focusing another card hands it
+   the highlighted treatment, the middle card holds it by default. */
 function EntryPointsPanel() {
   const [hovered, setHovered] = useState<number | null>(null);
   const active = hovered ?? 1;
@@ -93,40 +95,80 @@ function EntryPointsPanel() {
   return (
     <div className="flex size-full items-center justify-center p-5 lg:p-0">
       <div
-        className="flex w-full flex-col items-center justify-center gap-4 lg:w-[554px] lg:gap-7"
+        className="flex w-full flex-col items-center justify-center gap-4 lg:w-[554px] lg:gap-6"
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node)) setHovered(null);
+        }}
         onMouseLeave={() => setHovered(null)}
       >
-        {entryCards.map((card, index) => (
-          <div
-            className={cn(
-              "flex w-full items-stretch overflow-hidden rounded-[10.56px] bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:w-[487.52px]",
-              index === active ? "z-10 lg:scale-[1.135]" : "lg:scale-100",
-            )}
-            key={card.heading}
-            onFocus={() => setHovered(index)}
-            onMouseEnter={() => setHovered(index)}
-            tabIndex={0}
-          >
-            <div
-              className="relative w-[92px] shrink-0 self-stretch overflow-hidden sm:w-[124.96px]"
-              style={{ backgroundColor: card.panelBg }}
+        {entryCards.map((card, index) => {
+          const isActive = index === active;
+          return (
+            <motion.div
+              className={cn(
+                "flex w-full items-stretch overflow-hidden bg-white outline-none",
+                isActive
+                  ? "z-10 gap-6 rounded-xl"
+                  : "gap-[21.12px] rounded-[10.56px] lg:w-[487.52px]",
+              )}
+              key={card.heading}
+              layout
+              onFocus={() => setHovered(index)}
+              onMouseEnter={() => setHovered(index)}
+              tabIndex={0}
+              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             >
-              <img
-                alt=""
-                className="absolute left-1/2 top-1/2 h-[148.72px] w-[119.35px] max-w-none -translate-x-[calc(50%+2.4px)] -translate-y-1/2 object-cover"
-                src={card.image}
-              />
-            </div>
-            <div className="flex min-w-0 flex-1 flex-col gap-[3.52px] py-[21.12px] pr-[21.12px]">
-              <p className="text-base font-medium leading-6 text-[#53b1fd] sm:text-[17.6px] sm:leading-[26.4px]">
-                {card.heading}
-              </p>
-              <p className="text-base font-medium leading-6 text-[#101828] sm:text-[17.6px] sm:leading-[26.4px]">
-                {card.body}
-              </p>
-            </div>
-          </div>
-        ))}
+              <motion.div
+                className={cn(
+                  "relative shrink-0 self-stretch overflow-hidden",
+                  isActive ? "w-[104px] sm:w-[142px]" : "w-[92px] sm:w-[124.96px]",
+                )}
+                layout
+                style={{ backgroundColor: card.panelBg }}
+              >
+                <motion.img
+                  alt=""
+                  className={cn(
+                    "absolute left-1/2 top-1/2 max-w-none -translate-x-[calc(50%+2.5px)] -translate-y-1/2 object-cover",
+                    isActive ? "h-[169px] w-[136px]" : "h-[148.72px] w-[119.35px]",
+                  )}
+                  layout
+                  src={card.image}
+                />
+              </motion.div>
+              <motion.div
+                className={cn(
+                  "flex min-w-0 flex-1 flex-col",
+                  isActive ? "gap-1 py-6 pr-6" : "gap-[3.52px] py-[21.12px] pr-[21.12px]",
+                )}
+                layout
+              >
+                <motion.p
+                  className={cn(
+                    "font-medium text-[#53b1fd]",
+                    isActive
+                      ? "text-lg leading-[27px] sm:text-xl sm:leading-[30px]"
+                      : "text-base leading-6 sm:text-[17.6px] sm:leading-[26.4px]",
+                  )}
+                  layout
+                >
+                  {card.heading}
+                </motion.p>
+                <motion.p
+                  className={cn(
+                    "font-medium text-[#101828]",
+                    isActive
+                      ? "text-lg leading-[27px] sm:text-xl sm:leading-[30px]"
+                      : "text-base leading-6 sm:text-[17.6px] sm:leading-[26.4px]",
+                  )}
+                  layout
+                >
+                  {card.body}
+                </motion.p>
+              </motion.div>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
@@ -247,7 +289,9 @@ export function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
   const fillRef = useRef<HTMLSpanElement | null>(null);
   const progressRef = useRef(0);
-  const pausedRef = useRef(false);
+  /* 1 = normal speed; 0.7 while hovered/focused. Delta-time based, so speed
+     changes continue smoothly from the current progress with no jump. */
+  const speedRef = useRef(1);
 
   const setFillNode = useCallback((node: HTMLSpanElement | null) => {
     fillRef.current = node;
@@ -256,8 +300,8 @@ export function HowItWorksSection() {
 
   /* One rAF-driven timer owns the progress value, the fill visual, and the
      step switch, so the counter and the displayed content can never drift
-     apart. rAF stops in hidden tabs (auto-pause); hover/focus set pausedRef;
-     progress resumes from its current value. */
+     apart. rAF stops in hidden tabs (auto-pause); hover/focus slow the timer
+     to 70% via speedRef; progress always continues from its current value. */
   useEffect(() => {
     if (reducedMotion) return;
 
@@ -275,7 +319,7 @@ export function HowItWorksSection() {
       const dt = Math.min(now - last, 100);
       last = now;
 
-      if (pausedRef.current || !inViewNow) return;
+      if (!inViewNow) return;
 
       if (holdUntil !== null) {
         if (now >= holdUntil) {
@@ -284,7 +328,10 @@ export function HowItWorksSection() {
         return;
       }
 
-      progressRef.current = Math.min(1, progressRef.current + dt / STEP_DURATION_MS);
+      progressRef.current = Math.min(
+        1,
+        progressRef.current + (dt * speedRef.current) / STEP_DURATION_MS,
+      );
       if (fillRef.current) {
         fillRef.current.style.transform = `scaleX(${progressRef.current})`;
       }
@@ -318,16 +365,16 @@ export function HowItWorksSection() {
       <div
         className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col gap-14 lg:h-[620px] lg:flex-row lg:gap-14"
         onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget as Node)) pausedRef.current = false;
+          if (!event.currentTarget.contains(event.relatedTarget as Node)) speedRef.current = 1;
         }}
         onFocus={() => {
-          pausedRef.current = true;
+          speedRef.current = 0.7;
         }}
         onMouseEnter={() => {
-          pausedRef.current = true;
+          speedRef.current = 0.7;
         }}
         onMouseLeave={() => {
-          pausedRef.current = false;
+          speedRef.current = 1;
         }}
       >
         <motion.div

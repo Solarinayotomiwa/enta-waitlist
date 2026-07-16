@@ -109,6 +109,8 @@ export const figmaAssets = {
   howCaretDown: "/assets/figma/how/caret-down.svg",
   howSwap: "/assets/figma/how/swap.svg",
   featuresRateDashboard: "/assets/figma/features/features-rate-dashboard.png",
+  featuresBuyWidget: "/assets/figma/features/features-buy-widget.png",
+  featuresMoveDashboardV2: "/assets/figma/features/features-move-dashboard-v2.png",
   featuresMoveDashboard: "/assets/figma/features/features-move-dashboard.png",
   featuresPasskeyBg: "/assets/figma/features/features-passkey-bg.png",
   featuresIconLaptop: "/assets/figma/features/features-icon-laptop.svg",

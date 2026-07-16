@@ -26,8 +26,8 @@ const audiences: Audience[] = [
     icon: figmaAssets.builtForUsersThree,
     bullets: [
       "Settle cross-border payments without correspondent banks or the runaround.",
-      "Hold treasury in the currency or asset that suits you, and move between them instantly.",
-      "Give your team role-based access — owner, admin, viewer — matched to responsibility.",
+      "Choose the best asset for your treasury and switch instantly.",
+      "Assign role-based access: owner, admin, viewer based on responsibility.",
     ],
   },
 ];
@@ -51,7 +51,7 @@ function AudienceCard({
       animate={{ flexGrow: active ? 1 : 0 }}
       className={cn(
         "flex w-full cursor-pointer flex-col justify-between gap-6 overflow-hidden rounded-xl border bg-gradient-to-b from-[#0c111d] to-[rgba(12,17,29,0.1)] p-6 text-left sm:p-8 lg:h-[340px] lg:w-auto lg:basis-[380px]",
-        active ? "border-[#2a2a49]" : "border-[#00030a]",
+        active ? "gradient-stroke border-transparent" : "border-[#00030a]",
       )}
       initial={false}
       onClick={onActivate}
@@ -81,7 +81,7 @@ function AudienceCard({
                     aria-hidden="true"
                     className="mt-[10px] size-[10px] shrink-0 rounded-full bg-white"
                   />
-                  <span className="min-w-0 flex-1 text-lg leading-[27px] text-white sm:text-xl sm:leading-[30px]">
+                  <span className="min-w-0 flex-1 text-lg font-normal leading-[27px] text-white sm:text-xl sm:leading-[30px] min-[1330px]:whitespace-nowrap">
                     {bullet}
                   </span>
                 </li>

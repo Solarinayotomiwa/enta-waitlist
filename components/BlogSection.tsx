@@ -62,7 +62,7 @@ function GradientThumb({ className }: { className?: string }) {
       <img
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 size-full rounded-lg object-cover"
+        className="absolute inset-0 size-full rounded-lg object-cover transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.025]"
         src={figmaAssets.blogGradient}
       />
       <div
@@ -103,7 +103,7 @@ export function BlogSection() {
           transition={{ delay: 0.06, duration: 0.55, ease: "easeOut" }}
           variants={reveal}
         >
-          <article className="flex flex-col gap-10 border-b border-[#344054] pb-12 lg:flex-row lg:gap-14">
+          <article className="group flex flex-col gap-10 border-b border-[#344054] pb-12 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[3px] lg:flex-row lg:gap-14">
             <div className="relative h-[240px] overflow-hidden rounded-lg border border-[#344054] sm:h-[360px] lg:h-auto lg:min-h-[360px] lg:flex-1">
               <img
                 alt=""
@@ -117,7 +117,7 @@ export function BlogSection() {
               />
               <img
                 alt="The Enta team working together in the office"
-                className="absolute inset-0 size-full rounded-lg object-cover"
+                className="absolute inset-0 size-full rounded-lg object-cover transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.025]"
                 src={figmaAssets.blogFeaturedPhoto}
               />
             </div>
@@ -147,7 +147,10 @@ export function BlogSection() {
 
           <div className="grid gap-10 lg:grid-cols-3 lg:gap-8 lg:[&>*+*]:border-l lg:[&>*+*]:border-[#344054] lg:[&>*+*]:pl-8">
             {posts.map((post, index) => (
-              <article className="flex flex-col gap-6" key={index}>
+              <article
+                className="group flex flex-col gap-6 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[3px]"
+                key={index}
+              >
                 <GradientThumb className="h-[208px] w-full" />
                 <div className="flex flex-col gap-5 pb-6">
                   <PostMeta readTime={post.readTime} tag={post.tag} />
