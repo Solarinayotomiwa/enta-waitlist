@@ -9,6 +9,7 @@ import { SecuritySection } from "@/components/SecuritySection";
 import { WaitlistSection } from "@/components/WaitlistSection";
 import { HistorySection } from "@/components/HistorySection";
 import { BlogSection } from "@/components/BlogSection";
+import { CtaSection } from "@/components/CtaSection";
 import { FooterSection } from "@/components/FooterSection";
 
 export default function Home() {
@@ -25,6 +26,7 @@ export default function Home() {
       <WaitlistSection />
       <HistorySection />
       <BlogSection />
+      <CtaSection />
       <FooterSection />
     </main>
   );

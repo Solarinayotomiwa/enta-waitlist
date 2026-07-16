@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Instrument_Sans, Inter } from "next/font/google";
 import { AttributionTracker } from "@/components/AttributionTracker";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import "./globals.css";
 
 const instrumentSans = Instrument_Sans({
@@ -36,6 +37,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${instrumentSans.variable} ${inter.variable} ${plexMono.variable}`}>
         <AttributionTracker />
+        <ScrollToTop />
         {children}
       </body>
     </html>

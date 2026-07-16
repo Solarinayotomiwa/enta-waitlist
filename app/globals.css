@@ -202,11 +202,14 @@ select {
   }
 }
 
-/* Wide desktops (>=1440px): the meadow sits 15% lower (194px crest * 0.85).
-   Declared before the height tiers so short screens still win. */
+/* Wide desktops (>=1440px): the meadow sits a further 20% lower — 20% of its
+   visible rendered height (165px crest * 0.8 = 132px). Applied through the
+   positioning variable, so the entrance animation resolves straight into this
+   offset with no post-animation jump, and the decoration layers/overflow are
+   untouched. Declared before the height tiers so short screens still win. */
 @media (min-width: 1440px) {
   .hero-root {
-    --meadow-crest: 164.9px;
+    --meadow-crest: 132px;
   }
 }
 
@@ -430,8 +433,10 @@ select {
    on top. Masks keep the card's own background untouched. */
 .gradient-stroke {
   --stroke-width: 1px;
+  /* Figma stops on the diagonal axis: silver band crossing the top-left and
+     bottom-right corners, dark at the top-right/bottom-left ends. */
   --stroke-gradient: linear-gradient(
-    180deg,
+    45deg,
     #00030a 0%,
     #090a0d 5%,
     #8590a4 49%,

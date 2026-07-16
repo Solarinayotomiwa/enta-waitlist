@@ -929,16 +929,16 @@ function WaitlistSuccessDialog({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             aria-labelledby="waitlist-success-title"
             aria-modal="true"
-            className="relative flex max-h-[calc(100dvh-40px)] w-full max-w-[960px] overflow-hidden rounded-[17px] bg-white text-center text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.2)]"
+            className="relative flex max-h-[calc(100dvh-40px)] w-full max-w-[960px] overflow-hidden rounded-[17px] bg-white text-left text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.2)]"
             exit={{ opacity: 0, scale: 0.985, y: 12 }}
-            initial={{ opacity: 0, scale: 0.985, y: 18 }}
+            initial={{ opacity: 0, scale: 0.985, y: 16 }}
             ref={dialogRef}
             role="dialog"
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
           >
             <button
               aria-label="Close dialog"
-              className="absolute right-4 top-4 z-10 flex size-9 items-center justify-center rounded-full bg-black/10 text-[#101828] transition duration-150 ease-out hover:bg-black/20 lg:bg-white/40 lg:hover:bg-white/60"
+              className="absolute right-4 top-4 z-10 flex size-9 items-center justify-center rounded-full bg-black/10 text-[#101828] transition duration-150 ease-out hover:bg-black/20 md:bg-white/40 md:hover:bg-white/60"
               onClick={onClose}
               type="button"
             >
@@ -954,99 +954,56 @@ function WaitlistSuccessDialog({
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
             </button>
-            <div className="w-full overflow-y-auto p-6 sm:p-8 lg:w-[55%]">
-            <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#eff8ff]">
-              <svg
-                aria-hidden="true"
-                className="size-8"
-                fill="none"
-                stroke="#175cd3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-                viewBox="0 0 24 24"
+            <div className="flex min-h-[480px] w-full flex-col justify-between gap-8 overflow-y-auto p-6 sm:p-10 md:w-[55%] md:min-h-[654px]">
+              <h3
+                className="text-[32px] font-medium leading-[1.25] tracking-[-0.96px] text-[#101828] sm:text-[48px] sm:leading-[60px]"
+                id="waitlist-success-title"
               >
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
-            </span>
-            <h3 className="mt-5 text-2xl font-semibold text-[#101828]" id="waitlist-success-title">
-              {info?.position
-                ? `You're #${info.position.toLocaleString("en-US")} on the waitlist!`
-                : "You're on the waitlist!"}
-            </h3>
-            <p className="mt-3 text-base leading-6 text-[#475467]">
-              Thanks for joining — we&rsquo;ll be in touch with your onboarding details.{" "}
-              <span className="font-semibold text-[#101828]">
-                Want to move up the waitlist? Copy your link below and share it — every friend who
-                joins bumps you up.
-              </span>
-            </p>
-            <div className="mt-6">
-              <div className="flex items-center gap-2 rounded-lg border border-[#d0d5dd] bg-[#f9fafb] p-1.5 pl-3">
-                <span className="min-w-0 flex-1 truncate text-left text-sm text-[#475467]">
-                  {shareLink}
-                </span>
-                <button
-                  className="shrink-0 rounded-md bg-[#175cd3] px-3.5 py-2 text-sm font-semibold text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.98]"
-                  onClick={copyReferralLink}
-                  type="button"
-                >
-                  {copied ? "Copied!" : "Copy link"}
-                </button>
+                {info?.position
+                  ? `Congratulations! You are #${info.position.toLocaleString("en-US")} on the waitlist!`
+                  : "Congratulations! You are on the waitlist!"}
+              </h3>
+              <div className="flex flex-col gap-[26px]">
+                <p className="text-xl leading-[30px] text-[#475467]">
+                  Thank you for joining. We will be in touch soon with your onboarding details.{" "}
+                  <span className="font-bold">
+                    Want to move up the waitlist? Copy your link below and share it. Every friend
+                    who joins bumps you up.
+                  </span>
+                </p>
+                <div className="flex flex-col gap-8">
+                  <div className="flex h-[54px] items-center gap-2 rounded-lg border border-[#d0d5dd] bg-[#f9fafb] py-[7px] pl-3 pr-[7px]">
+                    <span className="min-w-0 flex-1 truncate text-sm leading-5 text-[#475467]">
+                      {shareLink}
+                    </span>
+                    <button
+                      className="flex h-10 w-24 shrink-0 items-center justify-center rounded-md bg-[#101828] text-base leading-6 text-white transition duration-150 ease-out hover:bg-[#182230] active:scale-[0.98]"
+                      onClick={copyReferralLink}
+                      type="button"
+                    >
+                      {copied ? "Copied!" : "Copy link"}
+                    </button>
+                  </div>
+                  <button
+                    autoFocus
+                    className="flex h-12 w-full items-center justify-center rounded-lg bg-[#175cd3] text-base leading-6 text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.99]"
+                    onClick={onClose}
+                    type="button"
+                  >
+                    Done
+                  </button>
+                </div>
               </div>
-              <div className="mt-3 flex justify-center gap-2">
-                <a
-                  className="flex h-10 flex-1 items-center justify-center rounded-lg bg-[#e7f6ec] text-sm font-semibold text-[#067647] transition duration-150 ease-out hover:bg-[#d3f0dd]"
-                  href={`https://wa.me/?text=${encodeURIComponent(`${referralShareText} ${shareLink}`)}`}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  Share on WhatsApp
-                </a>
-                <a
-                  className="flex h-10 flex-1 items-center justify-center rounded-lg bg-[#f2f4f7] text-sm font-semibold text-[#101828] transition duration-150 ease-out hover:bg-[#e4e7ec]"
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(referralShareText)}&url=${encodeURIComponent(shareLink)}`}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  Share on X
-                </a>
-              </div>
-              <div className="mt-5 flex items-center gap-3" aria-hidden="true">
-                <span className="h-px flex-1 bg-[#e4e7ec]" />
-                <span className="text-xs font-medium uppercase tracking-wide text-[#98a2b3]">or</span>
-                <span className="h-px flex-1 bg-[#e4e7ec]" />
-              </div>
-              <a
-                className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#229ed9] text-base font-semibold text-white transition duration-150 ease-out hover:bg-[#1d8bc0] active:scale-[0.99]"
-                href={telegramChannelUrl}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <svg aria-hidden="true" className="size-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21.9 4.4 18.7 19.5c-.24 1.06-.87 1.32-1.76.82l-4.87-3.59-2.35 2.26c-.26.26-.48.48-.98.48l.35-4.95L18.1 6.4c.39-.35-.09-.54-.61-.2L6.35 13.23l-4.8-1.5c-1.04-.33-1.06-1.04.22-1.54L20.55 3.1c.87-.32 1.63.2 1.35 1.3Z" />
-                </svg>
-                Join our Telegram — AfriSignal
-              </a>
             </div>
-            <button
-              autoFocus
-              className="mt-8 flex h-12 w-full items-center justify-center rounded-lg bg-[#175cd3] text-base font-semibold text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.99]"
-              onClick={onClose}
-              type="button"
-            >
-              Done
-            </button>
-            </div>
-            <div aria-hidden="true" className="relative hidden lg:block lg:w-[45%]">
+            <div aria-hidden="true" className="relative hidden md:block md:w-[45%]">
               <img
                 alt=""
-                className="absolute inset-0 size-full object-cover"
-                src={figmaAssets.howGradientBg}
+                className="absolute inset-0 size-full object-cover object-bottom"
+                src={figmaAssets.heroSky}
               />
               <img
                 alt=""
-                className="absolute left-1/2 top-1/2 w-[75%] -translate-x-1/2 -translate-y-1/2 object-contain"
+                className="absolute left-1/2 top-1/2 size-[364px] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain"
                 src={figmaAssets.heroEntaLogo}
               />
             </div>
