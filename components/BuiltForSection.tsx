@@ -51,6 +51,7 @@ function AudienceCard({
       animate={{ flexGrow: active ? 1 : 0 }}
       className={cn(
         "gradient-stroke flex w-full cursor-pointer flex-col justify-between gap-6 overflow-hidden rounded-xl border border-transparent bg-gradient-to-b from-[#0c111d] to-[rgba(12,17,29,0.1)] p-6 text-left sm:p-8 lg:h-[340px] lg:w-auto lg:basis-[380px]",
+        active && "gradient-stroke-active",
       )}
       initial={false}
       onClick={onActivate}

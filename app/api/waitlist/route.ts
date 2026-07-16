@@ -52,6 +52,49 @@ async function registerWithGetWaitlist(input: {
   }
 }
 
+async function registerWithLaunchList(input: {
+  email: string;
+  name: string;
+  refId: string;
+}): Promise<WaitlistInfo | null> {
+  const formKey = process.env.LAUNCHLIST_KEY?.replace(/^﻿/, "").trim() || "S8WkO8";
+
+  try {
+    const body = new URLSearchParams({ email: input.email });
+    if (input.name) body.set("name", input.name);
+    if (input.refId) body.set("ref_id", input.refId);
+
+    const response = await fetch(`https://getlaunchlist.com/s/${formKey}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: body.toString(),
+    });
+
+    // Direct API submission requires a paid LaunchList plan; on the free plan
+    // this returns 401 and we quietly fall back to GetWaitlist's referral link.
+    if (!response.ok) return null;
+
+    const result = (await response.json()) as Record<string, unknown>;
+    const referralLink = [result.referral_link, result.referral_url, result.ref_link].find(
+      (value): value is string => typeof value === "string" && value.startsWith("http"),
+    );
+
+    if (!referralLink) {
+      console.error("LaunchList responded without a recognisable referral link", result);
+      return null;
+    }
+
+    return { referralLink };
+  } catch (error) {
+    // Referral tracking is best-effort: the signup itself must still succeed.
+    console.error("LaunchList registration failed", error);
+    return null;
+  }
+}
+
 export async function POST(request: Request) {
   let data: Record<string, unknown>;
 
@@ -102,7 +145,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const [sheetResponse, waitlist] = await Promise.all([
+    const [sheetResponse, getWaitlist, launchList] = await Promise.all([
       fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -123,11 +166,22 @@ export async function POST(request: Request) {
           utm_term: row.utm_term,
         },
       }),
+      registerWithLaunchList({ email, name: row.name, refId: row.ref_id }),
     ]);
 
     if (!sheetResponse.ok) {
       throw new Error(`Sheets webhook responded ${sheetResponse.status}`);
     }
+
+    // Prefer LaunchList's referral link when its API is available; fall back
+    // to GetWaitlist's link (and position) otherwise.
+    const waitlist: WaitlistInfo | null =
+      getWaitlist || launchList
+        ? {
+            position: getWaitlist?.position,
+            referralLink: launchList?.referralLink ?? getWaitlist?.referralLink,
+          }
+        : null;
 
     return NextResponse.json({ ok: true, waitlist });
   } catch (error) {
