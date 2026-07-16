@@ -416,12 +416,19 @@ select {
   }
 }
 
-/* Rounded 1px gradient stroke (sampled from the Figma active card: bright
-   blue at the top-right/bottom-left corners, dark slate at the others). The
-   mask keeps the card's own background untouched. */
+/* Rounded 1px gradient stroke — exact Figma stops (dark at the ends, silver
+   at the middle, 90deg). Visible in the resting state; hover/focus only
+   brightens it. The mask keeps the card's own background untouched. */
 .gradient-stroke {
   --stroke-width: 1px;
-  --stroke-gradient: linear-gradient(45deg, #4a86f4 0%, #2c3560 50%, #4a86f4 100%);
+  --stroke-gradient: linear-gradient(
+    90deg,
+    #00030a 0%,
+    #090a0d 5%,
+    #8590a4 49%,
+    #090a0d 95%,
+    #00030a 100%
+  );
   position: relative;
 }
 
@@ -430,9 +437,11 @@ select {
   background: var(--stroke-gradient);
   content: "";
   inset: 0;
+  opacity: 1;
   padding: var(--stroke-width);
   pointer-events: none;
   position: absolute;
+  transition: filter 0.2s ease-out;
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -441,6 +450,11 @@ select {
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   mask-composite: exclude;
+}
+
+.gradient-stroke:hover::before,
+.gradient-stroke:focus-within::before {
+  filter: brightness(1.35);
 }
 
 @keyframes hero-reveal {

@@ -1,7 +1,26 @@
 "use client";
 
-import { WaitlistForm } from "./Hero";
 import { figmaAssets } from "@/lib/figma-assets";
+
+/* The waitlist signup + referral flow now runs on GetLaunchList: the widget
+   script is loaded globally in app/layout.tsx and renders its form (with
+   built-in referral handling) into this container. The previous custom
+   WaitlistForm remains available in components/Hero.tsx if it is needed
+   again. */
+function LaunchListCard() {
+  return (
+    <div
+      className="hero-form z-30 w-full max-w-[480px] rounded-[17px] border border-[#f6f7fa] bg-white p-6 text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.5)] sm:p-8"
+      id="waitlist"
+    >
+      <h3 className="text-2xl font-semibold text-[#101828]">Join the waitlist</h3>
+      <p className="mt-2 text-base leading-6 text-[#475467]">
+        Get early access and move up the list by referring friends.
+      </p>
+      <div className="launchlist-widget mt-6" data-height="180px" data-key-id="S8WkO8" />
+    </div>
+  );
+}
 
 export function WaitlistSection() {
   return (
@@ -36,7 +55,7 @@ export function WaitlistSection() {
             <div className="absolute inset-0 bg-black/15" />
           </div>
           <div className="relative z-10 flex w-full justify-center">
-            <WaitlistForm />
+            <LaunchListCard />
           </div>
         </div>
       </div>

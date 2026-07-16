@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { IBM_Plex_Mono, Instrument_Sans, Inter } from "next/font/google";
 import { AttributionTracker } from "@/components/AttributionTracker";
 import "./globals.css";
@@ -37,6 +38,7 @@ export default function RootLayout({
       <body className={`${instrumentSans.variable} ${inter.variable} ${plexMono.variable}`}>
         <AttributionTracker />
         {children}
+        <Script src="https://getlaunchlist.com/js/widget.js" strategy="afterInteractive" />
       </body>
     </html>
   );

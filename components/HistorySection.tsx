@@ -141,10 +141,25 @@ export function HistorySection() {
     return () => cancelAnimationFrame(raf);
   }, [activeIndex, inViewNow, reducedMotion]);
 
+  /* Keep the active year visible by scrolling the timeline track ONLY —
+     never scrollIntoView, which can scroll the whole document (that was the
+     bug that made fresh page loads open at this section). Skipped on the
+     first render so mounting never moves anything. */
+  const hasMounted = useRef(false);
   useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
     const track = trackRef.current;
-    const column = track?.children[activeIndex] as HTMLElement | undefined;
-    column?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    const column = track?.querySelectorAll<HTMLElement>('[role="tab"]')[activeIndex];
+    if (!track || !column) return;
+    const outOfView =
+      column.offsetLeft < track.scrollLeft ||
+      column.offsetLeft + column.offsetWidth > track.scrollLeft + track.clientWidth;
+    if (outOfView) {
+      track.scrollTo({ behavior: "smooth", left: Math.max(0, column.offsetLeft - 24) });
+    }
   }, [activeIndex]);
 
   function goTo(targetIndex: number, forcedDirection?: Direction) {
@@ -240,65 +255,70 @@ export function HistorySection() {
           role="tablist"
         >
           <div
-            className="flex gap-[30px] overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="overflow-x-auto overflow-y-visible pb-2 [overscroll-behavior-inline:contain] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             ref={trackRef}
           >
-            {milestones.map((milestone, index) => {
-              const isActive = index === activeIndex;
-              return (
-                <button
-                  aria-selected={isActive}
-                  className="flex w-[260px] shrink-0 flex-col items-start gap-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/60 sm:w-[350px]"
-                  key={`${milestone.year}-${milestone.title}`}
-                  onClick={() => goTo(index)}
-                  role="tab"
-                  type="button"
-                >
-                  <p
-                    className={cn(
-                      "min-h-[48px] text-base leading-6 transition-colors duration-300",
-                      isActive ? "text-white" : "text-white/80",
-                    )}
+            <div className="relative flex w-max gap-[30px] pr-6">
+              {/* One continuous base line behind every marker — the markers and
+                  the active progress fill sit on top of it, so there are no
+                  gaps between years. */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-[80px] h-px bg-white/40"
+              />
+              {milestones.map((milestone, index) => {
+                const isActive = index === activeIndex;
+                return (
+                  <button
+                    aria-selected={isActive}
+                    className="flex w-[260px] shrink-0 flex-col items-start gap-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/60 sm:w-[350px]"
+                    key={`${milestone.year}-${milestone.title}`}
+                    onClick={() => goTo(index)}
+                    role="tab"
+                    type="button"
                   >
-                    {milestone.label}
-                  </p>
-                  <span className="relative flex h-8 w-full items-center">
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-white/40"
-                    />
-                    {isActive ? (
-                      <span
-                        aria-hidden="true"
-                        className="absolute left-0 right-[-30px] top-1/2 h-px -translate-y-1/2 overflow-hidden"
-                      >
+                    <p
+                      className={cn(
+                        "h-12 overflow-hidden text-base leading-6 transition-colors duration-300 [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [display:-webkit-box]",
+                        isActive ? "text-white" : "text-white/80",
+                      )}
+                    >
+                      {milestone.label}
+                    </p>
+                    <span className="relative flex h-8 w-full items-center">
+                      {isActive ? (
                         <span
-                          className="absolute inset-0 origin-left bg-white"
-                          ref={fillRef}
-                          style={{ transform: "scaleX(0)" }}
-                        />
-                      </span>
-                    ) : null}
+                          aria-hidden="true"
+                          className="absolute left-0 right-[-30px] top-1/2 h-px -translate-y-1/2 overflow-hidden"
+                        >
+                          <span
+                            className="absolute inset-0 origin-left bg-white"
+                            ref={fillRef}
+                            style={{ transform: "scaleX(0)" }}
+                          />
+                        </span>
+                      ) : null}
+                      <span
+                        className={cn(
+                          "relative z-10 rounded-full transition-all duration-300",
+                          isActive
+                            ? "size-[10px] bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.3)]"
+                            : "size-3 border-2 border-white bg-[#1482ba]",
+                        )}
+                      />
+                    </span>
                     <span
                       className={cn(
-                        "relative z-10 rounded-full transition-all duration-300",
-                        isActive
-                          ? "size-[10px] bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.3)]"
-                          : "size-3 border-2 border-white bg-[#1482ba]",
+                        "flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium leading-5 transition-colors duration-300",
+                        isActive ? "bg-[#eff8ff] text-[#1849a9]" : "bg-[#f9fafb]/90 text-[#344054]",
                       )}
-                    />
-                  </span>
-                  <span
-                    className={cn(
-                      "flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium leading-5 transition-colors duration-300",
-                      isActive ? "bg-[#eff8ff] text-[#1849a9]" : "bg-[#f9fafb]/90 text-[#344054]",
-                    )}
-                  >
-                    {milestone.year}
-                  </span>
-                </button>
-              );
-            })}
+                    >
+                      {milestone.year}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </motion.div>

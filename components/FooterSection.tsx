@@ -76,8 +76,10 @@ export function FooterSection() {
           <a aria-label="Enta home" href="/">
             <img
               alt="Enta"
-              className="h-[52px] w-auto object-contain"
+              className="h-[52px] w-[196px] object-contain object-left"
+              height={52}
               src={figmaAssets.entaLogoWhite}
+              width={196}
             />
           </a>
           <p className="mt-8 max-w-[680px] text-base leading-6 text-[#8f9fa3]">
