@@ -6,58 +6,61 @@ import { cn } from "@/lib/cn";
 import { figmaAssets } from "@/lib/figma-assets";
 
 type Milestone = {
-  year: string;
+  year: number;
   title: string;
-  body: string;
-  label: string;
+  description: string;
+  image: string;
 };
 
-// Placeholder body copy until real milestone stories are written.
-const placeholderBody =
-  "It started with a problem. That led to founding Facilitate FX, a business matching USD to NGN and NGN to USD on traditional rails.";
-
-const milestones: Milestone[] = [
+/* Year cover images are expected at /images/history/<year>.<ext>. The folder
+   is currently empty, so every item falls back to the shared placeholder —
+   swap the image fields once the real 2016–2026 files are uploaded. */
+const historyItems: Milestone[] = [
   {
-    year: "2016",
+    year: 2016,
     title: "Facilitate FX founded",
-    body: placeholderBody,
-    label: "USD-NGN traditional rails",
+    description:
+      "It started with a problem. That led to founding Facilitate FX, a business matching USD to NGN and NGN to USD on traditional rails.",
+    image: figmaAssets.historyPhoto,
   },
   {
-    year: "2019",
-    title: "USD liquidity for stablecoin traders",
-    body: placeholderBody,
-    label: "USD liquidity for stablecoin traders",
+    year: 2019,
+    title: "USD liquidity for Nigeria's first stablecoins",
+    description: "Provided the USD liquidity behind the first stablecoin products in Nigeria.",
+    image: figmaAssets.historyPhoto,
   },
   {
-    year: "2021",
-    title: "Shiga founded, stablecoin trading",
-    body: placeholderBody,
-    label: "Shiga founded, stablecoin trading",
+    year: 2021,
+    title: "Shiga founded — OTC desk",
+    description: "Shiga launches, starting life as an OTC desk.",
+    image: figmaAssets.historyPhoto,
   },
   {
-    year: "2023",
-    title: "Celo Minipay accelerator runner-up",
-    body: placeholderBody,
-    label: "Celo Minipay accelerator runner-up",
+    year: 2023,
+    title: "MiniPay accelerator",
+    description:
+      "A runner-up finish in the MiniPay accelerator — and the turn from a mobile-phone product to building technology.",
+    image: figmaAssets.historyPhoto,
   },
   {
-    year: "2024",
-    title: "V1 launched, $100M volume",
-    body: placeholderBody,
-    label: "V1 launched, $100M volume",
+    year: 2024,
+    title: "Stellar accelerator & Africa Growth Fund",
+    description:
+      "Selected for the Stellar accelerator and raised from the Africa Growth Fund; V1 goes live, crossing $100M in volume.",
+    image: figmaAssets.historyPhoto,
   },
   {
-    year: "2025",
-    title: "Tether investment and partnership",
-    body: placeholderBody,
-    label: "Tether investment and partnership",
+    year: 2025,
+    title: "Strategic partnership",
+    description: "Tether investment and partnership, plus selection into Visa accelerator programmes.",
+    image: figmaAssets.historyPhoto,
   },
   {
-    year: "2026",
-    title: "Building deeper rails, scaling",
-    body: placeholderBody,
-    label: "Building deeper rails, scaling",
+    year: 2026,
+    title: "V2 launch — new product suite",
+    description:
+      "Rolling out the ENTA app — self-custodial Bitcoin, USD₮ and gold, with cross-border payments — alongside new infrastructure for our banking partners, as we build deeper rails and scale.",
+    image: figmaAssets.historyPhoto,
   },
 ];
 
@@ -106,10 +109,11 @@ export function HistorySection() {
   const progressRef = useRef(0);
   const fillRef = useRef<HTMLSpanElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
+  const hasMounted = useRef(false);
 
-  /* One rAF timer drives the 8s progress and auto-advance; rAF stops in hidden
-     tabs so progress pauses and resumes from where it was. Pointer position
-     never resets it. */
+  /* One rAF timer drives the 8s segment scrub and auto-advance. It only runs
+     once the section has revealed and is on screen; rAF stops in hidden tabs
+     so progress pauses and resumes. Pointer position never resets it. */
   useEffect(() => {
     if (reducedMotion) return;
 
@@ -125,7 +129,7 @@ export function HistorySection() {
       }
       const dt = Math.min(now - last, 100);
       last = now;
-      if (!inViewNow) return;
+      if (!revealed || !inViewNow) return;
 
       progressRef.current = Math.min(1, progressRef.current + dt / ACTIVE_DURATION_MS);
       if (fillRef.current) {
@@ -133,19 +137,16 @@ export function HistorySection() {
       }
       if (progressRef.current >= 1) {
         setDirection(1);
-        setActiveIndex((current) => (current + 1) % milestones.length);
+        setActiveIndex((current) => (current + 1) % historyItems.length);
       }
     };
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [activeIndex, inViewNow, reducedMotion]);
+  }, [activeIndex, inViewNow, reducedMotion, revealed]);
 
-  /* Keep the active year visible by scrolling the timeline track ONLY —
-     never scrollIntoView, which can scroll the whole document (that was the
-     bug that made fresh page loads open at this section). Skipped on the
-     first render so mounting never moves anything. */
-  const hasMounted = useRef(false);
+  /* Keep the active year visible by scrolling the timeline track ONLY — never
+     the document. Skipped on first render so mounting can't move anything. */
   useEffect(() => {
     if (!hasMounted.current) {
       hasMounted.current = true;
@@ -163,7 +164,7 @@ export function HistorySection() {
   }, [activeIndex]);
 
   function goTo(targetIndex: number, forcedDirection?: Direction) {
-    const wrapped = (targetIndex + milestones.length) % milestones.length;
+    const wrapped = (targetIndex + historyItems.length) % historyItems.length;
     if (wrapped === activeIndex) return;
     setDirection(forcedDirection ?? (wrapped > activeIndex ? 1 : -1));
     progressRef.current = 0;
@@ -171,7 +172,7 @@ export function HistorySection() {
     setActiveIndex(wrapped);
   }
 
-  const active = milestones[activeIndex];
+  const active = historyItems[activeIndex];
   const variants = reducedMotion ? fadeVariants : slideVariants;
 
   return (
@@ -217,14 +218,17 @@ export function HistorySection() {
           </div>
         </div>
 
+        {/* Card viewport: the ONLY clipped region, so sliding content never
+            spills, while the timeline below stays fully unclipped. */}
         <div className="mx-auto mt-16 w-full max-w-[1200px] px-6 lg:px-0">
-          <div className="relative h-[520px] sm:h-[420px] lg:h-[324px]">
+          <div className="relative h-[520px] overflow-hidden rounded-xl sm:h-[420px] lg:h-[324px]">
             <AnimatePresence custom={direction} initial={false}>
               <motion.article
                 animate="center"
                 className="absolute inset-0 flex flex-col justify-between gap-6 rounded-xl bg-[rgba(222,240,255,0.2)] p-5 lg:flex-row lg:items-stretch lg:gap-8"
                 custom={direction}
                 exit="exit"
+                id={`history-panel-${active.year}`}
                 initial="enter"
                 key={activeIndex}
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -234,90 +238,111 @@ export function HistorySection() {
                   <p className="text-2xl leading-8">{active.year}</p>
                   <div className="flex flex-col gap-3">
                     <p className="text-2xl font-medium leading-8">{active.title}</p>
-                    <p className="max-w-[582px] text-lg leading-7">{active.body}</p>
+                    <p className="max-w-[582px] text-lg leading-7">{active.description}</p>
                   </div>
                 </div>
                 <div className="relative h-[180px] shrink-0 overflow-hidden rounded-2xl bg-white sm:h-full lg:w-[446px]">
                   <img
                     alt=""
                     className="absolute inset-0 size-full rounded-2xl object-cover"
-                    src={figmaAssets.historyPhoto}
+                    src={active.image}
                   />
                 </div>
               </motion.article>
             </AnimatePresence>
           </div>
-        </div>
 
-        <div
-          aria-label="History timeline"
-          className="mx-auto mt-12 w-full max-w-[1200px] px-6 lg:px-0"
-          role="tablist"
-        >
-          <div
-            className="overflow-x-auto overflow-y-visible pb-2 [overscroll-behavior-inline:contain] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            ref={trackRef}
-          >
-            <div className="relative flex w-max gap-[30px] pr-6">
-              {/* One continuous base line behind every marker — the markers and
-                  the active progress fill sit on top of it, so there are no
-                  gaps between years. */}
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 top-[80px] h-px bg-white/40"
-              />
-              {milestones.map((milestone, index) => {
-                const isActive = index === activeIndex;
-                return (
-                  <button
-                    aria-selected={isActive}
-                    className="flex w-[260px] shrink-0 flex-col items-start gap-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/60 sm:w-[350px]"
-                    key={`${milestone.year}-${milestone.title}`}
-                    onClick={() => goTo(index)}
-                    role="tab"
-                    type="button"
-                  >
-                    <p
-                      className={cn(
-                        "h-12 overflow-hidden text-base leading-6 transition-colors duration-300 [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [display:-webkit-box]",
-                        isActive ? "text-white" : "text-white/80",
-                      )}
+          {/* Exactly 24px between the card and the timeline; the timeline
+              viewport clips nothing vertically. */}
+          <div aria-label="History timeline" className="mt-6" role="tablist">
+            <div
+              className="overflow-x-auto pb-3 pt-1 [overscroll-behavior-inline:contain] [scrollbar-width:none] xl:overflow-visible [&::-webkit-scrollbar]:hidden"
+              ref={trackRef}
+            >
+              <div className="relative flex w-max gap-6 px-1 xl:grid xl:w-full xl:grid-cols-7 xl:gap-4">
+                {/* One continuous base line behind every marker. */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-x-0 top-[64px] h-px bg-white/40"
+                />
+                {historyItems.map((milestone, index) => {
+                  const state =
+                    index === activeIndex ? "active" : index < activeIndex ? "completed" : "future";
+                  return (
+                    <button
+                      aria-controls={`history-panel-${milestone.year}`}
+                      aria-selected={state === "active"}
+                      className="flex w-[240px] shrink-0 flex-col items-start gap-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/60 xl:w-auto"
+                      key={milestone.year}
+                      onClick={() => goTo(index)}
+                      role="tab"
+                      type="button"
                     >
-                      {milestone.label}
-                    </p>
-                    <span className="relative flex h-8 w-full items-center">
-                      {isActive ? (
-                        <span
-                          aria-hidden="true"
-                          className="absolute left-0 right-[-30px] top-1/2 h-px -translate-y-1/2 overflow-hidden"
-                        >
+                      <p
+                        className={cn(
+                          "h-10 overflow-hidden text-sm leading-5 transition-colors duration-300 [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [display:-webkit-box]",
+                          state === "future" ? "text-white/80" : "text-white",
+                        )}
+                      >
+                        {milestone.title}
+                      </p>
+                      <span className="relative flex h-8 w-full items-center">
+                        {/* Completed segments: solid white overlay across the
+                            full segment (including the column gap). */}
+                        {state === "completed" ? (
                           <span
-                            className="absolute inset-0 origin-left bg-white"
-                            ref={fillRef}
-                            style={{ transform: "scaleX(0)" }}
+                            aria-hidden="true"
+                            className="absolute left-0 right-[-24px] top-1/2 h-px -translate-y-1/2 bg-white xl:right-[-16px]"
                           />
-                        </span>
-                      ) : null}
+                        ) : null}
+                        {state === "active" && activeIndex < historyItems.length - 1 ? (
+                          <span
+                            aria-hidden="true"
+                            className="absolute left-0 right-[-24px] top-1/2 h-px -translate-y-1/2 overflow-hidden xl:right-[-16px]"
+                          >
+                            <span
+                              className="absolute inset-0 origin-left bg-white"
+                              ref={fillRef}
+                              style={{ transform: "scaleX(0)" }}
+                            />
+                          </span>
+                        ) : null}
+                        {state === "active" && activeIndex === historyItems.length - 1 ? (
+                          <span
+                            aria-hidden="true"
+                            className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 overflow-hidden"
+                          >
+                            <span
+                              className="absolute inset-0 origin-left bg-white"
+                              ref={fillRef}
+                              style={{ transform: "scaleX(0)" }}
+                            />
+                          </span>
+                        ) : null}
+                        <span
+                          className={cn(
+                            "relative z-10 rounded-full transition-all duration-300",
+                            state === "active" &&
+                              "size-3 border-2 border-white bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.3)]",
+                            state === "completed" && "size-[10px] bg-white",
+                            state === "future" && "size-3 border-2 border-white bg-[#1482ba]",
+                          )}
+                        />
+                      </span>
                       <span
                         className={cn(
-                          "relative z-10 rounded-full transition-all duration-300",
-                          isActive
-                            ? "size-[10px] bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.3)]"
-                            : "size-3 border-2 border-white bg-[#1482ba]",
+                          "flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium leading-5 backdrop-blur-[6px] transition-colors duration-300",
+                          state === "active" && "bg-[#eff8ff] text-[#1849a9]",
+                          state === "completed" && "bg-white/20 text-white",
+                          state === "future" && "bg-[rgba(239,248,255,0.2)] text-white",
                         )}
-                      />
-                    </span>
-                    <span
-                      className={cn(
-                        "flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium leading-5 transition-colors duration-300",
-                        isActive ? "bg-[#eff8ff] text-[#1849a9]" : "bg-[#f9fafb]/90 text-[#344054]",
-                      )}
-                    >
-                      {milestone.year}
-                    </span>
-                  </button>
-                );
-              })}
+                      >
+                        {milestone.year}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
