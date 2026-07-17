@@ -9,8 +9,13 @@ const reveal = {
   visible: { opacity: 1, y: 0 },
 };
 
-/* CTA card from Figma node 749-2561: "Ready to move money differently?" with
-   the decorative pattern background, sitting directly above the footer. */
+const ctaMessage =
+  "Ready to move money differently? Thousands of businesses and individuals across Africa and the GCC are already waiting. Join them.";
+
+/* CTA above the footer. On desktop the section renders the exact design
+   export (public/images/cta/cta-section.png, 2400x600 = 2x of the 1200x300
+   card) with a real link overlaid on the button area; below lg the CTA is
+   recreated as semantic responsive content so text stays readable. */
 export function CtaSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const reducedMotion = useReducedMotion();
@@ -24,9 +29,35 @@ export function CtaSection() {
       ref={sectionRef}
     >
       <div className="mx-auto w-full max-w-[1200px]">
+        {/* Desktop: the exported artwork, pixel-accurate. */}
         <motion.div
           animate={contentVisible ? "visible" : "hidden"}
-          className="footer-cta-card relative isolate overflow-hidden rounded-[2rem] border border-white/10 bg-[#0c111d] p-8 shadow-2xl shadow-black/20 sm:p-12 lg:min-h-[300px] lg:p-0"
+          className="relative hidden lg:block"
+          initial="hidden"
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          variants={reveal}
+        >
+          <img
+            alt=""
+            className="h-auto w-full"
+            height={600}
+            src="/images/cta/cta-section.png"
+            width={1200}
+          />
+          <p className="sr-only">{ctaMessage}</p>
+          <a
+            aria-label="Join the Enta waitlist"
+            className="absolute left-[71.5%] top-[58.5%] h-[14.3%] w-[13.3%] rounded-lg outline-none transition duration-150 ease-out hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white"
+            href="/#waitlist"
+          >
+            <span className="sr-only">Join the Enta waitlist</span>
+          </a>
+        </motion.div>
+
+        {/* Tablet/mobile: semantic recreation so the copy stays readable. */}
+        <motion.div
+          animate={contentVisible ? "visible" : "hidden"}
+          className="footer-cta-card relative isolate overflow-hidden rounded-[2rem] border border-white/10 bg-[#0c111d] p-8 shadow-2xl shadow-black/20 sm:p-12 lg:hidden"
           initial="hidden"
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           variants={reveal}
@@ -45,34 +76,22 @@ export function CtaSection() {
           />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_84%_58%,rgba(238,170,253,0.34),transparent_22rem),radial-gradient(circle_at_56%_52%,rgba(28,83,223,0.42),transparent_28rem)]" />
 
-          <div className="relative z-10 grid gap-10 lg:min-h-[300px] lg:grid-cols-[1fr_361px] lg:items-center lg:gap-[160px] lg:px-[63px]">
-            <motion.h2
-              animate={contentVisible ? "visible" : "hidden"}
-              className="max-w-[560px] text-balance text-[2.65rem] font-medium leading-[1.08] tracking-[-0.037em] text-[#f5f5f6] sm:text-[3.625rem] sm:leading-[1.15]"
-              initial="hidden"
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              variants={reveal}
-            >
+          <div className="relative z-10 flex flex-col gap-8">
+            <h2 className="max-w-[560px] text-balance text-[2.65rem] font-medium leading-[1.08] tracking-[-0.037em] text-[#f5f5f6] sm:text-[3.625rem] sm:leading-[1.15]">
               Ready to move money differently?
-            </motion.h2>
-            <motion.div
-              animate={contentVisible ? "visible" : "hidden"}
-              className="flex max-w-[361px] flex-col items-start gap-6 text-left lg:items-center lg:text-center"
-              initial="hidden"
-              transition={{ delay: 0.05, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              variants={reveal}
-            >
+            </h2>
+            <div className="flex max-w-[361px] flex-col items-start gap-6 text-left">
               <p className="text-pretty text-lg leading-[1.34] tracking-[-0.018em] text-white">
                 Thousands of businesses and individuals across Africa and the GCC are already
                 waiting. Join them.
               </p>
               <a
-                className="inline-flex h-10 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-[#0c111d] transition duration-150 ease-out hover:-translate-y-0.5 hover:bg-white/90"
+                className="inline-flex h-10 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-[#0c111d] outline-none transition duration-150 ease-out hover:-translate-y-0.5 hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-white"
                 href="/#waitlist"
               >
                 Join Our Waitlist
               </a>
-            </motion.div>
+            </div>
           </div>
         </motion.div>
       </div>

@@ -2,9 +2,18 @@
 
 import { CSSProperties, FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
+import { polyfillCountryFlagEmojis } from "country-flag-emoji-polyfill";
 import { cn } from "@/lib/cn";
+import { dialCodes } from "@/lib/dial-codes";
 import { figmaAssets } from "@/lib/figma-assets";
 import { getAttribution } from "@/lib/tracking";
+
+/* Windows has no colour flag-emoji font, so 🇳🇬 renders as the letters "NG".
+   The polyfill injects the Twemoji Country Flags webfont; the .country-flag
+   class puts it first in the font stack so real flags render everywhere. */
+if (typeof window !== "undefined") {
+  polyfillCountryFlagEmojis();
+}
 
 const reveal = {
   hidden: { opacity: 0, y: 22, filter: "blur(10px)" },
@@ -1297,7 +1306,7 @@ function CountryCombobox() {
       <input name="countryCode" type="hidden" value={selectedCountry?.code ?? ""} />
       <div className="floating-field">
         {showSelectedFlag ? (
-          <span aria-hidden="true" className="country-selected-flag">
+          <span aria-hidden="true" className="country-selected-flag country-flag">
             {selectedCountry.flag}
           </span>
         ) : null}
@@ -1373,10 +1382,13 @@ function CountryCombobox() {
                       role="option"
                       type="button"
                     >
-                      <span className="country-option-flag" aria-hidden="true">
+                      <span className="country-option-flag country-flag" aria-hidden="true">
                         {country.flag}
                       </span>
                       <span className="min-w-0 flex-1 truncate">{country.name}</span>
+                      <span className="shrink-0 text-sm tabular-nums text-[#667085]">
+                        {dialCodes[country.code] ?? ""}
+                      </span>
                     </button>
                   );
                 })

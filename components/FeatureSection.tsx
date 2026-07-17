@@ -5,13 +5,6 @@ import { useRef } from "react";
 import { cn } from "@/lib/cn";
 import { figmaAssets } from "@/lib/figma-assets";
 
-type AssetLoop = {
-  duration: number;
-  delay: number;
-  y: number[];
-  rotate: number[];
-};
-
 type AssetCard = {
   title: string;
   description: string;
@@ -19,11 +12,8 @@ type AssetCard = {
   token: string;
   className: string;
   tokenClassName: string;
-  loop: AssetLoop;
 };
 
-/* Deterministic, offset ambient loops so the three artworks never move in
-   sync — no Math.random(), so SSR and client stay consistent. */
 const assetCards: AssetCard[] = [
   {
     title: "USD₮",
@@ -33,7 +23,6 @@ const assetCards: AssetCard[] = [
     token: figmaAssets.featureUsdtToken,
     className: "lg:translate-y-4 lg:hover:translate-y-2",
     tokenClassName: "",
-    loop: { duration: 6.2, delay: 0, y: [0, -8, 0], rotate: [-0.2, 0.2, -0.2] },
   },
   {
     title: "Bitcoin",
@@ -43,7 +32,6 @@ const assetCards: AssetCard[] = [
     token: figmaAssets.featureBitcoinToken,
     className: "lg:translate-y-32 lg:hover:translate-y-[120px]",
     tokenClassName: "",
-    loop: { duration: 7.6, delay: 1.25, y: [0, -11, 0], rotate: [0.35, -0.25, 0.35] },
   },
   {
     title: "Gold",
@@ -53,7 +41,6 @@ const assetCards: AssetCard[] = [
     token: figmaAssets.featureGoldToken,
     className: "",
     tokenClassName: "",
-    loop: { duration: 5.8, delay: 2.1, y: [0, -7, 0], rotate: [-0.3, 0.15, -0.3] },
   },
 ];
 
@@ -82,12 +69,10 @@ function FeatureAssetCard({
   card,
   index,
   animate,
-  loopActive,
 }: {
   animate: boolean;
   card: AssetCard;
   index: number;
-  loopActive: boolean;
 }) {
   return (
     <motion.article
@@ -97,6 +82,7 @@ function FeatureAssetCard({
         card.className,
       )}
       initial="hidden"
+      tabIndex={0}
       transition={{ delay: 0.08 * index, duration: 0.55, ease: "easeOut" }}
       variants={reveal}
     >
@@ -106,26 +92,17 @@ function FeatureAssetCard({
           className="absolute inset-0 size-full object-cover"
           src={card.background}
         />
-        <div className="absolute inset-0 grid place-items-center">
-          <motion.div
-            animate={loopActive ? { y: card.loop.y, rotate: card.loop.rotate } : undefined}
-            className="flex size-full items-center justify-center"
-            transition={{
-              delay: card.loop.delay,
-              duration: card.loop.duration,
-              ease: "easeInOut",
-              repeat: Infinity,
-            }}
-          >
-            <img
-              alt=""
-              className={cn(
-                "feature-card-token h-[91.8%] w-[91.8%] object-contain object-center",
-                card.tokenClassName,
-              )}
-              src={card.token}
-            />
-          </motion.div>
+        {/* Static at rest; hovering or focusing the card plays one faux-3D
+            coin revolution (see .feature-coin in globals.css). */}
+        <div className="absolute inset-0 grid place-items-center [perspective:900px]">
+          <img
+            alt=""
+            className={cn(
+              "feature-card-token feature-coin h-[91.8%] w-[91.8%] object-contain object-center",
+              card.tokenClassName,
+            )}
+            src={card.token}
+          />
         </div>
         <div className="absolute inset-x-0 bottom-[-1px] h-[90px] bg-gradient-to-b from-[rgba(56,79,130,0)] to-[#0c111c] to-[75%]" />
       </div>
@@ -145,10 +122,8 @@ export function FeatureSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const reducedMotion = useReducedMotion();
   const isInView = useInView(sectionRef, { margin: "0px 0px -35% 0px", once: true });
-  const inViewNow = useInView(sectionRef, { amount: 0.15 });
   const contentVisible = Boolean(reducedMotion || isInView);
   const shouldAnimate = isInView && !reducedMotion;
-  const loopActive = inViewNow && !reducedMotion;
 
   return (
     <section
@@ -221,13 +196,7 @@ export function FeatureSection() {
 
           <div className="relative z-20 mt-8 grid gap-5 sm:grid-cols-3 lg:mt-0 lg:flex lg:h-[420px] lg:items-start lg:justify-between">
             {assetCards.map((card, index) => (
-              <FeatureAssetCard
-                animate={contentVisible}
-                card={card}
-                index={index}
-                key={card.title}
-                loopActive={loopActive}
-              />
+              <FeatureAssetCard animate={contentVisible} card={card} index={index} key={card.title} />
             ))}
           </div>
         </div>

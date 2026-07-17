@@ -116,10 +116,10 @@ export function BlogSection() {
             target="_blank"
           >
             <article className="flex flex-col gap-10 border-b border-[#344054] pb-12 lg:flex-row lg:gap-14">
-              <div className="relative h-[240px] overflow-hidden rounded-lg border border-[#344054] sm:h-[360px] lg:h-auto lg:min-h-[360px] lg:flex-1">
+              <div className="relative aspect-video overflow-hidden rounded-lg border border-[#344054] bg-[#1750cc] lg:flex-1">
                 <img
                   alt=""
-                  className={`absolute inset-0 size-full rounded-lg object-cover transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.025] ${featuredPost.imagePosition}`}
+                  className={`absolute inset-0 size-full rounded-lg object-contain transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.015] ${featuredPost.imagePosition}`}
                   src={featuredPost.image}
                 />
               </div>
@@ -161,10 +161,10 @@ export function BlogSection() {
                   rel="noopener noreferrer"
                   target="_blank"
                 >
-                  <div className="relative h-[208px] w-full overflow-hidden rounded-lg border border-[#344054]">
+                  <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-[#344054] bg-[#1750cc]">
                     <img
                       alt=""
-                      className={`absolute inset-0 size-full rounded-lg object-cover transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.025] ${post.imagePosition}`}
+                      className={`absolute inset-0 size-full rounded-lg object-contain transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.015] ${post.imagePosition}`}
                       src={post.image}
                     />
                   </div>

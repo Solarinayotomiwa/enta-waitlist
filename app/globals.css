@@ -210,6 +210,11 @@ select {
 @media (min-width: 1440px) {
   .hero-root {
     --meadow-crest: 132px;
+    /* Glass "e" sits 20% of its own rendered height (590px * 0.2 = 118px)
+       lower on wide desktops. Applied via the positioning variable, so the
+       entrance and float animations are untouched and resolve directly into
+       the lowered position. */
+    --glass-bottom: min(-228px, calc(100svh - 1252px));
   }
 }
 
@@ -553,6 +558,57 @@ select {
   animation-play-state: running;
 }
 
+/* One-shot faux-3D coin turn on asset-card hover/focus. The animation plays
+   once per hover (no idle loop) and replays on re-entry; leaving mid-turn
+   cancels back to rest. Touch devices without hover stay static. */
+.feature-coin {
+  backface-visibility: visible;
+  transform-style: preserve-3d;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .group:hover .feature-coin,
+  .group:focus-visible .feature-coin,
+  .group:focus-within .feature-coin {
+    animation: coin-turn 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .feature-coin,
+  .group:focus-within .feature-coin {
+    filter: brightness(1.06);
+    transform: scale(1.02);
+    transition: transform 0.2s ease-out, filter 0.2s ease-out;
+  }
+}
+
+@keyframes coin-turn {
+  0% {
+    filter: brightness(1);
+    transform: rotateY(0deg) scale(1);
+  }
+  50% {
+    filter: brightness(1.08);
+    transform: rotateY(180deg) scale(0.97);
+  }
+  100% {
+    filter: brightness(1);
+    transform: rotateY(360deg) scale(1);
+  }
+}
+
+/* Real flag glyphs on every OS: the Twemoji Country Flags webfont (injected by
+   the polyfill) takes precedence for regional-indicator pairs. */
+.country-flag {
+  font-family:
+    "Twemoji Country Flags",
+    var(--font-instrument-sans),
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    sans-serif;
+}
+
 .hero-word-chip {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
   min-height: 1.18em;
@@ -750,15 +806,6 @@ select {
   mask-image: linear-gradient(180deg, transparent, #000 16rem);
   pointer-events: none;
   position: absolute;
-}
-
-.feature-card-token {
-  animation: feature-token-float 5.8s var(--ease-out-quart) infinite alternate;
-  animation-play-state: paused;
-}
-
-.motion-active .feature-card-token {
-  animation-play-state: running;
 }
 
 .how-section-glow {
@@ -1141,15 +1188,6 @@ select {
   }
   100% {
     transform: translate3d(-50%, 0, 0);
-  }
-}
-
-@keyframes feature-token-float {
-  0% {
-    transform: translate3d(0, 4px, 0) scale(1.02);
-  }
-  100% {
-    transform: translate3d(0, -7px, 0) scale(1.06);
   }
 }
 
