@@ -917,6 +917,7 @@ function WaitlistSuccessDialog({
   open: boolean;
 }) {
   const [copied, setCopied] = useState(false);
+  const launchListPosition = info?.provider === "getlaunchlist" ? info.position : undefined;
   const shareLink = info?.referralLink ?? fallbackShareLink;
 
   useEffect(() => {
@@ -1020,8 +1021,8 @@ function WaitlistSuccessDialog({
                 className="text-[32px] font-medium leading-[1.25] tracking-[-0.96px] text-[#101828] sm:text-[48px] sm:leading-[60px]"
                 id="waitlist-success-title"
               >
-                {info?.position
-                  ? `Congratulations! You are #${info.position.toLocaleString("en-US")} on the waitlist!`
+                {typeof launchListPosition === "number"
+                  ? `Congratulations! You are #${launchListPosition.toLocaleString("en-US")} on the waitlist!`
                   : "Congratulations! You are on the waitlist!"}
               </h3>
               <div className="flex flex-col gap-[26px]">

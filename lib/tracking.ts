@@ -22,8 +22,8 @@ const attributionKeys = [
   "utm_content",
 ] as const;
 
-// First-touch attribution: the first UTM/ref values a visitor arrives with win,
-// so the original source keeps credit even if they sign up on a later visit.
+// UTMs stay first-touch, but referral codes are last-touch so a shared
+// LaunchList link gets credit even if the visitor has been here before.
 export function captureAttribution(): Attribution {
   try {
     const params = new URLSearchParams(window.location.search);
@@ -39,6 +39,16 @@ export function captureAttribution(): Attribution {
 
     const stored = getAttribution();
     let changed = false;
+    const currentRef = params.get("ref") || params.get("ref_id");
+
+    if (currentRef) {
+      const ref = currentRef.slice(0, 200);
+      if (stored.ref !== ref || stored.ref_id !== ref) {
+        stored.ref = ref;
+        stored.ref_id = ref;
+        changed = true;
+      }
+    }
 
     for (const key of attributionKeys) {
       const value = params.get(key);
@@ -49,13 +59,23 @@ export function captureAttribution(): Attribution {
       }
     }
 
+    if (stored.ref && !stored.ref_id) {
+      stored.ref_id = stored.ref;
+      changed = true;
+    }
+
+    if (stored.ref_id && !stored.ref) {
+      stored.ref = stored.ref_id;
+      changed = true;
+    }
+
     if (changed) {
       if (!stored.landed_at) stored.landed_at = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
     }
 
     const launchlistQuery = params.toString();
-    if (launchlistQuery && !stored.launchlist_query) {
+    if (launchlistQuery && (currentRef || !stored.launchlist_query)) {
       stored.launchlist_query = launchlistQuery.slice(0, 500);
       if (!stored.landed_at) stored.landed_at = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
