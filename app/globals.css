@@ -1082,61 +1082,93 @@ select {
 
 .footer-cta-card {
   box-shadow:
-    0 28px 90px rgba(0, 0, 0, 0.24),
-    inset 0 0 0 1px rgba(100, 132, 255, 0.08);
+    0 28px 90px rgba(0, 0, 0, 0.26),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
   transform: translate3d(0, 0, 0) scale(1);
   transform-origin: center;
-  transition: box-shadow 220ms ease-out;
-  will-change: box-shadow;
+  transition:
+    box-shadow 240ms ease-out,
+    filter 240ms ease-out,
+    transform 260ms var(--ease-out-quart);
+  will-change: box-shadow, filter, transform;
 }
 
 .footer-cta-card::before {
-  background: linear-gradient(105deg, rgba(83, 177, 253, 0.5), rgba(159, 122, 234, 0.48));
-  border-radius: inherit;
+  background: linear-gradient(105deg, rgba(255, 255, 255, 0.18), rgba(83, 177, 253, 0.1), rgba(238, 170, 253, 0.16));
   content: "";
   inset: 0;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  opacity: 0.72;
-  padding: 1px;
+  opacity: 0;
   pointer-events: none;
   position: absolute;
-  z-index: 20;
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-}
-
-.footer-cta-grid {
-  background-image:
-    linear-gradient(rgba(42, 81, 151, 0.58) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(42, 81, 151, 0.58) 1px, transparent 1px);
-  background-position: -1px -1px;
-  background-size: 260px 150px;
-  opacity: 0.78;
-  z-index: 1;
-}
-
-.footer-cta-wash {
-  background:
-    radial-gradient(48rem 24rem at 75% 53%, rgba(35, 77, 185, 0.78), transparent 68%),
-    radial-gradient(30rem 22rem at 102% 80%, rgba(197, 128, 224, 0.74), transparent 70%),
-    linear-gradient(100deg, #0c111d 0%, #0c111d 36%, #13295d 62%, #324398 82%, #7756bd 100%);
+  transition: opacity 240ms ease-out;
   z-index: 2;
+}
+
+.footer-cta-image {
+  transition:
+    filter 260ms ease-out,
+    transform 260ms var(--ease-out-quart);
+  will-change: filter, transform;
 }
 
 .footer-cta-card:hover {
   box-shadow:
-    0 34px 110px rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px rgba(100, 132, 255, 0.12);
+    0 36px 115px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 0 58px rgba(83, 177, 253, 0.14),
+    0 0 76px rgba(238, 170, 253, 0.13);
+  filter: saturate(1.035) brightness(1.015);
+  transform: translate3d(0, -3px, 0) scale(1.006);
+}
+
+.footer-cta-card:hover::before {
+  opacity: 1;
+}
+
+.footer-cta-card:hover .footer-cta-image {
+  filter: saturate(1.04) brightness(1.02);
+  transform: scale(1.008);
+}
+
+.footer-cta-hotspot {
+  z-index: 3;
+}
+
+.footer-cta-hotspot::before {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: inherit;
+  box-shadow:
+    0 0 0 0 rgba(255, 255, 255, 0),
+    0 10px 28px rgba(4, 10, 24, 0);
+  content: "";
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+  transform: scale(0.98);
+  transition:
+    box-shadow 180ms ease-out,
+    opacity 180ms ease-out,
+    transform 180ms var(--ease-out-quart);
+}
+
+.footer-cta-hotspot:hover::before,
+.footer-cta-hotspot:focus-visible::before {
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.42),
+    0 14px 34px rgba(4, 10, 24, 0.28);
+  opacity: 1;
+  transform: scale(1.04);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .footer-cta-card,
   .footer-cta-card:hover {
+    filter: none;
+    transform: none;
+  }
+
+  .footer-cta-card:hover .footer-cta-image {
+    filter: none;
     transform: none;
   }
 }
