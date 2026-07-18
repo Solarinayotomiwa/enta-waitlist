@@ -76,7 +76,7 @@ const featureCards: FeatureCard[] = [
       <div className="relative min-h-[297px] flex-1 overflow-hidden rounded-xl bg-[#FCE7F6] lg:min-h-0">
         <img
           alt="Enta dashboard shown in dark mode"
-          className="absolute inset-0 size-full rounded-xl object-cover"
+          className="absolute inset-0 size-full rounded-xl object-cover [clip-path:inset(11.15%_0_0_10.34%)]"
           src={figmaAssets.featuresMoveDashboardV2}
         />
       </div>
