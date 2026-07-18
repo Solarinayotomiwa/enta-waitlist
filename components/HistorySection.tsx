@@ -102,7 +102,7 @@ function MilestoneColumn({
   return (
     <div
       className={cn(
-        "flex h-[532px] w-[334px] shrink-0 items-start gap-8 transition-opacity duration-300 ease-out",
+        "flex h-[640px] w-[334px] shrink-0 items-start gap-8 transition-opacity duration-300 ease-out",
         active ? "opacity-100" : "opacity-70",
       )}
       onFocus={onActivate}
@@ -114,7 +114,7 @@ function MilestoneColumn({
         aria-hidden="true"
         className={cn(
           "w-[1.5px] shrink-0 bg-gradient-to-b from-white/80 to-transparent transition-[height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-          active ? "h-full" : "h-[115px]",
+          active ? "h-full" : "h-[360px]",
         )}
       />
       <div className="min-w-0 flex-1">
@@ -132,7 +132,7 @@ function MilestoneColumn({
         </p>
         <div
           aria-hidden="true"
-          className="mt-[42px] flex h-[115px] items-start justify-between pr-1"
+          className="mt-[42px] flex h-[160px] items-start justify-between pr-1"
           onMouseLeave={handleTickLeave}
           onMouseMove={handleTickMove}
           ref={ticksRef}
@@ -228,6 +228,11 @@ export function HistorySection() {
     edgeStepRef.current = 0;
   }
 
+  function handleTrackScroll() {
+    const track = trackRef.current;
+    if (track && track.scrollTop !== 0) track.scrollTop = 0;
+  }
+
   return (
     <section
       className="relative isolate overflow-hidden text-white"
@@ -271,7 +276,8 @@ export function HistorySection() {
         </div>
 
         <div
-          className="mt-[72px] flex h-[558px] gap-8 overflow-x-auto pb-6 pl-6 [scrollbar-width:none] lg:pl-[max(24px,calc((100vw-1200px)/2))] [&::-webkit-scrollbar]:hidden"
+          className="mt-[72px] flex h-[666px] gap-8 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-6 pl-6 [overscroll-behavior-y:none] [scrollbar-width:none] lg:pl-[max(24px,calc((100vw-1200px)/2))] [&::-webkit-scrollbar]:hidden"
+          onScroll={handleTrackScroll}
           ref={trackRef}
         >
           {milestones.map((milestone, index) => (
