@@ -180,17 +180,7 @@ export function HistorySection() {
     const track = trackRef.current;
     if (track) track.scrollLeft = 303;
 
-    function handleWheel(event: WheelEvent) {
-      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-
-      event.preventDefault();
-      window.scrollBy({ top: event.deltaY, behavior: "auto" });
-    }
-
-    track?.addEventListener("wheel", handleWheel, { passive: false });
-
     return () => {
-      track?.removeEventListener("wheel", handleWheel);
       if (edgeTimerRef.current !== undefined) window.clearInterval(edgeTimerRef.current);
     };
   }, []);
