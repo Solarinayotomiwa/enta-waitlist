@@ -66,20 +66,14 @@ type FeatureCard = {
   title: string;
   body: string;
   visual: ReactNode;
-  cardClassName?: string;
-  bodyClassName?: string;
-  titleClassName?: string;
 };
 
 const featureCards: FeatureCard[] = [
   {
     title: "Only you can move it",
     body: "Only you can access your account using your device and biometrics. Shiga cannot freeze or transfer your assets.",
-    bodyClassName: "text-[#344054]",
-    cardClassName: "bg-[#FCE7F6]",
-    titleClassName: "text-[#101828]",
     visual: (
-      <div className="relative min-h-[297px] flex-1 overflow-hidden rounded-xl lg:min-h-0">
+      <div className="relative min-h-[297px] flex-1 overflow-hidden rounded-xl bg-[#FCE7F6] lg:min-h-0">
         <img
           alt="Enta dashboard shown in dark mode"
           className="absolute inset-0 size-full rounded-xl object-cover"
@@ -150,20 +144,12 @@ export function FeaturesGridSection() {
         >
           {featureCards.map((card) => (
             <div
-              className={cn(
-                "flex flex-col gap-8 rounded-2xl bg-[#182230] p-5 lg:h-[529px]",
-                card.cardClassName,
-                cardHover,
-              )}
+              className={cn("flex flex-col gap-8 rounded-2xl bg-[#182230] p-5 lg:h-[529px]", cardHover)}
               key={card.title}
             >
               <div className="flex min-h-[150px] flex-col gap-2">
-                <p className={cn("text-[20px] font-medium leading-[30px] text-white", card.titleClassName)}>
-                  {card.title}
-                </p>
-                <p className={cn("text-lg leading-[28px] text-[#d0d5dd]", card.bodyClassName)}>
-                  {card.body}
-                </p>
+                <p className="text-[20px] font-medium leading-[30px] text-white">{card.title}</p>
+                <p className="text-lg leading-[28px] text-[#d0d5dd]">{card.body}</p>
               </div>
               {card.visual}
             </div>
