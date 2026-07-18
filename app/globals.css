@@ -206,12 +206,12 @@ select {
   bottom: var(--glass-bottom);
   left: calc(var(--glass-w) * -0.2);
   width: var(--glass-w);
-  /* Raised by 10% of the glass artwork's own height at every visible
+  /* Lowered by 10% of the glass artwork's own height at every visible
      breakpoint. Lives on the positioning wrapper so the entrance and float
-     animations (on child wrappers) resolve straight into the raised position
+     animations (on child wrappers) resolve straight into the lowered position
      with no post-entrance jump. The wide-desktop offset stays in
      --glass-bottom, so the two adjustments combine instead of clashing. */
-  transform: translateY(-10%);
+  transform: translateY(10%);
 }
 
 .hero-glass-entrance,
