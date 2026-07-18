@@ -8,6 +8,7 @@ export type Attribution = {
   utm_term?: string;
   utm_content?: string;
   landed_at?: string;
+  launchlist_query?: string;
 };
 
 const attributionKeys = [
@@ -47,6 +48,13 @@ export function captureAttribution(): Attribution {
     }
 
     if (changed) {
+      if (!stored.landed_at) stored.landed_at = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+    }
+
+    const launchlistQuery = params.toString();
+    if (launchlistQuery && !stored.launchlist_query) {
+      stored.launchlist_query = launchlistQuery.slice(0, 500);
       if (!stored.landed_at) stored.landed_at = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
     }

@@ -15,7 +15,7 @@ type Milestone = {
 /* Year cover images are expected at /images/history/<year>.<ext>. The folder
    is currently empty, so every item falls back to the shared placeholder —
    swap the image fields once the real 2016–2026 files are uploaded. */
-const historyItems: Milestone[] = [
+const legacyHistoryItems: Milestone[] = [
   {
     year: 2016,
     title: "Facilitate FX founded",
@@ -60,6 +60,58 @@ const historyItems: Milestone[] = [
     title: "V2 launch — new product suite",
     description:
       "Rolling out the ENTA app — self-custodial Bitcoin, USD₮ and gold, with cross-border payments — alongside new infrastructure for our banking partners, as we build deeper rails and scale.",
+    image: figmaAssets.historyPhoto,
+  },
+];
+
+const historyItems: Milestone[] = [
+  {
+    year: 2016,
+    title: "Facilitate FX founded",
+    description:
+      "The work began with a simple problem: helping people and businesses move between USD and NGN with clearer pricing and more reliable settlement.",
+    image: figmaAssets.historyPhoto,
+  },
+  {
+    year: 2019,
+    title: "Stablecoin liquidity in Nigeria",
+    description:
+      "The team provided USD liquidity for early stablecoin products in Nigeria, learning where digital dollars could solve real cross-border friction.",
+    image: figmaAssets.historyPhoto,
+  },
+  {
+    year: 2021,
+    title: "Shiga launched",
+    description:
+      "Shiga started as an OTC desk built for businesses that needed dependable access to digital assets, liquidity, and fast settlement.",
+    image: figmaAssets.historyPhoto,
+  },
+  {
+    year: 2023,
+    title: "From desk to infrastructure",
+    description:
+      "After the MiniPay accelerator, the focus shifted from a phone-based product toward the deeper infrastructure needed to support wallets, payments, and partners.",
+    image: figmaAssets.historyPhoto,
+  },
+  {
+    year: 2024,
+    title: "Regulated rails at scale",
+    description:
+      "Selected for the Stellar accelerator and backed by the Africa Growth Fund, Shiga launched V1 and crossed $100M in processed volume.",
+    image: figmaAssets.historyPhoto,
+  },
+  {
+    year: 2025,
+    title: "Global partners joined",
+    description:
+      "Tether invested and partnered with the company, while Visa accelerator programs helped sharpen the payments and treasury infrastructure.",
+    image: figmaAssets.historyPhoto,
+  },
+  {
+    year: 2026,
+    title: "Enta waitlist opens",
+    description:
+      "Enta opens the next chapter: one account for USDT, Bitcoin, gold, and cross-border payments, built on the rails Shiga has been proving since 2016.",
     image: figmaAssets.historyPhoto,
   },
 ];

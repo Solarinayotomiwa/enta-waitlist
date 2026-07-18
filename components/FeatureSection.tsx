@@ -130,7 +130,7 @@ function FeatureAssetCard({
     <motion.article
       animate={animate ? "visible" : "hidden"}
       className={cn(
-        "group relative w-full overflow-hidden rounded-xl border border-[#00030a] bg-gradient-to-b from-[#0c111d] to-[rgba(12,17,29,0.1)] transition duration-300 ease-out hover:-translate-y-2 hover:border-[#6b7fd0]/70 hover:shadow-[0_24px_60px_rgba(6,10,24,0.45)] lg:w-[332px]",
+        "gradient-stroke group relative w-full overflow-hidden rounded-xl border border-transparent bg-gradient-to-b from-[#0c111d] to-[rgba(12,17,29,0.1)] transition duration-300 ease-out hover:-translate-y-2 hover:shadow-[0_24px_60px_rgba(6,10,24,0.45)] lg:w-[332px]",
         card.className,
       )}
       initial="hidden"

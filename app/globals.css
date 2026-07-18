@@ -655,43 +655,46 @@ select {
   align-items: center;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.34);
   border-radius: 999px;
   box-shadow: none;
   color: #ffffff;
   display: inline-flex;
   font-size: 0.44em;
   font-weight: 600;
-  gap: 0.5em;
+  gap: 0.34em;
   line-height: 1;
   margin-left: 0.32em;
-  padding: 0.36em 0.72em 0.36em 0.5em;
+  padding: 0.34em 0.76em 0.34em 0.52em;
   transform: translateY(-0.08em);
   vertical-align: middle;
   white-space: nowrap;
 }
 
-/* Fixed-size window the active token slides through; entering/exiting layers
-   are absolutely stacked so the pill's width never changes mid-cycle. */
+/* Fixed-size stage for the three-token carousel. The active token moves to the
+   right/front, while the other two stay partially tucked behind it. */
 .hero-asset-pill-icon-window {
   border-radius: 999px;
   flex: none;
-  height: 1.5em;
-  overflow: hidden;
+  height: 1.66em;
+  overflow: visible;
   position: relative;
-  width: 1.5em;
+  width: 3.06em;
 }
 
 .hero-asset-pill-icon {
   align-items: center;
-  background: rgba(255, 255, 255, 0.1);
   border-radius: 999px;
   display: inline-flex;
-  inset: 0;
+  height: 1.5em;
   justify-content: center;
   overflow: hidden;
   position: absolute;
+  top: 50%;
+  transform-origin: center;
+  translate: 0 -50%;
+  width: 1.5em;
 }
 
 .hero-asset-pill-label-window {

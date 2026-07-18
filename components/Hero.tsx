@@ -755,29 +755,55 @@ function HeroAssetPill() {
   }, [reducedMotion]);
 
   const activeItem = heroAssets[index];
-  /* Left-to-right travel: the outgoing layer exits toward the right while the
-     incoming layer enters from the left, inside fixed-width windows so the
-     pill never resizes. */
-  const slide = {
-    animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: 10 },
-    initial: { opacity: 0, x: -10 },
-    transition: { duration: reducedMotion ? 0 : 0.36, ease: [0.22, 1, 0.36, 1] as const },
+  const previousIndex = (index - 1 + heroAssets.length) % heroAssets.length;
+  const nextIndex = (index + 1) % heroAssets.length;
+  const iconTransition = {
+    duration: reducedMotion ? 0 : 0.5,
+    ease: [0.22, 1, 0.36, 1] as const,
   };
+  const labelSlide = {
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 12 },
+    initial: { opacity: 0, x: -12 },
+    transition: { duration: reducedMotion ? 0 : 0.34, ease: [0.22, 1, 0.36, 1] as const },
+  };
+
+  function getIconState(assetIndex: number) {
+    if (assetIndex === index) {
+      return { scale: 1.08, x: "1.42em", zIndex: 3 };
+    }
+
+    if (assetIndex === previousIndex) {
+      return { scale: 0.98, x: "0em", zIndex: 1 };
+    }
+
+    return { scale: 1, x: "0.72em", zIndex: 2 };
+  }
 
   return (
     <span aria-label={heroAssets.map((asset) => asset.label).join(", ")} className="hero-asset-pill">
       <span aria-hidden="true" className="hero-asset-pill-icon-window">
-        <AnimatePresence initial={false}>
-          <motion.span className="hero-asset-pill-icon" key={activeItem.label} {...slide}>
-            <img alt="" className="size-full object-contain" src={activeItem.token} />
-          </motion.span>
-        </AnimatePresence>
+        {heroAssets.map((asset, assetIndex) => {
+          const iconState = getIconState(assetIndex);
+
+          return (
+            <motion.span
+              animate={{ scale: iconState.scale, x: iconState.x }}
+              className="hero-asset-pill-icon"
+              initial={false}
+              key={asset.label}
+              style={{ zIndex: iconState.zIndex }}
+              transition={iconTransition}
+            >
+              <img alt="" className="size-full object-contain" src={asset.token} />
+            </motion.span>
+          );
+        })}
       </span>
       <span aria-hidden="true" className="hero-asset-pill-label-window">
         <span className="hero-asset-pill-label-sizer">Bitcoin</span>
-        <AnimatePresence initial={false}>
-          <motion.span className="hero-asset-pill-label" key={activeItem.label} {...slide}>
+        <AnimatePresence initial={false} mode="popLayout">
+          <motion.span className="hero-asset-pill-label" key={activeItem.label} {...labelSlide}>
             {activeItem.label}
           </motion.span>
         </AnimatePresence>
@@ -824,6 +850,39 @@ type WaitlistInfo = {
   position?: number;
   referralLink?: string;
 };
+
+type LaunchListFields = Record<string, string>;
+
+const getLaunchListFormKey = process.env.NEXT_PUBLIC_GETLAUNCHLIST_FORM_KEY ?? "S8WkO8";
+
+function buildLaunchListFields(payload: LaunchListFields): LaunchListFields {
+  const email = payload.audience === "business" ? payload.businessEmail : payload.email;
+  const name = payload.audience === "business" ? payload.contactName : payload.name;
+
+  return {
+    ...payload,
+    email: email ?? "",
+    name: name ?? "",
+  };
+}
+
+function getLaunchListAction(fields: LaunchListFields) {
+  const params = new URLSearchParams(fields.launchlist_query ?? "");
+
+  for (const key of [
+    "ref_id",
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_content",
+    "utm_term",
+  ]) {
+    if (fields[key] && !params.has(key)) params.set(key, fields[key]);
+  }
+
+  const query = params.toString();
+  return `https://getlaunchlist.com/s/${getLaunchListFormKey}${query ? `?${query}` : ""}`;
+}
 
 const referralShareText =
   "I just joined the Enta waitlist — one account for USDT, Bitcoin, and gold, straight from your local currency. Join me:";
@@ -1002,11 +1061,21 @@ export function WaitlistForm() {
   const [audience, setAudience] = useState<"individual" | "business">("individual");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [waitlistInfo, setWaitlistInfo] = useState<WaitlistInfo | null>(null);
+  const [launchListFields, setLaunchListFields] = useState<LaunchListFields | null>(null);
+  const launchListFormRef = useRef<HTMLFormElement | null>(null);
+
+  useEffect(() => {
+    if (!launchListFields) return;
+    launchListFormRef.current?.submit();
+  }, [launchListFields]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
-    const data = Object.fromEntries(new FormData(form).entries());
+    const data = Object.fromEntries(
+      Array.from(new FormData(form).entries()).map(([key, value]) => [key, String(value)]),
+    );
+    const submitPayload = { ...data, ...getAttribution(), audience };
 
     setStatus("loading");
 
@@ -1014,7 +1083,7 @@ export function WaitlistForm() {
       const response = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, ...getAttribution(), audience }),
+        body: JSON.stringify(submitPayload),
       });
 
       if (!response.ok) throw new Error(`Request failed: ${response.status}`);
@@ -1022,6 +1091,7 @@ export function WaitlistForm() {
       const payload = (await response.json()) as { waitlist?: WaitlistInfo | null };
 
       setWaitlistInfo(payload.waitlist ?? null);
+      setLaunchListFields(buildLaunchListFields(submitPayload));
       setStatus("success");
       form.reset();
     } catch {
@@ -1036,6 +1106,29 @@ export function WaitlistForm() {
       onClose={() => setStatus("idle")}
       open={status === "success"}
     />
+    {launchListFields ? (
+      <>
+        <iframe
+          aria-hidden="true"
+          className="hidden"
+          name="launchlist-submit-frame"
+          title="LaunchList submission"
+        />
+        <form
+          action={getLaunchListAction(launchListFields)}
+          className="launchlist-form hidden"
+          method="POST"
+          ref={launchListFormRef}
+          target="launchlist-submit-frame"
+        >
+          {Object.entries(launchListFields)
+            .filter(([key, value]) => key !== "website" && key !== "launchlist_query" && value)
+            .map(([key, value]) => (
+              <input key={key} name={key} readOnly type="hidden" value={value} />
+            ))}
+        </form>
+      </>
+    ) : null}
     <motion.form
       animate={{ opacity: 1, y: 0, scale: 1 }}
       className="hero-form z-30 w-full max-w-[480px] rounded-[17px] border border-[#f6f7fa] bg-white p-6 text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.5)] sm:p-8"

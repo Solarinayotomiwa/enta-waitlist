@@ -8,14 +8,17 @@ type WaitlistInfo = {
   referralLink?: string;
 };
 
+function envValue(value: string | undefined) {
+  return value?.replace(/^\uFEFF/, "").trim() ?? "";
+}
+
 async function registerWithGetWaitlist(input: {
   email: string;
   name: string;
   refId: string;
   metadata: Record<string, string>;
 }): Promise<WaitlistInfo | null> {
-  // Strip BOM/whitespace that shell pipelines can smuggle into the env value.
-  const waitlistId = process.env.GETWAITLIST_ID?.replace(/^\uFEFF/, "").trim();
+  const waitlistId = envValue(process.env.GETWAITLIST_ID);
 
   if (!waitlistId) return null;
 
@@ -46,51 +49,7 @@ async function registerWithGetWaitlist(input: {
       referralLink: typeof result.referral_link === "string" ? result.referral_link : undefined,
     };
   } catch (error) {
-    // Referral tracking is best-effort: the signup itself must still succeed.
     console.error("GetWaitlist registration failed", error);
-    return null;
-  }
-}
-
-async function registerWithLaunchList(input: {
-  email: string;
-  name: string;
-  refId: string;
-}): Promise<WaitlistInfo | null> {
-  const formKey = process.env.LAUNCHLIST_KEY?.replace(/^﻿/, "").trim() || "S8WkO8";
-
-  try {
-    const body = new URLSearchParams({ email: input.email });
-    if (input.name) body.set("name", input.name);
-    if (input.refId) body.set("ref_id", input.refId);
-
-    const response = await fetch(`https://getlaunchlist.com/s/${formKey}`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: body.toString(),
-    });
-
-    // Direct API submission requires a paid LaunchList plan; on the free plan
-    // this returns 401 and we quietly fall back to GetWaitlist's referral link.
-    if (!response.ok) return null;
-
-    const result = (await response.json()) as Record<string, unknown>;
-    const referralLink = [result.referral_link, result.referral_url, result.ref_link].find(
-      (value): value is string => typeof value === "string" && value.startsWith("http"),
-    );
-
-    if (!referralLink) {
-      console.error("LaunchList responded without a recognisable referral link", result);
-      return null;
-    }
-
-    return { referralLink };
-  } catch (error) {
-    // Referral tracking is best-effort: the signup itself must still succeed.
-    console.error("LaunchList registration failed", error);
     return null;
   }
 }
@@ -104,7 +63,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  // Honeypot: real users never fill this hidden field. Pretend success for bots.
   if (typeof data.website === "string" && data.website.length > 0) {
     return NextResponse.json({ ok: true });
   }
@@ -134,10 +92,10 @@ export async function POST(request: Request) {
     utm_content: field("utm_content"),
     utm_term: field("utm_term"),
     ref_id: field("ref_id"),
+    launchlist_query: field("launchlist_query"),
   };
 
-  // Strip BOM/whitespace that shell pipelines can smuggle into the env value.
-  const webhookUrl = process.env.SHEETS_WEBHOOK_URL?.replace(/^\uFEFF/, "").trim();
+  const webhookUrl = envValue(process.env.SHEETS_WEBHOOK_URL);
 
   if (!webhookUrl) {
     console.error("SHEETS_WEBHOOK_URL is not set");
@@ -145,7 +103,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const [sheetResponse, getWaitlist, launchList] = await Promise.all([
+    const [sheetResponse, getWaitlist] = await Promise.all([
       fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -166,22 +124,18 @@ export async function POST(request: Request) {
           utm_term: row.utm_term,
         },
       }),
-      registerWithLaunchList({ email, name: row.name, refId: row.ref_id }),
     ]);
 
     if (!sheetResponse.ok) {
       throw new Error(`Sheets webhook responded ${sheetResponse.status}`);
     }
 
-    // Prefer LaunchList's referral link when its API is available; fall back
-    // to GetWaitlist's link (and position) otherwise.
-    const waitlist: WaitlistInfo | null =
-      getWaitlist || launchList
-        ? {
-            position: getWaitlist?.position,
-            referralLink: launchList?.referralLink ?? getWaitlist?.referralLink,
-          }
-        : null;
+    const waitlist: WaitlistInfo | null = getWaitlist
+      ? {
+          position: getWaitlist.position,
+          referralLink: getWaitlist.referralLink,
+        }
+      : null;
 
     return NextResponse.json({ ok: true, waitlist });
   } catch (error) {
