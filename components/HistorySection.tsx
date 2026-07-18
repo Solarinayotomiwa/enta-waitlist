@@ -177,9 +177,20 @@ export function HistorySection() {
   const edgeStepRef = useRef(0);
 
   useEffect(() => {
-    if (trackRef.current) trackRef.current.scrollLeft = 303;
+    const track = trackRef.current;
+    if (track) track.scrollLeft = 303;
+
+    function handleWheel(event: WheelEvent) {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+
+      event.preventDefault();
+      window.scrollBy({ top: event.deltaY, behavior: "auto" });
+    }
+
+    track?.addEventListener("wheel", handleWheel, { passive: false });
 
     return () => {
+      track?.removeEventListener("wheel", handleWheel);
       if (edgeTimerRef.current !== undefined) window.clearInterval(edgeTimerRef.current);
     };
   }, []);
@@ -228,11 +239,6 @@ export function HistorySection() {
     edgeStepRef.current = 0;
   }
 
-  function handleTrackScroll() {
-    const track = trackRef.current;
-    if (track && track.scrollTop !== 0) track.scrollTop = 0;
-  }
-
   return (
     <section
       className="relative isolate overflow-hidden text-white"
@@ -276,8 +282,7 @@ export function HistorySection() {
         </div>
 
         <div
-          className="mt-[72px] flex h-[666px] gap-8 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-6 pl-6 [overscroll-behavior-y:none] [scrollbar-width:none] lg:pl-[max(24px,calc((100vw-1200px)/2))] [&::-webkit-scrollbar]:hidden"
-          onScroll={handleTrackScroll}
+          className="mt-[72px] flex h-[666px] gap-8 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-6 pl-6 [scrollbar-width:none] lg:pl-[max(24px,calc((100vw-1200px)/2))] [&::-webkit-scrollbar]:hidden"
           ref={trackRef}
         >
           {milestones.map((milestone, index) => (
