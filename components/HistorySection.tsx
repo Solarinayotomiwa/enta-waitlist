@@ -260,11 +260,15 @@ export function HistorySection() {
               ref={trackRef}
             >
               <div className="relative flex w-max gap-6 px-1 xl:grid xl:w-full xl:grid-cols-7 xl:gap-4">
-                {/* One continuous base line behind every marker. Sits at the
-                    dot center (title h-10 + gap-4 + half of the h-8 dot row). */}
+                {/* One continuous base line behind every marker, sitting at the
+                    dot center (one-line label h-5 + gap-4 + half of the h-8 dot
+                    row = 52px). On xl it goes full-bleed (w-screen, centred) so
+                    it runs past the outer markers to the section edges; the
+                    scroll track is overflow-visible there, and the section clips
+                    it cleanly at the viewport so the page never scrolls. */}
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 top-[72px] h-px bg-white/40"
+                  className="pointer-events-none absolute inset-x-0 top-[52px] h-px bg-white/40 xl:left-1/2 xl:right-auto xl:w-screen xl:-translate-x-1/2"
                 />
                 {historyItems.map((milestone, index) => {
                   const state =
@@ -272,18 +276,22 @@ export function HistorySection() {
                   return (
                     <button
                       aria-controls={`history-panel-${milestone.year}`}
+                      aria-label={`${milestone.year}: ${milestone.title}`}
                       aria-selected={state === "active"}
-                      className="flex w-[240px] shrink-0 flex-col items-start gap-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/60 xl:w-auto"
+                      className="flex w-[240px] min-w-0 shrink-0 flex-col items-start gap-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/60 xl:w-auto"
                       key={milestone.year}
                       onClick={() => goTo(index)}
                       role="tab"
                       type="button"
                     >
+                      {/* One line only, with an ellipsis when the title is too
+                          long; the full title stays available via title/aria. */}
                       <p
                         className={cn(
-                          "h-10 overflow-hidden text-sm leading-5 transition-colors duration-300 [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [display:-webkit-box]",
+                          "block h-5 w-full min-w-0 truncate text-sm leading-5 transition-colors duration-300",
                           state === "future" ? "text-white/80" : "text-white",
                         )}
+                        title={milestone.title}
                       >
                         {milestone.title}
                       </p>

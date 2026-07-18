@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView, useReducedMotion } from "motion/react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import { figmaAssets } from "@/lib/figma-assets";
 
@@ -65,6 +65,56 @@ function WalletIllustration({ animate }: { animate: boolean }) {
   );
 }
 
+/* Faux-3D coin. The rotation wrapper is separate from the card's entrance
+   wrapper. `active` (card hover/keyboard-focus) turns the coin once to 360deg
+   and the animated value STAYS 360 so it holds face-forward — no keyframe loop
+   and no base transform pulling it back. Leaving hover animates it back to 0.
+   Thickness comes from stacked, darkened silhouette layers between a front and
+   a mirrored back face; reduced motion swaps the spin for a subtle highlight. */
+function AssetCoin({ active, image }: { active: boolean; image: string }) {
+  const reducedMotion = useReducedMotion();
+
+  if (reducedMotion) {
+    return (
+      <motion.div
+        animate={{ scale: active ? 1.03 : 1, filter: active ? "brightness(1.08)" : "brightness(1)" }}
+        className="feature-coin-scene relative grid h-[91.8%] w-[91.8%] place-items-center"
+        transition={{ duration: 0.25, ease: "easeOut" }}
+      >
+        <img alt="" className="size-full object-contain" src={image} />
+      </motion.div>
+    );
+  }
+
+  return (
+    <div className="feature-coin-scene relative grid h-[91.8%] w-[91.8%] place-items-center">
+      <motion.div
+        animate={active ? { rotateY: 360, scale: [1, 0.985, 1] } : { rotateY: 0, scale: 1 }}
+        className="feature-coin-3d relative size-full"
+        transition={{ duration: active ? 0.85 : 0.55, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div aria-hidden="true" className="feature-coin-edges">
+          {Array.from({ length: 8 }).map((_, layer) => {
+            const z = -4 + layer * (8 / 7);
+            return (
+              <img
+                alt=""
+                aria-hidden="true"
+                className="feature-coin-edge"
+                key={layer}
+                src={image}
+                style={{ transform: `translateZ(${z}px)` }}
+              />
+            );
+          })}
+        </div>
+        <img alt="" className="feature-coin-face feature-coin-face-front" src={image} />
+        <img alt="" aria-hidden="true" className="feature-coin-face feature-coin-face-back" src={image} />
+      </motion.div>
+    </div>
+  );
+}
+
 function FeatureAssetCard({
   card,
   index,
@@ -74,6 +124,8 @@ function FeatureAssetCard({
   card: AssetCard;
   index: number;
 }) {
+  const [active, setActive] = useState(false);
+
   return (
     <motion.article
       animate={animate ? "visible" : "hidden"}
@@ -82,6 +134,10 @@ function FeatureAssetCard({
         card.className,
       )}
       initial="hidden"
+      onBlur={() => setActive(false)}
+      onFocus={() => setActive(true)}
+      onMouseEnter={() => setActive(true)}
+      onMouseLeave={() => setActive(false)}
       tabIndex={0}
       transition={{ delay: 0.08 * index, duration: 0.55, ease: "easeOut" }}
       variants={reveal}
@@ -92,17 +148,10 @@ function FeatureAssetCard({
           className="absolute inset-0 size-full object-cover"
           src={card.background}
         />
-        {/* Static at rest; hovering or focusing the card plays one faux-3D
-            coin revolution (see .feature-coin in globals.css). */}
+        {/* Static at rest; hover/focus plays one faux-3D coin revolution and
+            holds at 360deg while active. Only the coin rotates. */}
         <div className="absolute inset-0 grid place-items-center [perspective:900px]">
-          <img
-            alt=""
-            className={cn(
-              "feature-card-token feature-coin h-[91.8%] w-[91.8%] object-contain object-center",
-              card.tokenClassName,
-            )}
-            src={card.token}
-          />
+          <AssetCoin active={active} image={card.token} />
         </div>
         <div className="absolute inset-x-0 bottom-[-1px] h-[90px] bg-gradient-to-b from-[rgba(56,79,130,0)] to-[#0c111c] to-[75%]" />
       </div>

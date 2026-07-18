@@ -20,11 +20,6 @@ const reveal = {
   visible: { opacity: 1, y: 0, filter: "blur(0px)" },
 };
 
-const chipReveal = {
-  hidden: { opacity: 0, y: 16, scale: 0.96 },
-  visible: { opacity: 1, y: 0, scale: 1 },
-};
-
 const formFields = [
   { id: "name", label: "Name", type: "text", autoComplete: "name" },
   { id: "email", label: "Email address", type: "email", autoComplete: "email", required: true },
@@ -339,34 +334,12 @@ function countryCodeToFlag(code: string) {
     .join("");
 }
 
-const assetChipItems = [
-  {
-    name: "Bitcoin",
-    token: figmaAssets.tokenBtcExport,
-  },
-  {
-    name: "XAU₮",
-    token: figmaAssets.tokenXautExport,
-  },
-  {
-    name: "USD₮",
-    token: figmaAssets.tokenUsdtExport,
-  },
-] as const;
-
-const fiatChipItems = [
-  {
-    name: "Naira",
-    token: figmaAssets.tokenNairaExport,
-  },
-  {
-    name: "Pound",
-    token: figmaAssets.tokenPoundExport,
-  },
-  {
-    name: "Euro",
-    token: figmaAssets.tokenEuroExport,
-  },
+/* The cycling hero pill: fixed token names + the icons already shipped in the
+   project. Order is USD₮ → Bitcoin → XAU₮ → repeat. */
+const heroAssets = [
+  { label: "USDT", token: figmaAssets.tokenUsdtExport },
+  { label: "Bitcoin", token: figmaAssets.tokenBtcExport },
+  { label: "XAUT", token: figmaAssets.tokenXautExport },
 ] as const;
 
 const grassBlades = [
@@ -730,84 +703,93 @@ function HeroHeadline() {
       </motion.span>
       <motion.span className="block text-[#a9e0fb]" variants={reveal}>
         you do.
+        <HeroAssetPill />
       </motion.span>
     </motion.h1>
   );
 }
 
-type RotatingChipItem = {
-  name: string;
-  token: string;
-};
-
-function CurrencyChip({
-  initialDelayMs,
-  intervalMs,
-  items,
-  shouldAnimate,
-}: {
-  initialDelayMs: number;
-  intervalMs: number;
-  items: readonly RotatingChipItem[];
-  shouldAnimate: boolean;
-}) {
-  const [activeIndex, setActiveIndex] = useState(0);
+/* Cycling asset pill beside the hero title. It fades in with the heading; only
+   once the entrance settles (initial delay) does the label start cycling
+   USDT → Bitcoin → XAUT. The icon stack always shows all three tokens with a
+   constant width; the active one is brought forward and emphasised. A hidden
+   sizer reserves the widest label's width so the heading never rewraps, and the
+   cycle pauses while the tab is hidden. Reduced motion holds the default asset
+   with no looping and no live announcements. */
+function HeroAssetPill() {
   const reducedMotion = useReducedMotion();
-  const activeItem = items[activeIndex];
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    if (!shouldAnimate || reducedMotion) return;
+    if (reducedMotion) return;
 
-    let interval: number | undefined;
-    const timeout = window.setTimeout(() => {
-      setActiveIndex((current) => (current + 1) % items.length);
-      interval = window.setInterval(() => {
-        setActiveIndex((current) => (current + 1) % items.length);
-      }, intervalMs);
-    }, initialDelayMs);
+    let intervalId: number | undefined;
+    const start = () => {
+      if (intervalId === undefined) {
+        intervalId = window.setInterval(() => {
+          setIndex((current) => (current + 1) % heroAssets.length);
+        }, 2400);
+      }
+    };
+    const stop = () => {
+      if (intervalId !== undefined) {
+        window.clearInterval(intervalId);
+        intervalId = undefined;
+      }
+    };
+    const onVisibility = () => {
+      if (document.hidden) stop();
+      else start();
+    };
+
+    const startTimeout = window.setTimeout(() => {
+      if (!document.hidden) start();
+      document.addEventListener("visibilitychange", onVisibility);
+    }, 1100);
 
     return () => {
-      window.clearTimeout(timeout);
-      if (interval) window.clearInterval(interval);
+      window.clearTimeout(startTimeout);
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [initialDelayMs, intervalMs, items.length, reducedMotion, shouldAnimate]);
+  }, [reducedMotion]);
+
+  const activeItem = heroAssets[index];
 
   return (
-    <motion.span
-      aria-label={items.map((item) => item.name).join(", ")}
-      className="hero-word-chip mx-2 inline-flex translate-y-[-0.08em] items-center rounded-full bg-white/10 px-4 py-2 align-middle text-[0.62em] leading-none ring-1 ring-white/20 backdrop-blur-[1px]"
-      transition={{ duration: reducedMotion ? 0 : 0.32, ease: [0.22, 1, 0.36, 1] }}
-      variants={chipReveal}
-    >
-      <span className="rotating-chip-window">
-        <span aria-hidden="true" className="rotating-chip-content rotating-chip-sizer">
-          <CurrencyChipContent item={activeItem} />
-        </span>
+    <span aria-label={heroAssets.map((asset) => asset.label).join(", ")} className="hero-asset-pill">
+      <span aria-hidden="true" className="hero-asset-pill-stack">
+        {heroAssets.map((asset, assetIndex) => (
+          <motion.span
+            animate={{
+              opacity: assetIndex === index ? 1 : 0.5,
+              scale: assetIndex === index ? 1 : 0.82,
+            }}
+            className="hero-asset-pill-icon"
+            key={asset.label}
+            style={{ zIndex: assetIndex === index ? 3 : 1 }}
+            transition={{ duration: reducedMotion ? 0 : 0.36, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <img alt="" className="size-full object-contain" src={asset.token} />
+          </motion.span>
+        ))}
+      </span>
+      <span aria-hidden="true" className="hero-asset-pill-label-window">
+        <span className="hero-asset-pill-label-sizer">Bitcoin</span>
         <AnimatePresence initial={false}>
           <motion.span
-            animate={{ opacity: 1, x: 0 }}
-            className="rotating-chip-content rotating-chip-animated"
-            exit={{ opacity: 0, x: -18 }}
-            initial={{ opacity: 0, x: 18 }}
-            key={activeItem.name}
-            transition={{ duration: reducedMotion ? 0 : 0.34, ease: [0.22, 1, 0.36, 1] }}
+            animate={{ opacity: 1, y: 0 }}
+            className="hero-asset-pill-label"
+            exit={{ opacity: 0, y: -6 }}
+            initial={{ opacity: 0, y: 6 }}
+            key={activeItem.label}
+            transition={{ duration: reducedMotion ? 0 : 0.36, ease: [0.22, 1, 0.36, 1] }}
           >
-            <CurrencyChipContent item={activeItem} />
+            {activeItem.label}
           </motion.span>
         </AnimatePresence>
       </span>
-    </motion.span>
-  );
-}
-
-function CurrencyChipContent({ item }: { item: RotatingChipItem }) {
-  return (
-    <>
-      <span className="token-avatar" aria-hidden="true">
-        <img alt="" className="size-full object-contain" src={item.token} />
-      </span>
-      <span className="chip-name">{item.name}</span>
-    </>
+    </span>
   );
 }
 

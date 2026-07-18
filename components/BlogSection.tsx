@@ -1,69 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
+import { blogArticles } from "@/lib/blog-articles";
 import { figmaAssets } from "@/lib/figma-assets";
 
 const reveal = {
   hidden: { opacity: 0, y: 32 },
   visible: { opacity: 1, y: 0 },
 };
-
-type BlogArticle = {
-  title: string;
-  category: string;
-  excerpt: string;
-  image: string;
-  imagePosition: string;
-  href: string;
-  publishedAt: string;
-};
-
-/* Real Shiga Digital articles. Dates are decoded from the LinkedIn activity
-   IDs of the announcement posts; covers are the original article covers
-   stored locally in /public/images/blog. */
-const blogArticles: BlogArticle[] = [
-  {
-    title: "How to actually buy gold in Nigeria: five options, compared",
-    category: "Gold",
-    excerpt: "A comparison of five ways to own gold in Nigeria and the trade-offs behind each option.",
-    image: "/images/blog/how-to-buy-gold-nigeria.png",
-    imagePosition: "object-center",
-    href: "https://www.linkedin.com/pulse/how-actually-buy-gold-nigeria-five-options-compared-shigadigital-lr5we",
-    publishedAt: "June 13, 2026",
-  },
-  {
-    title:
-      "Gold without the vault: holding the ultimate hedge against currency fluctuation with just your wallet",
-    category: "Wealth preservation",
-    excerpt:
-      "How digital ownership preserves gold’s value while removing the friction of physical storage.",
-    image: "/images/blog/gold-without-the-vault.png",
-    imagePosition: "object-center",
-    href: "https://www.linkedin.com/pulse/gold-without-vault-holding-ultimate-hedge-against-currency-qaxke",
-    publishedAt: "June 7, 2026",
-  },
-  {
-    title: "The Best Way to Get Started with Bitcoin in 2026",
-    category: "Bitcoin",
-    excerpt:
-      "A practical look at Bitcoin as a long-term asset and the infrastructure needed to hold it properly.",
-    image: "/images/blog/get-started-with-bitcoin-2026.png",
-    imagePosition: "object-center",
-    href: "https://www.linkedin.com/pulse/best-way-get-started-bitcoin-2026-shigadigital-vkece",
-    publishedAt: "June 1, 2026",
-  },
-  {
-    title: "Tokenization in emerging markets: the opportunity hiding in plain sight",
-    category: "Tokenized assets",
-    excerpt:
-      "How tokenized assets can expand access and improve financial infrastructure in emerging markets.",
-    image: "/images/blog/tokenization-emerging-markets.png",
-    imagePosition: "object-center",
-    href: "https://www.linkedin.com/pulse/tokenization-emerging-markets-opportunity-hiding-plain-sight-acede",
-    publishedAt: "May 23, 2026",
-  },
-];
 
 const [featuredPost, ...posts] = blogArticles;
 
@@ -108,12 +54,10 @@ export function BlogSection() {
           transition={{ delay: 0.06, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           variants={reveal}
         >
-          <a
+          <Link
             aria-label={`Read ${featuredPost.title}`}
             className="group block rounded-lg outline-none transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[3px] focus-visible:-translate-y-[3px] focus-visible:ring-2 focus-visible:ring-[#53b1fd]"
             href={featuredPost.href}
-            rel="noopener noreferrer"
-            target="_blank"
           >
             <article className="flex flex-col gap-10 border-b border-[#344054] pb-12 lg:flex-row lg:gap-14">
               <div className="relative aspect-video overflow-hidden rounded-lg border border-[#344054] bg-[#1750cc] lg:flex-1">
@@ -143,7 +87,7 @@ export function BlogSection() {
                 </span>
               </div>
             </article>
-          </a>
+          </Link>
 
           <div className="grid gap-10 lg:grid-cols-3 lg:gap-8 lg:[&>*+*]:border-l lg:[&>*+*]:border-[#344054] lg:[&>*+*]:pl-8">
             {posts.map((post, index) => (
@@ -154,12 +98,10 @@ export function BlogSection() {
                 transition={{ delay: 0.1 + index * 0.07, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
                 variants={reveal}
               >
-                <a
+                <Link
                   aria-label={`Read ${post.title}`}
                   className="group flex flex-col gap-6 rounded-lg outline-none transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[3px] focus-visible:-translate-y-[3px] focus-visible:ring-2 focus-visible:ring-[#53b1fd]"
                   href={post.href}
-                  rel="noopener noreferrer"
-                  target="_blank"
                 >
                   <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-[#344054] bg-[#1750cc]">
                     <img
@@ -179,7 +121,7 @@ export function BlogSection() {
                       </p>
                     </div>
                   </div>
-                </a>
+                </Link>
               </motion.div>
             ))}
           </div>
