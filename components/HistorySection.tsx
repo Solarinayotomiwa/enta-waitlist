@@ -1,136 +1,54 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
+import { MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import { figmaAssets } from "@/lib/figma-assets";
 
 type Milestone = {
-  year: number;
+  year: string;
   title: string;
-  description: string;
-  image: string;
+  body: string;
 };
 
-/* Year cover images are expected at /images/history/<year>.<ext>. The folder
-   is currently empty, so every item falls back to the shared placeholder —
-   swap the image fields once the real 2016–2026 files are uploaded. */
-const legacyHistoryItems: Milestone[] = [
+const milestones: Milestone[] = [
   {
-    year: 2016,
+    year: "2016",
     title: "Facilitate FX founded",
-    description:
-      "It started with a problem. That led to founding Facilitate FX, a business matching USD to NGN and NGN to USD on traditional rails.",
-    image: figmaAssets.historyPhoto,
+    body: "The work began with a simple problem: helping people and businesses move between USD and NGN with clearer pricing and more reliable settlement.",
   },
   {
-    year: 2019,
-    title: "USD liquidity for Nigeria's first stablecoins",
-    description: "Provided the USD liquidity behind the first stablecoin products in Nigeria.",
-    image: figmaAssets.historyPhoto,
-  },
-  {
-    year: 2021,
-    title: "Shiga founded — OTC desk",
-    description: "Shiga launches, starting life as an OTC desk.",
-    image: figmaAssets.historyPhoto,
-  },
-  {
-    year: 2023,
-    title: "MiniPay accelerator",
-    description:
-      "A runner-up finish in the MiniPay accelerator — and the turn from a mobile-phone product to building technology.",
-    image: figmaAssets.historyPhoto,
-  },
-  {
-    year: 2024,
-    title: "Stellar accelerator & Africa Growth Fund",
-    description:
-      "Selected for the Stellar accelerator and raised from the Africa Growth Fund; V1 goes live, crossing $100M in volume.",
-    image: figmaAssets.historyPhoto,
-  },
-  {
-    year: 2025,
-    title: "Strategic partnership",
-    description: "Tether investment and partnership, plus selection into Visa accelerator programmes.",
-    image: figmaAssets.historyPhoto,
-  },
-  {
-    year: 2026,
-    title: "V2 launch — new product suite",
-    description:
-      "Rolling out the ENTA app — self-custodial Bitcoin, USD₮ and gold, with cross-border payments — alongside new infrastructure for our banking partners, as we build deeper rails and scale.",
-    image: figmaAssets.historyPhoto,
-  },
-];
-
-const historyItems: Milestone[] = [
-  {
-    year: 2016,
-    title: "Facilitate FX founded",
-    description:
-      "The work began with a simple problem: helping people and businesses move between USD and NGN with clearer pricing and more reliable settlement.",
-    image: figmaAssets.historyPhoto,
-  },
-  {
-    year: 2019,
+    year: "2019",
     title: "Stablecoin liquidity in Nigeria",
-    description:
-      "The team provided USD liquidity for early stablecoin products in Nigeria, learning where digital dollars could solve real cross-border friction.",
-    image: figmaAssets.historyPhoto,
+    body: "The team provided USD liquidity for early stablecoin products in Nigeria, learning where digital dollars could solve real cross-border friction.",
   },
   {
-    year: 2021,
+    year: "2021",
     title: "Shiga launched",
-    description:
-      "Shiga started as an OTC desk built for businesses that needed dependable access to digital assets, liquidity, and fast settlement.",
-    image: figmaAssets.historyPhoto,
+    body: "Shiga started as an OTC desk built for businesses that needed dependable access to digital assets, liquidity, and fast settlement.",
   },
   {
-    year: 2023,
+    year: "2023",
     title: "From desk to infrastructure",
-    description:
-      "After the MiniPay accelerator, the focus shifted from a phone-based product toward the deeper infrastructure needed to support wallets, payments, and partners.",
-    image: figmaAssets.historyPhoto,
+    body: "After the MiniPay accelerator, the focus shifted from a phone-based product toward the deeper infrastructure needed to support wallets, payments, and partners.",
   },
   {
-    year: 2024,
+    year: "2024",
     title: "Regulated rails at scale",
-    description:
-      "Selected for the Stellar accelerator and backed by the Africa Growth Fund, Shiga launched V1 and crossed $100M in processed volume.",
-    image: figmaAssets.historyPhoto,
+    body: "Selected for the Stellar accelerator and backed by the Africa Growth Fund, Shiga launched V1 and crossed $100M in processed volume.",
   },
   {
-    year: 2025,
+    year: "2025",
     title: "Global partners joined",
-    description:
-      "Tether invested and partnered with the company, while Visa accelerator programs helped sharpen the payments and treasury infrastructure.",
-    image: figmaAssets.historyPhoto,
+    body: "Tether invested and partnered with the company, while Visa accelerator programs helped sharpen the payments and treasury infrastructure.",
   },
   {
-    year: 2026,
+    year: "2026",
     title: "Enta waitlist opens",
-    description:
-      "Enta opens the next chapter: one account for USDT, Bitcoin, gold, and cross-border payments, built on the rails Shiga has been proving since 2016.",
-    image: figmaAssets.historyPhoto,
+    body: "Enta opens the next chapter: one account for USDT, Bitcoin, gold, and cross-border payments, built on the rails Shiga has been proving since 2016.",
   },
 ];
 
-const ACTIVE_DURATION_MS = 8000;
-
-type Direction = -1 | 1;
-
-const slideVariants = {
-  enter: (direction: Direction) => ({ opacity: 0, x: direction * 56 }),
-  center: { opacity: 1, x: 0 },
-  exit: (direction: Direction) => ({ opacity: 0, x: direction * -56 }),
-};
-
-const fadeVariants = {
-  enter: () => ({ opacity: 0, x: 0 }),
-  center: { opacity: 1, x: 0 },
-  exit: () => ({ opacity: 0, x: 0 }),
-};
+const tickCount = 16;
 
 function ArrowIcon({ direction }: { direction: "left" | "right" }) {
   return (
@@ -149,86 +67,174 @@ function ArrowIcon({ direction }: { direction: "left" | "right" }) {
   );
 }
 
-export function HistorySection() {
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const reducedMotion = useReducedMotion();
-  const revealed = useInView(sectionRef, { margin: "0px 0px -35% 0px", once: true });
-  const inViewNow = useInView(sectionRef, { amount: 0.3 });
-  const contentVisible = Boolean(reducedMotion || revealed);
+function MilestoneColumn({
+  active,
+  milestone,
+  onActivate,
+}: {
+  active: boolean;
+  milestone: Milestone;
+  onActivate: () => void;
+}) {
+  const ticksRef = useRef<HTMLDivElement | null>(null);
 
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [direction, setDirection] = useState<Direction>(1);
-  const progressRef = useRef(0);
-  const fillRef = useRef<HTMLSpanElement | null>(null);
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const hasMounted = useRef(false);
+  function handleTickMove(event: ReactMouseEvent<HTMLDivElement>) {
+    const wrap = ticksRef.current;
+    if (!wrap) return;
 
-  /* One rAF timer drives the 8s segment scrub and auto-advance. It only runs
-     once the section has revealed and is on screen; rAF stops in hidden tabs
-     so progress pauses and resumes. Pointer position never resets it. */
-  useEffect(() => {
-    if (reducedMotion) return;
-
-    progressRef.current = 0;
-    let raf = 0;
-    let last: number | null = null;
-
-    const tick = (now: number) => {
-      raf = requestAnimationFrame(tick);
-      if (last === null) {
-        last = now;
-        return;
-      }
-      const dt = Math.min(now - last, 100);
-      last = now;
-      if (!revealed || !inViewNow) return;
-
-      progressRef.current = Math.min(1, progressRef.current + dt / ACTIVE_DURATION_MS);
-      if (fillRef.current) {
-        fillRef.current.style.transform = `scaleX(${progressRef.current})`;
-      }
-      if (progressRef.current >= 1) {
-        setDirection(1);
-        setActiveIndex((current) => (current + 1) % historyItems.length);
-      }
-    };
-
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [activeIndex, inViewNow, reducedMotion, revealed]);
-
-  /* Keep the active year visible by scrolling the timeline track ONLY — never
-     the document. Skipped on first render so mounting can't move anything. */
-  useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
+    for (const tick of Array.from(wrap.children) as HTMLElement[]) {
+      const rect = tick.getBoundingClientRect();
+      const distance = Math.abs(event.clientX - (rect.left + rect.width / 2));
+      const boost = Math.max(0, 1 - distance / 110);
+      tick.style.transform = boost > 0 ? `scaleY(${(1 + boost * 0.5).toFixed(3)})` : "";
     }
-    const track = trackRef.current;
-    const column = track?.querySelectorAll<HTMLElement>('[role="tab"]')[activeIndex];
-    if (!track || !column) return;
-    const outOfView =
-      column.offsetLeft < track.scrollLeft ||
-      column.offsetLeft + column.offsetWidth > track.scrollLeft + track.clientWidth;
-    if (outOfView) {
-      track.scrollTo({ behavior: "smooth", left: Math.max(0, column.offsetLeft - 24) });
-    }
-  }, [activeIndex]);
-
-  function goTo(targetIndex: number, forcedDirection?: Direction) {
-    const wrapped = (targetIndex + historyItems.length) % historyItems.length;
-    if (wrapped === activeIndex) return;
-    setDirection(forcedDirection ?? (wrapped > activeIndex ? 1 : -1));
-    progressRef.current = 0;
-    if (fillRef.current) fillRef.current.style.transform = "scaleX(0)";
-    setActiveIndex(wrapped);
   }
 
-  const active = historyItems[activeIndex];
-  const variants = reducedMotion ? fadeVariants : slideVariants;
+  function handleTickLeave() {
+    const wrap = ticksRef.current;
+    if (!wrap) return;
+
+    for (const tick of Array.from(wrap.children) as HTMLElement[]) {
+      tick.style.transform = "";
+    }
+  }
 
   return (
-    <section className="relative isolate overflow-hidden text-white" id="history" ref={sectionRef}>
+    <div
+      className={cn(
+        "flex h-[532px] w-[334px] shrink-0 items-start gap-8 transition-opacity duration-300 ease-out",
+        active ? "opacity-100" : "opacity-70",
+      )}
+      onFocus={onActivate}
+      onMouseEnter={onActivate}
+      onMouseLeave={handleTickLeave}
+      tabIndex={0}
+    >
+      <span
+        aria-hidden="true"
+        className={cn(
+          "w-[1.5px] shrink-0 bg-gradient-to-b from-white/80 to-transparent transition-[height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          active ? "h-full" : "h-[115px]",
+        )}
+      />
+      <div className="min-w-0 flex-1">
+        <p className="text-[44px] font-normal leading-[48px] tracking-[-1px] text-white sm:text-[64px] sm:leading-[52px] sm:tracking-[-1.152px]">
+          {milestone.year}
+        </p>
+        <p
+          className={cn(
+            "mt-[19px] truncate text-base leading-6 text-white sm:text-lg sm:leading-7",
+            active ? "font-semibold" : "font-medium",
+          )}
+          title={milestone.title}
+        >
+          {milestone.title}
+        </p>
+        <div
+          aria-hidden="true"
+          className="mt-[42px] flex h-[115px] items-start justify-between pr-1"
+          onMouseLeave={handleTickLeave}
+          onMouseMove={handleTickMove}
+          ref={ticksRef}
+        >
+          {Array.from({ length: tickCount }, (_, tick) => (
+            <span
+              className={cn(
+                "history-tick h-full w-[1.5px] bg-gradient-to-b to-transparent",
+                active ? "from-white" : "from-white/80",
+              )}
+              key={tick}
+            />
+          ))}
+        </div>
+        <div
+          className={cn(
+            "mt-10 w-[394px] max-w-[80vw] transition-[opacity,transform] duration-300 ease-out",
+            active
+              ? "pointer-events-auto translate-y-0 opacity-100"
+              : "pointer-events-none translate-y-3 opacity-0",
+          )}
+        >
+          <p className="text-sm font-medium leading-5 text-white sm:text-base sm:leading-6">
+            {milestone.body}
+          </p>
+          <img
+            alt=""
+            className="mt-6 h-[132px] w-[220px] bg-white object-cover sm:h-[164px] sm:w-[261px]"
+            src={figmaAssets.historyPlaceholder}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function HistorySection() {
+  const [activeIndex, setActiveIndex] = useState(2);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const edgeSpeedRef = useRef(0);
+  const edgeTimerRef = useRef<number | undefined>(undefined);
+  const edgeStepRef = useRef(0);
+
+  useEffect(() => {
+    if (trackRef.current) trackRef.current.scrollLeft = 303;
+
+    return () => {
+      if (edgeTimerRef.current !== undefined) window.clearInterval(edgeTimerRef.current);
+    };
+  }, []);
+
+  function scrollByColumn(direction: 1 | -1) {
+    trackRef.current?.scrollBy({ behavior: "smooth", left: direction * 362 });
+  }
+
+  function handleEdgeMove(event: ReactMouseEvent<HTMLElement>) {
+    const zone = 180;
+    const width = window.innerWidth;
+    let direction: 1 | -1 | 0 = 0;
+
+    if (event.clientX < zone) {
+      direction = -1;
+    } else if (event.clientX > width - zone) {
+      direction = 1;
+    }
+
+    edgeSpeedRef.current = direction;
+
+    if (direction !== 0 && edgeTimerRef.current === undefined) {
+      edgeStepRef.current = 0;
+      trackRef.current?.scrollBy({ behavior: "smooth", left: direction * 280 });
+
+      edgeTimerRef.current = window.setInterval(() => {
+        const track = trackRef.current;
+
+        if (!track || edgeSpeedRef.current === 0) {
+          window.clearInterval(edgeTimerRef.current);
+          edgeTimerRef.current = undefined;
+          edgeStepRef.current = 0;
+          return;
+        }
+
+        edgeStepRef.current += 1;
+
+        const distance = edgeStepRef.current >= 2 ? 520 : 280;
+        track.scrollBy({ behavior: "smooth", left: edgeSpeedRef.current * distance });
+      }, 520);
+    }
+  }
+
+  function handleEdgeLeave() {
+    edgeSpeedRef.current = 0;
+    edgeStepRef.current = 0;
+  }
+
+  return (
+    <section
+      className="relative isolate overflow-hidden text-white"
+      id="history"
+      onMouseLeave={handleEdgeLeave}
+      onMouseMove={handleEdgeMove}
+    >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[#175cd3]" />
         <img
@@ -236,33 +242,27 @@ export function HistorySection() {
           className="absolute inset-0 size-full object-cover object-bottom"
           src={figmaAssets.historySky}
         />
-        <div className="absolute inset-0 bg-black/20" />
+        <div className="absolute inset-0 bg-black/10" />
       </div>
 
-      <motion.div
-        animate={contentVisible ? "visible" : "hidden"}
-        className="relative z-10 py-20"
-        initial="hidden"
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        variants={{ hidden: { opacity: 0, y: 36 }, visible: { opacity: 1, y: 0 } }}
-      >
+      <div className="relative z-10 py-20">
         <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-6 lg:px-0">
           <h2 className="text-[2.6rem] font-semibold leading-[52px] tracking-[-0.018em] sm:text-[64px] sm:tracking-[-1.152px]">
             Our History
           </h2>
           <div className="flex items-center gap-2">
             <button
-              aria-label="Previous milestone"
-              className="flex size-12 items-center justify-center rounded-full bg-[#f9fafb] transition duration-150 ease-out hover:bg-white active:scale-[0.96]"
-              onClick={() => goTo(activeIndex - 1, -1)}
+              aria-label="Scroll timeline backwards"
+              className="flex size-10 items-center justify-center rounded-full bg-[#f9fafb] transition duration-150 ease-out hover:bg-white active:scale-[0.96] sm:size-12"
+              onClick={() => scrollByColumn(-1)}
               type="button"
             >
               <ArrowIcon direction="left" />
             </button>
             <button
-              aria-label="Next milestone"
-              className="flex size-12 items-center justify-center rounded-full bg-[#f9fafb] transition duration-150 ease-out hover:bg-white active:scale-[0.96]"
-              onClick={() => goTo(activeIndex + 1, 1)}
+              aria-label="Scroll timeline forwards"
+              className="flex size-10 items-center justify-center rounded-full bg-[#f9fafb] transition duration-150 ease-out hover:bg-white active:scale-[0.96] sm:size-12"
+              onClick={() => scrollByColumn(1)}
               type="button"
             >
               <ArrowIcon direction="right" />
@@ -270,144 +270,20 @@ export function HistorySection() {
           </div>
         </div>
 
-        {/* Card viewport: the ONLY clipped region, so sliding content never
-            spills, while the timeline below stays fully unclipped. */}
-        <div className="mx-auto mt-16 w-full max-w-[1200px] px-6 lg:px-0">
-          <div className="relative h-[520px] overflow-hidden rounded-xl sm:h-[420px] lg:h-[324px]">
-            <AnimatePresence custom={direction} initial={false}>
-              <motion.article
-                animate="center"
-                className="absolute inset-0 flex flex-col justify-between gap-6 rounded-xl bg-[rgba(222,240,255,0.2)] p-5 lg:flex-row lg:items-stretch lg:gap-8"
-                custom={direction}
-                exit="exit"
-                id={`history-panel-${active.year}`}
-                initial="enter"
-                key={activeIndex}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                variants={variants}
-              >
-                <div className="flex min-w-0 flex-1 flex-col justify-between text-white">
-                  <p className="text-2xl leading-8">{active.year}</p>
-                  <div className="flex flex-col gap-3">
-                    <p className="text-2xl font-medium leading-8">{active.title}</p>
-                    <p className="max-w-[582px] text-lg leading-7">{active.description}</p>
-                  </div>
-                </div>
-                <div className="relative h-[180px] shrink-0 overflow-hidden rounded-2xl bg-white sm:h-full lg:w-[446px]">
-                  <img
-                    alt=""
-                    className="absolute inset-0 size-full rounded-2xl object-cover"
-                    src={active.image}
-                  />
-                </div>
-              </motion.article>
-            </AnimatePresence>
-          </div>
-
-          {/* Exactly 24px between the card and the timeline; the timeline
-              viewport clips nothing vertically. */}
-          <div aria-label="History timeline" className="mt-6" role="tablist">
-            <div
-              className="overflow-x-auto pb-3 pt-1 [overscroll-behavior-inline:contain] [scrollbar-width:none] xl:overflow-visible [&::-webkit-scrollbar]:hidden"
-              ref={trackRef}
-            >
-              <div className="relative flex w-max gap-6 px-1 xl:grid xl:w-full xl:grid-cols-7 xl:gap-4">
-                {/* One continuous base line behind every marker, sitting at the
-                    dot center (one-line label h-5 + gap-4 + half of the h-8 dot
-                    row = 52px). On xl it goes full-bleed (w-screen, centred) so
-                    it runs past the outer markers to the section edges; the
-                    scroll track is overflow-visible there, and the section clips
-                    it cleanly at the viewport so the page never scrolls. */}
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 top-[52px] h-px bg-white/40 xl:left-1/2 xl:right-auto xl:w-screen xl:-translate-x-1/2"
-                />
-                {historyItems.map((milestone, index) => {
-                  const state =
-                    index === activeIndex ? "active" : index < activeIndex ? "completed" : "future";
-                  return (
-                    <button
-                      aria-controls={`history-panel-${milestone.year}`}
-                      aria-label={`${milestone.year}: ${milestone.title}`}
-                      aria-selected={state === "active"}
-                      className="flex w-[240px] min-w-0 shrink-0 flex-col items-start gap-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/60 xl:w-auto"
-                      key={milestone.year}
-                      onClick={() => goTo(index)}
-                      role="tab"
-                      type="button"
-                    >
-                      {/* One line only, with an ellipsis when the title is too
-                          long; the full title stays available via title/aria. */}
-                      <p
-                        className={cn(
-                          "block h-5 w-full min-w-0 truncate text-sm leading-5 transition-colors duration-300",
-                          state === "future" ? "text-white/80" : "text-white",
-                        )}
-                        title={milestone.title}
-                      >
-                        {milestone.title}
-                      </p>
-                      <span className="relative flex h-8 w-full items-center">
-                        {/* Completed segments: solid white overlay across the
-                            full segment (including the column gap). */}
-                        {state === "completed" ? (
-                          <span
-                            aria-hidden="true"
-                            className="absolute left-0 right-[-24px] top-1/2 h-px -translate-y-1/2 bg-white xl:right-[-16px]"
-                          />
-                        ) : null}
-                        {state === "active" && activeIndex < historyItems.length - 1 ? (
-                          <span
-                            aria-hidden="true"
-                            className="absolute left-0 right-[-24px] top-1/2 h-px -translate-y-1/2 overflow-hidden xl:right-[-16px]"
-                          >
-                            <span
-                              className="absolute inset-0 origin-left bg-white"
-                              ref={fillRef}
-                              style={{ transform: "scaleX(0)" }}
-                            />
-                          </span>
-                        ) : null}
-                        {state === "active" && activeIndex === historyItems.length - 1 ? (
-                          <span
-                            aria-hidden="true"
-                            className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 overflow-hidden"
-                          >
-                            <span
-                              className="absolute inset-0 origin-left bg-white"
-                              ref={fillRef}
-                              style={{ transform: "scaleX(0)" }}
-                            />
-                          </span>
-                        ) : null}
-                        <span
-                          className={cn(
-                            "relative z-10 rounded-full transition-all duration-300",
-                            state === "active" &&
-                              "size-[10px] bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.3)]",
-                            state === "completed" && "size-[10px] bg-white",
-                            state === "future" && "size-3 border-2 border-white bg-[#1482ba]",
-                          )}
-                        />
-                      </span>
-                      <span
-                        className={cn(
-                          "flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium leading-5 backdrop-blur-[6px] transition-colors duration-300",
-                          state === "active" && "bg-[#eff8ff] text-[#1849a9]",
-                          state === "completed" && "bg-white/20 text-white",
-                          state === "future" && "bg-[rgba(239,248,255,0.2)] text-white",
-                        )}
-                      >
-                        {milestone.year}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+        <div
+          className="mt-[72px] flex h-[558px] gap-8 overflow-x-auto pb-6 pl-6 [scrollbar-width:none] lg:pl-[max(24px,calc((100vw-1200px)/2))] [&::-webkit-scrollbar]:hidden"
+          ref={trackRef}
+        >
+          {milestones.map((milestone, index) => (
+            <MilestoneColumn
+              active={index === activeIndex}
+              key={`${milestone.year}-${milestone.title}`}
+              milestone={milestone}
+              onActivate={() => setActiveIndex(index)}
+            />
+          ))}
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
