@@ -16,31 +16,12 @@ const cardHover =
 
 function PasskeyVisual() {
   return (
-    <div className="relative min-h-[297px] flex-1 overflow-hidden rounded-xl bg-[#dcfae6] lg:min-h-0">
-      <div className="absolute left-1/2 top-1/2 flex w-[315px] max-w-[calc(100%-32px)] -translate-x-1/2 -translate-y-1/2 flex-col gap-[15.5px] rounded-[7.75px] bg-white p-[15.5px]">
-        <div className="flex items-start gap-[15.5px]">
-          <img alt="" className="size-[25.8px] shrink-0" src={figmaAssets.featuresIconLaptop} />
-          <div className="flex flex-col gap-[10.33px]">
-            <div className="flex flex-col gap-[2.58px]">
-              <p className="text-[10.33px] font-semibold leading-[15.5px] text-[#101828]">
-                This Mac
-              </p>
-              <p className="text-[9.04px] leading-[12.9px] text-[#344054]">
-                Use this device biometrics to sign in
-              </p>
-            </div>
-            <span className="flex w-fit items-center gap-[2.58px] rounded-full bg-[#f9fafb] px-[5.17px] py-[1.29px]">
-              <img alt="" className="size-[7.75px]" src={figmaAssets.featuresIconClock} />
-              <span className="text-[7.75px] font-medium leading-[11.6px] text-[#344054]">
-                Takes less than 30 seconds
-              </span>
-            </span>
-          </div>
-        </div>
-        <span className="flex h-[31px] w-full items-center justify-center rounded-[5.17px] bg-[#175cd3] text-[10.33px] font-semibold capitalize leading-[15.5px] text-white shadow-[0_0.65px_1.29px_rgba(16,24,40,0.05),inset_0_0_0_1px_rgba(16,24,40,0.18),inset_0_-1.29px_0_0_rgba(16,24,40,0.05)]">
-          Create passkey
-        </span>
-      </div>
+    <div className="relative flex min-h-[297px] flex-1 items-center justify-center overflow-hidden rounded-xl bg-[#dcfae6] px-4 lg:min-h-0">
+      <img
+        alt="Passkey recovery prompt for this device"
+        className="h-auto w-full max-w-[326px]"
+        src={figmaAssets.featuresPasskeyClean}
+      />
     </div>
   );
 }
@@ -76,8 +57,8 @@ const featureCards: FeatureCard[] = [
       <div className="relative flex min-h-[297px] flex-1 items-center justify-center overflow-hidden rounded-xl bg-[#FCE7F6] lg:min-h-0">
         <img
           alt="Enta dashboard shown in dark mode"
-          className="h-auto w-full max-w-[358px] rounded-xl [clip-path:inset(11.15%_0_0_10.34%)]"
-          src={figmaAssets.featuresMoveDashboardV2}
+          className="h-auto w-full max-w-[245px]"
+          src={figmaAssets.featuresMoveDashboardClean}
         />
       </div>
     ),
