@@ -73,10 +73,10 @@ const featureCards: FeatureCard[] = [
     title: "Only you can move it",
     body: "Only you can access your account using your device and biometrics. Shiga cannot freeze or transfer your assets.",
     visual: (
-      <div className="relative min-h-[297px] flex-1 overflow-hidden rounded-xl bg-[#FCE7F6] lg:min-h-0">
+      <div className="relative flex min-h-[297px] flex-1 items-center justify-center overflow-hidden rounded-xl bg-[#FCE7F6] lg:min-h-0">
         <img
           alt="Enta dashboard shown in dark mode"
-          className="absolute inset-0 size-full rounded-xl object-cover [clip-path:inset(11.15%_0_0_10.34%)]"
+          className="h-auto w-full max-w-[358px] rounded-xl [clip-path:inset(11.15%_0_0_10.34%)]"
           src={figmaAssets.featuresMoveDashboardV2}
         />
       </div>
@@ -130,7 +130,7 @@ export function FeaturesGridSection() {
           </div>
           <img
             alt="Enta buy widget converting naira in a few taps"
-            className="w-full rounded-xl object-cover lg:h-[455px] lg:w-[712px]"
+            className="h-auto w-full max-w-[712px] rounded-xl"
             src={figmaAssets.featuresBuyWidget}
           />
         </motion.div>
