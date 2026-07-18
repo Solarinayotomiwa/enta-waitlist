@@ -1,24 +1,23 @@
 "use client";
 
 import createGlobe from "cobe";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { useReducedMotion } from "motion/react";
 
 const BLUE_DOT = [0.294, 0.545, 1] as [number, number, number];
 const GLOBE_BLUE = [0.063, 0.165, 0.337] as [number, number, number];
 
 type GlobeLocation = [number, number];
-type GlobeMarker = { location: GlobeLocation; size: number };
+type GlobeMarker = { id: string; location: GlobeLocation; size: number };
 
 const LOCATIONS: GlobeMarker[] = [
-  { location: [6.45, 3.39], size: 0.07 },
-  { location: [40.71, -74.01], size: 0.052 },
-  { location: [51.51, -0.13], size: 0.05 },
-  { location: [25.2, 55.27], size: 0.058 },
-  { location: [-1.29, 36.82], size: 0.05 },
-  { location: [5.56, -0.2], size: 0.048 },
-  { location: [-33.87, 151.21], size: 0.048 },
-  { location: [35.68, 139.65], size: 0.046 },
+  { id: "lagos", location: [6.45, 3.39], size: 0.07 },
+  { id: "new-york", location: [40.71, -74.01], size: 0.052 },
+  { id: "london", location: [51.51, -0.13], size: 0.05 },
+  { id: "dubai", location: [25.2, 55.27], size: 0.058 },
+  { id: "kenya", location: [-1.29, 36.82], size: 0.05 },
+  { id: "australia", location: [-33.87, 151.21], size: 0.048 },
+  { id: "japan", location: [35.68, 139.65], size: 0.046 },
 ];
 
 function getPulsingMarkers(now: number, hovered: boolean) {
@@ -130,6 +129,23 @@ export function SmoothGlobe({ hovered }: { hovered: boolean }) {
       ref={hostRef}
     >
       <canvas className="block size-full opacity-100" ref={canvasRef} />
+      {LOCATIONS.map((marker, index) => (
+        <span
+          className="globe-location-ripple"
+          key={marker.id}
+          style={
+            {
+              "--globe-ripple-delay": `${index * 170}ms`,
+              "--globe-ripple-visible": `var(--cobe-visible-${marker.id}, 0)`,
+              left: "anchor(center)",
+              positionAnchor: `--cobe-${marker.id}`,
+              top: "anchor(center)",
+            } as CSSProperties
+          }
+        >
+          <span />
+        </span>
+      ))}
     </div>
   );
 }

@@ -1011,6 +1011,61 @@ select {
   transform: scale(1.008);
 }
 
+.globe-location-ripple {
+  opacity: var(--globe-ripple-visible);
+  pointer-events: none;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition: opacity 180ms ease-out;
+  z-index: 2;
+}
+
+.globe-location-ripple,
+.globe-location-ripple span {
+  display: block;
+  height: 38px;
+  width: 38px;
+}
+
+.globe-location-ripple::before,
+.globe-location-ripple::after,
+.globe-location-ripple span {
+  animation: globe-ripple 1900ms ease-out infinite;
+  animation-delay: var(--globe-ripple-delay);
+  border: 1px solid rgba(75, 139, 255, 0.56);
+  border-radius: 999px;
+  box-shadow: 0 0 16px rgba(75, 139, 255, 0.32);
+  content: "";
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.18);
+}
+
+.globe-location-ripple::after {
+  animation-delay: calc(var(--globe-ripple-delay) + 520ms);
+}
+
+.globe-location-ripple span {
+  animation-delay: calc(var(--globe-ripple-delay) + 1040ms);
+}
+
+@keyframes globe-ripple {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.18);
+  }
+
+  18% {
+    opacity: 0.76;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .footer-cta-card,
   .footer-cta-card:hover {
@@ -1021,6 +1076,14 @@ select {
   .footer-cta-card:hover .footer-cta-image {
     filter: none;
     transform: none;
+  }
+
+  .globe-location-ripple::before,
+  .globe-location-ripple::after,
+  .globe-location-ripple span {
+    animation: none;
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(0.58);
   }
 }
 
