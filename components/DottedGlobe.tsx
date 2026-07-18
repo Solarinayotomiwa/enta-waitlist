@@ -55,12 +55,13 @@ export function SmoothGlobe({ hovered }: { hovered: boolean }) {
       phi,
       theta: 0.22,
       dark: 1,
-      diffuse: 1.15,
+      diffuse: 1.45,
       mapSamples: 16000,
-      mapBrightness: 3.8,
-      baseColor: [0.04, 0.08, 0.17],
-      markerColor: [0.65, 0.88, 1],
-      glowColor: [0.16, 0.36, 0.72],
+      mapBrightness: 6.2,
+      mapBaseBrightness: 0.08,
+      baseColor: [0.08, 0.14, 0.28],
+      markerColor: [0.78, 0.93, 1],
+      glowColor: [0.32, 0.62, 1],
       markers: MARKERS,
       arcs: ARCS,
       arcColor: [0.63, 0.86, 1],
@@ -84,9 +85,9 @@ export function SmoothGlobe({ hovered }: { hovered: boolean }) {
         phi,
         width: width * 2,
         height: width * 2,
-        mapBrightness: 3.3 + pulse * 1.4,
-        markerColor: [0.5 + pulse * 0.35, 0.78 + pulse * 0.18, 1],
-        glowColor: [0.12 + pulse * 0.18, 0.28 + pulse * 0.28, 0.64 + pulse * 0.28],
+        mapBrightness: 5.4 + pulse * 2.2,
+        markerColor: [0.72 + pulse * 0.25, 0.88 + pulse * 0.12, 1],
+        glowColor: [0.24 + pulse * 0.24, 0.5 + pulse * 0.28, 0.9 + pulse * 0.1],
         scale: hoveredRef.current ? 1.075 : 1.04 + pulse * 0.012,
       });
 
@@ -105,10 +106,10 @@ export function SmoothGlobe({ hovered }: { hovered: boolean }) {
   return (
     <div
       aria-hidden="true"
-      className="absolute left-1/2 top-1/2 aspect-square w-[86%] -translate-x-1/2 -translate-y-1/2"
+      className="absolute left-1/2 top-1/2 aspect-square w-[88%] -translate-x-1/2 -translate-y-1/2"
       ref={hostRef}
     >
-      <canvas className="block size-full opacity-95" ref={canvasRef} />
+      <canvas className="block size-full opacity-100" ref={canvasRef} />
     </div>
   );
 }
