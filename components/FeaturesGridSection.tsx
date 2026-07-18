@@ -4,7 +4,7 @@ import { useRef, useState, type ReactNode } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/cn";
 import { figmaAssets } from "@/lib/figma-assets";
-import { DottedGlobe } from "@/components/DottedGlobe";
+import { SmoothGlobe } from "@/components/DottedGlobe";
 
 const reveal = {
   hidden: { opacity: 0, y: 26 },
@@ -56,7 +56,7 @@ function GlobeVisual() {
       onMouseLeave={() => setHovered(false)}
       tabIndex={-1}
     >
-      <DottedGlobe hovered={hovered} />
+      <SmoothGlobe hovered={hovered} />
     </div>
   );
 }
