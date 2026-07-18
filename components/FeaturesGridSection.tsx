@@ -49,14 +49,14 @@ function GlobeVisual() {
   const [hovered, setHovered] = useState(false);
   return (
     <div
-      className="relative min-h-[297px] flex-1 overflow-hidden rounded-xl bg-[#fce7f6] lg:min-h-0"
+      className="relative min-h-[297px] flex-1 overflow-hidden rounded-xl bg-[#D1E9FF] lg:min-h-0"
       onBlur={() => setHovered(false)}
       onFocus={() => setHovered(true)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       tabIndex={-1}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(83,177,253,0.18),rgba(252,231,246,0)_62%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(75,139,255,0.18),rgba(209,233,255,0)_62%)]" />
       <SmoothGlobe hovered={hovered} />
     </div>
   );
