@@ -25,7 +25,7 @@ const steps: Step[] = [
   },
 ];
 
-const STEP_DURATION_MS = 7000;
+const STEP_DURATION_MS = 3000;
 const COMPLETE_HOLD_MS = 150;
 
 const reveal = {
@@ -294,7 +294,8 @@ export function HowItWorksSection() {
   const [activeStep, setActiveStep] = useState(0);
   const fillRef = useRef<HTMLSpanElement | null>(null);
   const progressRef = useRef(0);
-  /* 1 = normal speed; 0.7 while hovered/focused. Delta-time based, so speed
+  /* 1 = normal speed (3000ms per step); 0.6 while hovered/focused so the
+     effective duration becomes exactly 5000ms. Delta-time based, so speed
      changes continue smoothly from the current progress with no jump. */
   const speedRef = useRef(1);
 
@@ -373,10 +374,10 @@ export function HowItWorksSection() {
           if (!event.currentTarget.contains(event.relatedTarget as Node)) speedRef.current = 1;
         }}
         onFocus={() => {
-          speedRef.current = 0.7;
+          speedRef.current = 0.6;
         }}
         onMouseEnter={() => {
-          speedRef.current = 0.7;
+          speedRef.current = 0.6;
         }}
         onMouseLeave={() => {
           speedRef.current = 1;

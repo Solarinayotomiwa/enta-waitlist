@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/Hero";
 import { FooterSection } from "@/components/FooterSection";
 import { type BlogBlock, blogArticles, getBlogArticle } from "@/lib/blog-articles";
-import { figmaAssets } from "@/lib/figma-assets";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -107,13 +106,6 @@ export default async function BlogArticlePage({ params }: PageProps) {
               <h1 className="mt-3.5 max-w-[594px] text-[30px] leading-9 tracking-[-0.005px] text-white sm:text-[37.8px] sm:leading-[42px]">
                 {article.title}
               </h1>
-              <div className="mt-[15px] flex items-center gap-3">
-                <img alt="" className="size-10 rounded-full object-cover" src={figmaAssets.blogAuthor} />
-                <div>
-                  <p className="text-[15.1px] leading-[22px] text-white">{article.author.name}</p>
-                  <p className="text-[15.3px] leading-[22px] text-[#d0d5dd]">{article.author.role}</p>
-                </div>
-              </div>
             </div>
             <div className="relative h-[240px] w-full overflow-hidden rounded-xl border border-[#344054] bg-[#1750cc] sm:h-[322px] lg:w-[644px] lg:shrink-0">
               <img

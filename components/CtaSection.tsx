@@ -54,12 +54,12 @@ export function CtaSection() {
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_135%_at_100%_100%,rgba(176,126,196,0.6),rgba(120,84,163,0.4)_26%,rgba(60,66,140,0.26)_46%,transparent_66%),radial-gradient(95%_130%_at_68%_60%,rgba(23,45,110,0.82),rgba(16,30,80,0.48)_42%,transparent_68%),linear-gradient(100deg,#0c111d_0%,#0c111d_32%,#0c1428_54%,#0d1a3a_80%,#101d44_100%)]"
           />
 
-          <h2 className="relative z-10 max-w-[560px] text-balance text-[2.65rem] font-medium leading-[1.08] tracking-[-0.037em] text-[#f5f5f6] sm:text-[3.625rem] sm:leading-[1.12] lg:w-[45%] lg:max-w-none lg:text-[clamp(2.6rem,4.5vw,58px)] lg:leading-[1.14] lg:tracking-[-0.037em]">
+          <h2 className="relative z-10 max-w-[560px] text-balance text-[2.65rem] font-medium leading-[1.08] tracking-[-0.037em] text-[#f5f5f6] sm:text-[3.625rem] sm:leading-[1.12] lg:w-[532px] lg:max-w-none lg:text-[58px] lg:leading-[67px] lg:tracking-[-2.16px]">
             Ready to move money differently?
           </h2>
 
-          <div className="relative z-10 flex w-full max-w-[361px] flex-col items-start gap-6 text-left lg:w-[31%] lg:items-center lg:text-center">
-            <p className="text-pretty text-lg leading-[1.34] tracking-[-0.018em] text-white lg:tracking-[-0.32px]">
+          <div className="relative z-10 flex w-full max-w-[361px] flex-col items-start gap-6 text-left lg:w-[361px] lg:items-center lg:text-center">
+            <p className="max-w-[313px] text-pretty text-lg leading-6 tracking-[-0.32px] text-white">
               Thousands of businesses and individuals across Africa and the GCC are already waiting.
               Join them.
             </p>

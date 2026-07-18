@@ -78,7 +78,7 @@ function AssetCoin({ active, image }: { active: boolean; image: string }) {
     return (
       <motion.div
         animate={{ scale: active ? 1.03 : 1, filter: active ? "brightness(1.08)" : "brightness(1)" }}
-        className="feature-coin-scene relative grid h-[91.8%] w-[91.8%] place-items-center"
+        className="feature-coin-scene relative grid h-[105.6%] w-[105.6%] place-items-center"
         transition={{ duration: 0.25, ease: "easeOut" }}
       >
         <img alt="" className="size-full object-contain" src={image} />
@@ -87,7 +87,7 @@ function AssetCoin({ active, image }: { active: boolean; image: string }) {
   }
 
   return (
-    <div className="feature-coin-scene relative grid h-[91.8%] w-[91.8%] place-items-center">
+    <div className="feature-coin-scene relative grid h-[105.6%] w-[105.6%] place-items-center">
       <motion.div
         animate={active ? { rotateY: 360, scale: [1, 0.985, 1] } : { rotateY: 0, scale: 1 }}
         className="feature-coin-3d relative size-full"

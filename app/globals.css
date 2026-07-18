@@ -6,6 +6,35 @@
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Shared page grid. The hero re-declares these on .hero-root; defining the
+     same ladder here lets the shared Header align identically on pages
+     without a hero (e.g. /blog), where the .hero-root variables don't exist. */
+  --content-max-width: 1200px;
+  --page-gutter: 120px;
+}
+
+@media (min-width: 1024px) and (max-width: 1329px) {
+  :root {
+    --page-gutter: 80px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root {
+    --page-gutter: 40px;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --page-gutter: 24px;
+  }
+}
+
+@media (max-width: 479px) {
+  :root {
+    --page-gutter: 20px;
+  }
 }
 
 * {
@@ -177,6 +206,12 @@ select {
   bottom: var(--glass-bottom);
   left: calc(var(--glass-w) * -0.2);
   width: var(--glass-w);
+  /* Raised by 10% of the glass artwork's own height at every visible
+     breakpoint. Lives on the positioning wrapper so the entrance and float
+     animations (on child wrappers) resolve straight into the raised position
+     with no post-entrance jump. The wide-desktop offset stays in
+     --glass-bottom, so the two adjustments combine instead of clashing. */
+  transform: translateY(-10%);
 }
 
 .hero-glass-entrance,
@@ -618,14 +653,12 @@ select {
    width fixed so the heading never rewraps between USDT / Bitcoin / XAUT. */
 .hero-asset-pill {
   align-items: center;
-  backdrop-filter: blur(6px) saturate(1.3);
-  -webkit-backdrop-filter: blur(6px) saturate(1.3);
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 999px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    0 6px 20px rgba(8, 16, 40, 0.18);
+  box-shadow: none;
   color: #ffffff;
   display: inline-flex;
   font-size: 0.44em;
@@ -639,27 +672,26 @@ select {
   white-space: nowrap;
 }
 
-.hero-asset-pill-stack {
-  align-items: center;
-  display: inline-flex;
+/* Fixed-size window the active token slides through; entering/exiting layers
+   are absolutely stacked so the pill's width never changes mid-cycle. */
+.hero-asset-pill-icon-window {
+  border-radius: 999px;
   flex: none;
+  height: 1.5em;
+  overflow: hidden;
+  position: relative;
+  width: 1.5em;
 }
 
 .hero-asset-pill-icon {
   align-items: center;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 999px;
-  box-shadow: 0 0 0 1.5px rgba(13, 16, 29, 0.35);
   display: inline-flex;
-  height: 1.5em;
+  inset: 0;
   justify-content: center;
   overflow: hidden;
-  position: relative;
-  width: 1.5em;
-}
-
-.hero-asset-pill-icon + .hero-asset-pill-icon {
-  margin-left: -0.6em;
+  position: absolute;
 }
 
 .hero-asset-pill-label-window {
@@ -679,6 +711,19 @@ select {
   inset: 0;
   display: inline-flex;
   position: absolute;
+}
+
+/* Vertical demarcation line between blog cards — Figma vector 2813: a 1px
+   line that is invisible at both ends and fully #344054 at the middle. */
+.blog-card-separator {
+  background: linear-gradient(
+    to bottom,
+    rgba(52, 64, 84, 0) 0%,
+    rgba(52, 64, 84, 1) 50%,
+    rgba(52, 64, 84, 0) 99%
+  );
+  height: 100%;
+  width: 1px;
 }
 
 .floating-field {

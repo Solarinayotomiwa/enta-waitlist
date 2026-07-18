@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { blogArticles } from "@/lib/blog-articles";
 import { figmaAssets } from "@/lib/figma-assets";
@@ -60,7 +60,7 @@ export function BlogSection() {
             href={featuredPost.href}
           >
             <article className="flex flex-col gap-10 border-b border-[#344054] pb-12 lg:flex-row lg:gap-14">
-              <div className="relative aspect-video overflow-hidden rounded-lg border border-[#344054] bg-[#1750cc] lg:flex-1">
+              <div className="relative aspect-video overflow-hidden rounded-lg border border-[#344054] bg-[#1750cc] lg:aspect-auto lg:h-[360px] lg:flex-1">
                 <img
                   alt=""
                   className={`absolute inset-0 size-full rounded-lg object-contain transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.015] ${featuredPost.imagePosition}`}
@@ -79,22 +79,25 @@ export function BlogSection() {
                     </p>
                   </div>
                 </div>
-                <span className="flex w-fit items-center gap-3 rounded-full bg-[#182230] pl-6 transition duration-150 ease-out group-hover:bg-[#1f2a3d]">
-                  <span className="text-xl font-medium leading-[30px] text-[#d0d5dd]">Read</span>
-                  <span className="flex size-12 items-center justify-center rounded-full bg-[#f9fafb]">
-                    <img alt="" className="size-6 -scale-x-100" src={figmaAssets.blogArrow} />
+                <span className="flex w-fit items-center gap-2 rounded-full bg-[#182230] pl-4 transition duration-150 ease-out group-hover:bg-[#1f2a3d]">
+                  <span className="text-lg font-medium leading-7 text-[#d0d5dd]">Read</span>
+                  <span className="flex size-10 items-center justify-center rounded-full bg-[#f9fafb]">
+                    <img alt="" className="size-5 -scale-x-100" src={figmaAssets.blogArrow} />
                   </span>
                 </span>
               </div>
             </article>
           </Link>
 
-          <div className="grid gap-10 lg:grid-cols-3 lg:gap-8 lg:[&>*+*]:border-l lg:[&>*+*]:border-[#344054] lg:[&>*+*]:pl-8">
+          <div className="grid gap-10 lg:grid-cols-[1fr_1px_1fr_1px_1fr] lg:gap-8">
             {posts.map((post, index) => (
+              <Fragment key={post.title}>
+                {index > 0 ? (
+                  <span aria-hidden="true" className="blog-card-separator hidden lg:block" />
+                ) : null}
               <motion.div
                 animate={contentVisible ? "visible" : "hidden"}
                 initial="hidden"
-                key={post.title}
                 transition={{ delay: 0.1 + index * 0.07, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
                 variants={reveal}
               >
@@ -103,7 +106,7 @@ export function BlogSection() {
                   className="group flex flex-col gap-6 rounded-lg outline-none transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[3px] focus-visible:-translate-y-[3px] focus-visible:ring-2 focus-visible:ring-[#53b1fd]"
                   href={post.href}
                 >
-                  <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-[#344054] bg-[#1750cc]">
+                  <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-[#344054] bg-[#1750cc] lg:aspect-auto lg:h-[208px]">
                     <img
                       alt=""
                       className={`absolute inset-0 size-full rounded-lg object-contain transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.015] ${post.imagePosition}`}
@@ -123,6 +126,7 @@ export function BlogSection() {
                   </div>
                 </Link>
               </motion.div>
+              </Fragment>
             ))}
           </div>
         </motion.div>

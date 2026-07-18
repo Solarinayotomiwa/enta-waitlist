@@ -755,36 +755,29 @@ function HeroAssetPill() {
   }, [reducedMotion]);
 
   const activeItem = heroAssets[index];
+  /* Left-to-right travel: the outgoing layer exits toward the right while the
+     incoming layer enters from the left, inside fixed-width windows so the
+     pill never resizes. */
+  const slide = {
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 10 },
+    initial: { opacity: 0, x: -10 },
+    transition: { duration: reducedMotion ? 0 : 0.36, ease: [0.22, 1, 0.36, 1] as const },
+  };
 
   return (
     <span aria-label={heroAssets.map((asset) => asset.label).join(", ")} className="hero-asset-pill">
-      <span aria-hidden="true" className="hero-asset-pill-stack">
-        {heroAssets.map((asset, assetIndex) => (
-          <motion.span
-            animate={{
-              opacity: assetIndex === index ? 1 : 0.5,
-              scale: assetIndex === index ? 1 : 0.82,
-            }}
-            className="hero-asset-pill-icon"
-            key={asset.label}
-            style={{ zIndex: assetIndex === index ? 3 : 1 }}
-            transition={{ duration: reducedMotion ? 0 : 0.36, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <img alt="" className="size-full object-contain" src={asset.token} />
+      <span aria-hidden="true" className="hero-asset-pill-icon-window">
+        <AnimatePresence initial={false}>
+          <motion.span className="hero-asset-pill-icon" key={activeItem.label} {...slide}>
+            <img alt="" className="size-full object-contain" src={activeItem.token} />
           </motion.span>
-        ))}
+        </AnimatePresence>
       </span>
       <span aria-hidden="true" className="hero-asset-pill-label-window">
         <span className="hero-asset-pill-label-sizer">Bitcoin</span>
         <AnimatePresence initial={false}>
-          <motion.span
-            animate={{ opacity: 1, y: 0 }}
-            className="hero-asset-pill-label"
-            exit={{ opacity: 0, y: -6 }}
-            initial={{ opacity: 0, y: 6 }}
-            key={activeItem.label}
-            transition={{ duration: reducedMotion ? 0 : 0.36, ease: [0.22, 1, 0.36, 1] }}
-          >
+          <motion.span className="hero-asset-pill-label" key={activeItem.label} {...slide}>
             {activeItem.label}
           </motion.span>
         </AnimatePresence>
