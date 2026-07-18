@@ -1011,36 +1011,6 @@ select {
   transform: scale(1.008);
 }
 
-.footer-cta-hotspot {
-  z-index: 3;
-}
-
-.footer-cta-hotspot::before {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: inherit;
-  box-shadow:
-    0 0 0 0 rgba(255, 255, 255, 0),
-    0 10px 28px rgba(4, 10, 24, 0);
-  content: "";
-  inset: 0;
-  opacity: 0;
-  position: absolute;
-  transform: scale(0.98);
-  transition:
-    box-shadow 180ms ease-out,
-    opacity 180ms ease-out,
-    transform 180ms var(--ease-out-quart);
-}
-
-.footer-cta-hotspot:hover::before,
-.footer-cta-hotspot:focus-visible::before {
-  box-shadow:
-    0 0 0 3px rgba(255, 255, 255, 0.42),
-    0 14px 34px rgba(4, 10, 24, 0.28);
-  opacity: 1;
-  transform: scale(1.04);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .footer-cta-card,
   .footer-cta-card:hover {

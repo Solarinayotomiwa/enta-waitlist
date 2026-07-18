@@ -1,6 +1,7 @@
 const STORAGE_KEY = "enta-attribution";
 
 export type Attribution = {
+  ref?: string;
   ref_id?: string;
   utm_source?: string;
   utm_medium?: string;
@@ -12,6 +13,7 @@ export type Attribution = {
 };
 
 const attributionKeys = [
+  "ref",
   "ref_id",
   "utm_source",
   "utm_medium",

@@ -20,9 +20,11 @@ export function CtaSection() {
       id="cta"
       ref={sectionRef}
     >
-      <motion.div
+      <motion.a
         animate={contentVisible ? "visible" : "hidden"}
-        className="footer-cta-card group relative mx-auto w-full max-w-[1200px] overflow-hidden rounded-[30px]"
+        aria-label="Join our waitlist"
+        className="footer-cta-card group relative mx-auto block w-full max-w-[1200px] overflow-hidden rounded-[30px] outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        href="/#waitlist"
         initial="hidden"
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         variants={reveal}
@@ -32,14 +34,7 @@ export function CtaSection() {
           className="footer-cta-image block aspect-[4/1] min-h-[180px] w-full object-cover object-center"
           src="/images/cta/cta-section.png"
         />
-        <a
-          aria-label="Join our waitlist"
-          className="footer-cta-hotspot absolute left-[72%] top-[58.5%] h-[14%] min-h-10 w-[12.7%] min-w-[150px] -translate-x-1/2 rounded-lg outline-none"
-          href="/#waitlist"
-        >
-          <span className="sr-only">Join our waitlist</span>
-        </a>
-      </motion.div>
+      </motion.a>
     </section>
   );
 }

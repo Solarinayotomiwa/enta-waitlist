@@ -849,6 +849,8 @@ function HeroIntro() {
 type WaitlistInfo = {
   position?: number;
   referralLink?: string;
+  referralId?: string;
+  provider?: "getwaitlist" | "getlaunchlist";
 };
 
 type LaunchListFields = Record<string, string>;
@@ -871,6 +873,7 @@ function getLaunchListAction(fields: LaunchListFields) {
 
   for (const key of [
     "ref_id",
+    "ref",
     "utm_source",
     "utm_medium",
     "utm_campaign",
@@ -882,6 +885,21 @@ function getLaunchListAction(fields: LaunchListFields) {
 
   const query = params.toString();
   return `https://getlaunchlist.com/s/${getLaunchListFormKey}${query ? `?${query}` : ""}`;
+}
+
+async function submitToGetLaunchList(fields: LaunchListFields) {
+  const body = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(fields)) {
+    if (!value || key === "website" || key === "launchlist_query") continue;
+    body.set(key, value);
+  }
+
+  await fetch(getLaunchListAction(fields), {
+    method: "POST",
+    body,
+    mode: "no-cors",
+  });
 }
 
 const referralShareText =
@@ -1061,13 +1079,6 @@ export function WaitlistForm() {
   const [audience, setAudience] = useState<"individual" | "business">("individual");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [waitlistInfo, setWaitlistInfo] = useState<WaitlistInfo | null>(null);
-  const [launchListFields, setLaunchListFields] = useState<LaunchListFields | null>(null);
-  const launchListFormRef = useRef<HTMLFormElement | null>(null);
-
-  useEffect(() => {
-    if (!launchListFields) return;
-    launchListFormRef.current?.submit();
-  }, [launchListFields]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -1091,7 +1102,9 @@ export function WaitlistForm() {
       const payload = (await response.json()) as { waitlist?: WaitlistInfo | null };
 
       setWaitlistInfo(payload.waitlist ?? null);
-      setLaunchListFields(buildLaunchListFields(submitPayload));
+      if (payload.waitlist?.provider !== "getlaunchlist") {
+        void submitToGetLaunchList(buildLaunchListFields(submitPayload));
+      }
       setStatus("success");
       form.reset();
     } catch {
@@ -1106,29 +1119,6 @@ export function WaitlistForm() {
       onClose={() => setStatus("idle")}
       open={status === "success"}
     />
-    {launchListFields ? (
-      <>
-        <iframe
-          aria-hidden="true"
-          className="hidden"
-          name="launchlist-submit-frame"
-          title="LaunchList submission"
-        />
-        <form
-          action={getLaunchListAction(launchListFields)}
-          className="launchlist-form hidden"
-          method="POST"
-          ref={launchListFormRef}
-          target="launchlist-submit-frame"
-        >
-          {Object.entries(launchListFields)
-            .filter(([key, value]) => key !== "website" && key !== "launchlist_query" && value)
-            .map(([key, value]) => (
-              <input key={key} name={key} readOnly type="hidden" value={value} />
-            ))}
-        </form>
-      </>
-    ) : null}
     <motion.form
       animate={{ opacity: 1, y: 0, scale: 1 }}
       className="hero-form z-30 w-full max-w-[480px] rounded-[17px] border border-[#f6f7fa] bg-white p-6 text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.5)] sm:p-8"
