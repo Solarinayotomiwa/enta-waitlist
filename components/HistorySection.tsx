@@ -260,10 +260,11 @@ export function HistorySection() {
               ref={trackRef}
             >
               <div className="relative flex w-max gap-6 px-1 xl:grid xl:w-full xl:grid-cols-7 xl:gap-4">
-                {/* One continuous base line behind every marker. */}
+                {/* One continuous base line behind every marker. Sits at the
+                    dot center (title h-10 + gap-4 + half of the h-8 dot row). */}
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 top-[64px] h-px bg-white/40"
+                  className="pointer-events-none absolute inset-x-0 top-[72px] h-px bg-white/40"
                 />
                 {historyItems.map((milestone, index) => {
                   const state =
@@ -323,7 +324,7 @@ export function HistorySection() {
                           className={cn(
                             "relative z-10 rounded-full transition-all duration-300",
                             state === "active" &&
-                              "size-3 border-2 border-white bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.3)]",
+                              "size-[10px] bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.3)]",
                             state === "completed" && "size-[10px] bg-white",
                             state === "future" && "size-3 border-2 border-white bg-[#1482ba]",
                           )}

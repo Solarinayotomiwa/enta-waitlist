@@ -4,7 +4,7 @@
     {
       "name": "enta-waitlist",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--prefix", "C:\\Users\\Green\\Desktop\\Enta waitlist website\\enta-waitlist"],
+      "runtimeArgs": ["run", "dev"],
       "port": 3000
     }
   ]
