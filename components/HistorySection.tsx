@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import { figmaAssets } from "@/lib/figma-assets";
@@ -9,6 +10,8 @@ type Milestone = {
   title: string;
   body: string;
   image: string;
+  imageHeight: number;
+  imageWidth: number;
 };
 
 const milestones: Milestone[] = [
@@ -17,42 +20,56 @@ const milestones: Milestone[] = [
     title: "Facilitate FX founded",
     body: "The work began with a simple problem: helping people and businesses move between USD and NGN with clearer pricing and more reliable settlement.",
     image: "/images/our history/2016.png",
+    imageHeight: 724,
+    imageWidth: 1278,
   },
   {
     year: "2019",
     title: "Stablecoin liquidity in Nigeria",
     body: "The team provided USD liquidity for early stablecoin products in Nigeria, learning where digital dollars could solve real cross-border friction.",
     image: "/images/our history/2019.png",
+    imageHeight: 724,
+    imageWidth: 1278,
   },
   {
     year: "2021",
     title: "Shiga launched",
     body: "Shiga started as an OTC desk built for businesses that needed dependable access to digital assets, liquidity, and fast settlement.",
     image: "/images/our history/2021.png",
+    imageHeight: 724,
+    imageWidth: 1278,
   },
   {
     year: "2023",
     title: "From desk to infrastructure",
     body: "After the MiniPay accelerator, the focus shifted from a phone-based product toward the deeper infrastructure needed to support wallets, payments, and partners.",
     image: "/images/our history/2023.png",
+    imageHeight: 838,
+    imageWidth: 1334,
   },
   {
     year: "2024",
     title: "Regulated rails at scale",
     body: "Selected for the Stellar accelerator and backed by the Africa Growth Fund, Shiga launched V1 and crossed $100M in processed volume.",
     image: "/images/our history/2024.png",
+    imageHeight: 838,
+    imageWidth: 1334,
   },
   {
     year: "2025",
     title: "Global partners joined",
     body: "Tether invested and partnered with the company, while Visa accelerator programs helped sharpen the payments and treasury infrastructure.",
     image: "/images/our history/2025.png",
+    imageHeight: 838,
+    imageWidth: 1334,
   },
   {
     year: "2026",
     title: "Enta waitlist opens",
     body: "Enta opens the next chapter: one account for USDT, Bitcoin, gold, and cross-border payments, built on the rails Shiga has been proving since 2016.",
     image: "/images/our history/2026.png",
+    imageHeight: 838,
+    imageWidth: 1334,
   },
 ];
 
@@ -166,10 +183,14 @@ function MilestoneColumn({
           <p className="text-sm font-medium leading-5 text-white sm:text-base sm:leading-6">
             {milestone.body}
           </p>
-          <img
+          <Image
             alt={`${milestone.year} ${milestone.title}`}
             className="mt-6 h-[132px] w-[220px] bg-white object-cover sm:h-[164px] sm:w-[261px]"
+            height={milestone.imageHeight}
+            quality={100}
+            sizes="(max-width: 639px) 220px, 261px"
             src={milestone.image}
+            width={milestone.imageWidth}
           />
         </div>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState, type ReactNode } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/cn";
@@ -16,12 +17,18 @@ const cardHover =
 
 function PasskeyVisual() {
   return (
-    <div className="relative flex min-h-[297px] flex-1 items-center justify-center overflow-hidden rounded-xl bg-[#dcfae6] px-4 lg:min-h-0">
-      <img
-        alt="Passkey recovery prompt for this device"
-        className="h-auto w-full max-w-[326px]"
-        src={figmaAssets.featuresPasskeyClean}
-      />
+    <div className="featureVisualPanel featureVisualPanel--access">
+      <div className="featureIllustration featureIllustration--access">
+        <Image
+          alt=""
+          className="h-auto max-h-full w-auto max-w-full object-contain"
+          height={166}
+          quality={100}
+          sizes="(max-width: 767px) 90vw, (max-width: 1199px) 45vw, 32vw"
+          src="/images/features/never-lose-access.png"
+          width={328}
+        />
+      </div>
     </div>
   );
 }
@@ -54,12 +61,17 @@ const featureCards: FeatureCard[] = [
     title: "Only you can move it",
     body: "Only you can access your account using your device and biometrics. Shiga cannot freeze or transfer your assets.",
     visual: (
-      <div className="relative flex min-h-[297px] flex-1 items-center justify-center overflow-hidden rounded-xl bg-[#FCE7F6] lg:min-h-0">
-        <img
-          alt="Enta dashboard shown in dark mode"
-          className="h-auto w-full max-w-[245px]"
-          src={figmaAssets.featuresMoveDashboardClean}
-        />
+      <div className="featureVisualPanel featureVisualPanel--move">
+        <div className="featureIllustration featureIllustration--move">
+          <Image
+            alt=""
+            className="object-contain"
+            fill
+            quality={100}
+            sizes="(max-width: 767px) 90vw, (max-width: 1199px) 45vw, 32vw"
+            src="/images/features/only-you-can-move-it.png"
+          />
+        </div>
       </div>
     ),
   },

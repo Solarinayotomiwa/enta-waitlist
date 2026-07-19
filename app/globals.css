@@ -522,6 +522,68 @@ select {
   opacity: 1;
 }
 
+.featureVisualPanel {
+  align-items: center;
+  border-radius: 12px;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  min-height: 297px;
+  overflow: hidden;
+  position: relative;
+}
+
+.featureVisualPanel--move {
+  background: #fce7f6;
+}
+
+.featureVisualPanel--access {
+  background: #dcfae6;
+  padding: 0 16px;
+}
+
+.featureIllustration {
+  position: relative;
+}
+
+.featureIllustration--move {
+  aspect-ratio: 296 / 263;
+  width: min(296px, calc(100% - 56px));
+}
+
+.featureIllustration--move img {
+  object-fit: contain;
+  object-position: center center;
+}
+
+.featureIllustration--access {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  width: min(328px, 100%);
+}
+
+.featureIllustration--access img {
+  object-fit: contain;
+  object-position: center center;
+}
+
+@media (min-width: 1024px) {
+  .featureVisualPanel {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 479px) {
+  .featureVisualPanel {
+    min-height: 244px;
+  }
+
+  .featureIllustration--move {
+    width: min(240px, calc(100% - 56px));
+  }
+}
+
 @keyframes hero-reveal {
   from {
     clip-path: inset(0 0 100% 0);
