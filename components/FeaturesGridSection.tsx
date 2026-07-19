@@ -13,7 +13,7 @@ const reveal = {
 };
 
 const cardHover =
-  "transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.015] focus-within:-translate-y-1";
+  "transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 focus-within:-translate-y-1";
 
 function PasskeyVisual() {
   return (
@@ -26,6 +26,7 @@ function PasskeyVisual() {
           quality={100}
           sizes="(max-width: 767px) 90vw, (max-width: 1199px) 45vw, 32vw"
           src="/images/features/never-lose-access.png"
+          unoptimized
           width={328}
         />
       </div>
@@ -65,11 +66,13 @@ const featureCards: FeatureCard[] = [
         <div className="featureIllustration featureIllustration--move">
           <Image
             alt=""
-            className="object-contain"
-            fill
+            className="h-auto max-h-full w-auto max-w-full object-contain"
+            height={263}
             quality={100}
             sizes="(max-width: 767px) 90vw, (max-width: 1199px) 45vw, 32vw"
             src="/images/features/only-you-can-move-it.png"
+            unoptimized
+            width={296}
           />
         </div>
       </div>
