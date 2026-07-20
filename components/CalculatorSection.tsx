@@ -1,34 +1,58 @@
 "use client";
 
-import { ChangeEvent, CSSProperties, useMemo, useRef, useState } from "react";
+import { ChangeEvent, CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/cn";
 import { figmaAssets } from "@/lib/figma-assets";
 
-type AssetOutcome = {
-  key: "naira" | "usdt" | "bitcoin" | "xaut";
+type AssetKey = "naira" | "usdt" | "bitcoin" | "xaut";
+
+type AssetMeta = {
+  key: AssetKey;
   label: string;
-  multiplier: number;
   icon: string;
   accent: string;
   barText: string;
   summary: string;
 };
 
-const assetOutcomes: AssetOutcome[] = [
+type GrowthMultipliers = {
+  usdt: number;
+  bitcoin: number;
+  xaut: number;
+};
+
+// Fallback multipliers (2021 -> today) shown until the live quote loads or if it fails.
+const fallbackMultipliers: GrowthMultipliers = {
+  usdt: 2.71,
+  bitcoin: 3.15,
+  xaut: 3.7666667,
+};
+
+// usdt/btc/xaut are nullable upstream: null when there's no rate snapshot yet,
+// or when a specific asset's provider pair is missing from that snapshot.
+type RateQuoteResponse = {
+  historicalGrowth: {
+    baselineYear: number;
+    ngn: number;
+    usdt: number | null;
+    btc: number | null;
+    xaut: number | null;
+  };
+};
+
+const assetMeta: AssetMeta[] = [
   {
     key: "naira",
     label: "Held in naira",
-    multiplier: 1,
     icon: figmaAssets.calculatorChartNaira,
     accent: "#e6e7e7",
     barText: "#0d101d",
-    summary: "Still ₦6M. But worth 63% less in purchasing power than when you saved it.",
+    summary: "",
   },
   {
     key: "usdt",
     label: "Held in USDT",
-    multiplier: 2.71,
     icon: figmaAssets.calculatorChartUsdt,
     accent: "#00e56b",
     barText: "#0d101d",
@@ -38,7 +62,6 @@ const assetOutcomes: AssetOutcome[] = [
   {
     key: "bitcoin",
     label: "Held in Bitcoin",
-    multiplier: 3.15,
     icon: figmaAssets.calculatorChartBtc,
     accent: "#ec8503",
     barText: "#0d101d",
@@ -48,7 +71,6 @@ const assetOutcomes: AssetOutcome[] = [
   {
     key: "xaut",
     label: "Held in Gold",
-    multiplier: 3.7666667,
     icon: figmaAssets.calculatorChartXaut,
     accent: "#f9bd03",
     barText: "#fffefe",
@@ -56,6 +78,10 @@ const assetOutcomes: AssetOutcome[] = [
       "Five thousand years as the ultimate store of value. Now able to be held without the custody and counterfeit risks.",
   },
 ];
+
+function getMultiplier(key: AssetKey, multipliers: GrowthMultipliers) {
+  return key === "naira" ? 1 : multipliers[key];
+}
 
 const defaultAmount = 6000000;
 const minAmount = 1;
@@ -121,16 +147,68 @@ export function CalculatorSection() {
   const shouldAnimate = isInView && !reducedMotion;
   const [amount, setAmount] = useState(defaultAmount);
   const [amountInput, setAmountInput] = useState(defaultAmount.toLocaleString("en-NG"));
-  const [expandedKey, setExpandedKey] = useState<AssetOutcome["key"]>("xaut");
+  const [expandedKey, setExpandedKey] = useState<AssetKey>("xaut");
+  const [multipliers, setMultipliers] = useState<GrowthMultipliers>(fallbackMultipliers);
+
+  // Live 2021-vs-today growth, sourced from the rates quote API. Debounced so we
+  // don't fire a request on every keystroke, with the last good multipliers kept
+  // on failure so the calculator never goes blank.
+  useEffect(() => {
+    if (amount <= 0) return;
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/rates/quote?amount=${amount}`, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) throw new Error(`Quote request failed: ${response.status}`);
+
+        const data = (await response.json()) as RateQuoteResponse;
+        const { usdt, btc, xaut } = data.historicalGrowth;
+
+        // Any of these can be null (no rate snapshot yet, or a missing
+        // provider pair for that asset) — keep the last good multipliers
+        // rather than let `null / amount` silently coerce to 0.
+        if (usdt === null || btc === null || xaut === null) {
+          throw new Error("Quote response missing one or more asset rates");
+        }
+
+        setMultipliers({
+          usdt: usdt / amount,
+          bitcoin: btc / amount,
+          xaut: xaut / amount,
+        });
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          console.error("Failed to load live rates", error);
+        }
+      }
+    }, 400);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeoutId);
+    };
+  }, [amount]);
 
   const outcomes = useMemo(
     () => {
-      const calculated = assetOutcomes.map((item) => {
-        const result = amount * item.multiplier;
+      const purchasingPowerLossPct = Math.round((1 - 1 / multipliers.usdt) * 100);
+
+      const calculated = assetMeta.map((item) => {
+        const multiplier = getMultiplier(item.key, multipliers);
+        const result = amount * multiplier;
+        const summary =
+          item.key === "naira"
+            ? `Still ${formatNaira(amount)}. But worth ${purchasingPowerLossPct}% less in purchasing power than when you saved it.`
+            : item.summary;
 
         return {
           ...item,
           result,
+          summary,
         };
       });
       const maxResult = Math.max(...calculated.map((item) => item.result));
@@ -146,7 +224,7 @@ export function CalculatorSection() {
         };
       });
     },
-    [amount],
+    [amount, multipliers],
   );
   function onAmountChange(event: ChangeEvent<HTMLInputElement>) {
     const nextAmount = parseAmountInput(event.target.value);
