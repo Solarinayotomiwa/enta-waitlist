@@ -18,7 +18,7 @@ const footerLinks = [
   { label: "Learn more", href: "/#how-it-works" },
   { label: "How it works", href: "/#how-it-works" },
   { label: "About", href: "/#about" },
-  { label: "Join waitlist", href: "/#waitlist" },
+  { label: "Join waitlist", href: "/#waitlist-form" },
 ] as const;
 
 const socialLinks = [

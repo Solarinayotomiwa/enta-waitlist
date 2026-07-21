@@ -5,7 +5,10 @@ import { figmaAssets } from "@/lib/figma-assets";
 
 export function WaitlistSection() {
   return (
-    <section className="relative isolate overflow-hidden bg-[#0d101d] px-6 py-24 text-white sm:py-[120px] lg:px-0">
+    <section
+      className="relative isolate overflow-hidden bg-[#0d101d] px-6 py-24 text-white sm:py-[120px] lg:px-0"
+      id="waitlist-form"
+    >
       <div className="mx-auto grid w-full max-w-[1200px] gap-10 lg:grid-cols-[419px_1fr] lg:gap-8">
         <div className="lg:pt-4">
           <h2 className="text-balance text-[2.35rem] font-medium leading-[1.08] tracking-[-0.018em] sm:text-5xl sm:leading-[52px]">

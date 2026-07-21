@@ -2,7 +2,6 @@ const STORAGE_KEY = "enta-attribution";
 
 export type Attribution = {
   ref?: string;
-  ref_id?: string;
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
@@ -12,45 +11,28 @@ export type Attribution = {
   launchlist_query?: string;
 };
 
-const attributionKeys = [
-  "ref",
-  "ref_id",
-  "utm_source",
-  "utm_medium",
-  "utm_campaign",
-  "utm_term",
-  "utm_content",
-] as const;
+const utmKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"] as const;
 
-// UTMs stay first-touch, but referral codes are last-touch so a shared
-// LaunchList link gets credit even if the visitor has been here before.
+/* UTMs stay first-touch, but the LaunchList referral code (`?ref=`) is
+   last-touch so a shared referral link gets credit even if the visitor has
+   been here before. */
 export function captureAttribution(): Attribution {
   try {
     const params = new URLSearchParams(window.location.search);
-    // GetWaitlist referral links put the query after the hash
-    // (e.g. /#waitlist?ref_id=XYZ), where location.search can't see it.
-    const hashQuery = window.location.hash.split("?")[1];
-
-    if (hashQuery) {
-      for (const [key, value] of new URLSearchParams(hashQuery)) {
-        if (!params.has(key)) params.set(key, value);
-      }
-    }
-
     const stored = getAttribution();
     let changed = false;
-    const currentRef = params.get("ref") || params.get("ref_id");
+    const currentRef = params.get("ref");
 
     if (currentRef) {
       const ref = currentRef.slice(0, 200);
-      if (stored.ref !== ref || stored.ref_id !== ref) {
+
+      if (stored.ref !== ref) {
         stored.ref = ref;
-        stored.ref_id = ref;
         changed = true;
       }
     }
 
-    for (const key of attributionKeys) {
+    for (const key of utmKeys) {
       const value = params.get(key);
 
       if (value && !stored[key]) {
@@ -59,24 +41,14 @@ export function captureAttribution(): Attribution {
       }
     }
 
-    if (stored.ref && !stored.ref_id) {
-      stored.ref_id = stored.ref;
-      changed = true;
-    }
+    const launchlistQuery = params.toString();
 
-    if (stored.ref_id && !stored.ref) {
-      stored.ref = stored.ref_id;
+    if (launchlistQuery && (currentRef || !stored.launchlist_query)) {
+      stored.launchlist_query = launchlistQuery.slice(0, 500);
       changed = true;
     }
 
     if (changed) {
-      if (!stored.landed_at) stored.landed_at = new Date().toISOString();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
-    }
-
-    const launchlistQuery = params.toString();
-    if (launchlistQuery && (currentRef || !stored.launchlist_query)) {
-      stored.launchlist_query = launchlistQuery.slice(0, 500);
       if (!stored.landed_at) stored.landed_at = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
     }

@@ -131,7 +131,7 @@ export default async function BlogArticlePage({ params }: PageProps) {
           </p>
           <Link
             className="mt-6 inline-flex h-11 items-center justify-center rounded-lg bg-white px-5 text-sm font-semibold text-[#0c111d] transition duration-150 ease-out hover:bg-white/90"
-            href="/#waitlist"
+            href="/#waitlist-form"
           >
             Join our waitlist
           </Link>

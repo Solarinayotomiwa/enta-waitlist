@@ -24,7 +24,7 @@ export function CtaSection() {
         animate={contentVisible ? "visible" : "hidden"}
         aria-label="Join our waitlist"
         className="footer-cta-card group relative mx-auto block w-full max-w-[1200px] overflow-hidden rounded-[30px] outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-        href="/#waitlist"
+        href="/#waitlist-form"
         initial="hidden"
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         variants={reveal}

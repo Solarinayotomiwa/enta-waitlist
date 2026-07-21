@@ -568,7 +568,7 @@ export function Header() {
         </div>
         <a
           className="ml-auto shrink-0 whitespace-nowrap rounded-lg bg-[#eff8ff] px-3 py-1.5 text-xs font-semibold capitalize leading-5 text-[#0e2243] transition duration-150 ease-out hover:bg-white active:scale-[0.98] sm:text-sm"
-          href="/#waitlist"
+          href="/#waitlist-form"
         >
           Join Waitlist
         </a>
@@ -658,7 +658,7 @@ export function Header() {
               </nav>
               <a
                 className="mt-8 flex h-12 items-center justify-center rounded-lg bg-[#eff8ff] text-base font-semibold capitalize text-[#0e2243] transition duration-150 ease-out hover:bg-white"
-                href="/#waitlist"
+                href="/#waitlist-form"
                 onClick={() => setMenuOpen(false)}
               >
                 Join Waitlist
@@ -831,7 +831,7 @@ function HeroIntro() {
       <motion.div className="hero-cta-row mt-12 flex w-full max-w-[453px] gap-4" variants={reveal}>
         <a
           className="flex h-12 flex-1 items-center justify-center rounded-lg bg-white px-[18px] text-base font-semibold capitalize leading-6 text-[#0c111d] transition duration-150 ease-out hover:bg-white/90 active:scale-[0.99]"
-          href="#waitlist"
+          href="#waitlist-form"
         >
           Join our waitlist
         </a>
@@ -850,57 +850,7 @@ type WaitlistInfo = {
   position?: number;
   referralLink?: string;
   referralId?: string;
-  provider?: "getwaitlist" | "getlaunchlist";
 };
-
-type LaunchListFields = Record<string, string>;
-
-const getLaunchListFormKey = process.env.NEXT_PUBLIC_GETLAUNCHLIST_FORM_KEY ?? "S8WkO8";
-
-function buildLaunchListFields(payload: LaunchListFields): LaunchListFields {
-  const email = payload.audience === "business" ? payload.businessEmail : payload.email;
-  const name = payload.audience === "business" ? payload.contactName : payload.name;
-
-  return {
-    ...payload,
-    email: email ?? "",
-    name: name ?? "",
-  };
-}
-
-function getLaunchListAction(fields: LaunchListFields) {
-  const params = new URLSearchParams(fields.launchlist_query ?? "");
-
-  for (const key of [
-    "ref_id",
-    "ref",
-    "utm_source",
-    "utm_medium",
-    "utm_campaign",
-    "utm_content",
-    "utm_term",
-  ]) {
-    if (fields[key] && !params.has(key)) params.set(key, fields[key]);
-  }
-
-  const query = params.toString();
-  return `https://getlaunchlist.com/s/${getLaunchListFormKey}${query ? `?${query}` : ""}`;
-}
-
-async function submitToGetLaunchList(fields: LaunchListFields) {
-  const body = new URLSearchParams();
-
-  for (const [key, value] of Object.entries(fields)) {
-    if (!value || key === "website" || key === "launchlist_query") continue;
-    body.set(key, value);
-  }
-
-  await fetch(getLaunchListAction(fields), {
-    method: "POST",
-    body,
-    mode: "no-cors",
-  });
-}
 
 const referralShareText =
   "I just joined the Enta waitlist — one account for USDT, Bitcoin, and gold, straight from your local currency. Join me:";
@@ -917,7 +867,7 @@ function WaitlistSuccessDialog({
   open: boolean;
 }) {
   const [copied, setCopied] = useState(false);
-  const launchListPosition = info?.provider === "getlaunchlist" ? info.position : undefined;
+  const launchListPosition = info?.position;
   const shareLink = info?.referralLink ?? fallbackShareLink;
 
   useEffect(() => {
@@ -1103,9 +1053,6 @@ export function WaitlistForm() {
       const payload = (await response.json()) as { waitlist?: WaitlistInfo | null };
 
       setWaitlistInfo(payload.waitlist ?? null);
-      if (payload.waitlist?.provider !== "getlaunchlist") {
-        void submitToGetLaunchList(buildLaunchListFields(submitPayload));
-      }
       setStatus("success");
       form.reset();
     } catch {
@@ -1152,7 +1099,6 @@ export function WaitlistForm() {
             <CountryCombobox />
             <FloatingTextField field={formFields[1]} />
             <FloatingTextField field={formFields[2]} />
-            <FrustrationField />
           </>
         ) : (
           <>
@@ -1167,7 +1113,7 @@ export function WaitlistForm() {
               <FloatingTextField field={businessFields[4]} />
             </div>
             <CountryCombobox />
-            <ProblemTextarea />
+            <ApiInterestField />
           </>
         )}
       </div>
@@ -1231,44 +1177,35 @@ function VolumeSelect() {
           </option>
         ))}
       </select>
-      <span className="floating-label">Monthly cross-border transaction volume</span>
+      <span className="floating-label">What is your monthly transaction volume?</span>
       <span aria-hidden="true" className="country-chevron" />
     </label>
   );
 }
 
-function FrustrationField() {
+function ApiInterestField() {
   return (
-    <label className="floating-field" htmlFor="frustration">
-      <span className="floating-label !text-[14px] !leading-5">
-        What is your biggest frustration with sending or holding money across borders?{" "}
-        <span className="text-[#a9b4c8]">(optional)</span>
+    <div aria-labelledby="api-interest-label" className="floating-field" role="radiogroup">
+      <span className="floating-label" id="api-interest-label">
+        Are you interested in our APIs?
       </span>
-      <textarea
-        className="floating-input floating-textarea !min-h-[62px] !text-[14px] placeholder:text-[#667085]"
-        id="frustration"
-        name="problem"
-        placeholder="Short text"
-        rows={2}
-      />
-    </label>
-  );
-}
-
-function ProblemTextarea() {
-  return (
-    <label className="floating-field" htmlFor="problem">
-      <textarea
-        className="floating-input floating-textarea"
-        id="problem"
-        name="problem"
-        placeholder=" "
-        rows={2}
-      />
-      <span className="floating-label">
-        What payment problem costs your business the most right now? (optional)
-      </span>
-    </label>
+      <div className="grid grid-cols-2 gap-[13px] sm:gap-[21px]">
+        {(["Yes", "No"] as const).map((option) => (
+          <label className="api-interest-option flex cursor-pointer" key={option}>
+            <input
+              className="sr-only"
+              name="interested_in_apis"
+              required
+              type="radio"
+              value={option}
+            />
+            <span className="floating-input flex items-center justify-center text-center transition duration-150 ease-out">
+              {option}
+            </span>
+          </label>
+        ))}
+      </div>
+    </div>
   );
 }
 

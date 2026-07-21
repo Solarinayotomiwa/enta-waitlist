@@ -7,7 +7,6 @@ import { BuiltForSection } from "@/components/BuiltForSection";
 import { FeaturesGridSection } from "@/components/FeaturesGridSection";
 import { SecuritySection } from "@/components/SecuritySection";
 import { WaitlistSection } from "@/components/WaitlistSection";
-import { HistorySection } from "@/components/HistorySection";
 import { BlogSection } from "@/components/BlogSection";
 import { CtaSection } from "@/components/CtaSection";
 import { FooterSection } from "@/components/FooterSection";
@@ -24,7 +23,6 @@ export default function Home() {
       <FeaturesGridSection />
       <SecuritySection />
       <WaitlistSection />
-      <HistorySection />
       <BlogSection />
       <CtaSection />
       <FooterSection />

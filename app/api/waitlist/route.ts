@@ -7,54 +7,10 @@ type WaitlistInfo = {
   position?: number;
   referralLink?: string;
   referralId?: string;
-  provider?: "getwaitlist" | "getlaunchlist";
 };
 
 function envValue(value: string | undefined) {
   return value?.replace(/^\uFEFF/, "").trim() ?? "";
-}
-
-async function registerWithGetWaitlist(input: {
-  email: string;
-  name: string;
-  refId: string;
-  metadata: Record<string, string>;
-}): Promise<WaitlistInfo | null> {
-  const waitlistId = envValue(process.env.GETWAITLIST_ID);
-
-  if (!waitlistId) return null;
-
-  try {
-    const response = await fetch("https://api.getwaitlist.com/api/v1/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: input.email,
-        waitlist_id: Number(waitlistId),
-        first_name: input.name || undefined,
-        referral_link: input.refId ? `${siteUrl}/?ref_id=${encodeURIComponent(input.refId)}` : undefined,
-        metadata: input.metadata,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`GetWaitlist responded ${response.status}`);
-    }
-
-    const result = (await response.json()) as {
-      priority?: number;
-      referral_link?: string;
-    };
-
-    return {
-      position: typeof result.priority === "number" ? result.priority : undefined,
-      referralLink: typeof result.referral_link === "string" ? result.referral_link : undefined,
-      provider: "getwaitlist",
-    };
-  } catch (error) {
-    console.error("GetWaitlist registration failed", error);
-    return null;
-  }
 }
 
 function decodeHtml(value: string) {
@@ -70,27 +26,20 @@ function referralIdFromLink(referralLink: string | undefined) {
   if (!referralLink) return undefined;
 
   try {
-    const url = new URL(referralLink);
-    return url.searchParams.get("ref") ?? url.searchParams.get("ref_id") ?? undefined;
+    return new URL(referralLink).searchParams.get("ref") ?? undefined;
   } catch {
     return undefined;
   }
 }
 
-function getLaunchListAction(formKey: string, input: { fields: Record<string, string>; refId: string }) {
+/* LaunchList attributes referrals via the `ref` query parameter on the
+   submission endpoint, exactly as the visitor's landing URL carried it. */
+function getLaunchListAction(formKey: string, input: { fields: Record<string, string> }) {
   const endpoint = new URL(`https://getlaunchlist.com/s/${formKey}`);
   const params = new URLSearchParams(input.fields.launchlist_query ?? "");
 
-  for (const key of [
-    "ref_id",
-    "ref",
-    "utm_source",
-    "utm_medium",
-    "utm_campaign",
-    "utm_content",
-    "utm_term",
-  ]) {
-    const value = input.fields[key] || (key === "ref_id" ? input.refId : "");
+  for (const key of ["ref", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]) {
+    const value = input.fields[key];
     if (value && !params.has(key)) params.set(key, value);
   }
 
@@ -105,38 +54,35 @@ function parseLaunchListHtml(html: string): WaitlistInfo {
   const referralMatch =
     html.match(/data-clipboard-text="([^"]+)"/i) ??
     html.match(/class="[^"]*refer-url[^"]*"[^>]*>\s*([^<\s][^<]*)/i);
-  const referralLink = referralMatch ? decodeHtml(referralMatch[1].trim()) : undefined;
+  const rawLink = referralMatch ? decodeHtml(referralMatch[1].trim()) : undefined;
+  const referralId = referralIdFromLink(rawLink);
 
   return {
     position: positionMatch ? Number(positionMatch[1].replace(/,/g, "")) : undefined,
-    referralLink,
-    referralId: referralIdFromLink(referralLink),
-    provider: "getlaunchlist",
+    // LaunchList builds the link from the website URL saved in its dashboard,
+    // which can lag behind the live domain — keep its ref code, use our host.
+    referralLink: referralId ? `${siteUrl}/?ref=${referralId}` : rawLink,
+    referralId,
   };
 }
 
-async function registerWithGetLaunchList(input: {
+async function registerWithLaunchList(input: {
   email: string;
   name: string;
-  refId: string;
   fields: Record<string, string>;
 }): Promise<WaitlistInfo | null> {
-  const formKey =
-    envValue(process.env.GETLAUNCHLIST_FORM_KEY) || envValue(process.env.LAUNCHLIST_KEY) || "S8WkO8";
-
-  if (!formKey) return null;
+  const formKey = envValue(process.env.GETLAUNCHLIST_FORM_KEY) || "S8WkO8";
 
   try {
     const body = new URLSearchParams();
 
     for (const [key, value] of Object.entries(input.fields)) {
-      if (!value || key === "website" || key === "launchlist_query") continue;
+      if (!value || key === "website" || key === "launchlist_query" || key === "ref") continue;
       body.set(key, value);
     }
 
     body.set("email", input.email);
     if (input.name) body.set("name", input.name);
-    if (input.refId) body.set("ref_id", input.refId);
 
     const response = await fetch(getLaunchListAction(formKey, input), {
       method: "POST",
@@ -154,7 +100,7 @@ async function registerWithGetLaunchList(input: {
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location");
       if (!location) {
-        console.error("GetLaunchList redirected without a location");
+        console.error("LaunchList redirected without a location");
         return null;
       }
 
@@ -169,7 +115,7 @@ async function registerWithGetLaunchList(input: {
 
       if (!thankYouResponse.ok) {
         const errorText = await thankYouResponse.text().catch(() => "");
-        console.error("GetLaunchList thank-you page responded", thankYouResponse.status, errorText.slice(0, 200));
+        console.error("LaunchList thank-you page responded", thankYouResponse.status, errorText.slice(0, 200));
         return null;
       }
 
@@ -178,13 +124,13 @@ async function registerWithGetLaunchList(input: {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => "");
-      console.error("GetLaunchList responded", response.status, errorText.slice(0, 200));
+      console.error("LaunchList responded", response.status, errorText.slice(0, 200));
       return null;
     }
 
     return parseLaunchListHtml(await response.text());
   } catch (error) {
-    console.error("GetLaunchList registration failed", error);
+    console.error("LaunchList registration failed", error);
     return null;
   }
 }
@@ -220,14 +166,13 @@ export async function POST(request: Request) {
     email,
     whatsapp: audience === "business" ? field("whatsapp") : field("contact"),
     country: field("country"),
-    problem: field("problem"),
+    interested_in_apis: field("interested_in_apis"),
     utm_source: field("utm_source"),
     utm_medium: field("utm_medium"),
     utm_campaign: field("utm_campaign"),
     utm_content: field("utm_content"),
     utm_term: field("utm_term"),
     ref: field("ref"),
-    ref_id: field("ref_id") || field("ref"),
     launchlist_query: field("launchlist_query"),
   };
 
@@ -239,48 +184,19 @@ export async function POST(request: Request) {
   }
 
   try {
-    const [getWaitlist, launchList] = await Promise.all([
-      registerWithGetWaitlist({
-        email,
-        name: row.name,
-        refId: row.ref_id,
-        metadata: {
-          audience,
-          country: row.country,
-          utm_source: row.utm_source,
-          utm_medium: row.utm_medium,
-          utm_campaign: row.utm_campaign,
-          utm_content: row.utm_content,
-          utm_term: row.utm_term,
-        },
-      }),
-      registerWithGetLaunchList({ email, name: row.name, refId: row.ref_id, fields: row }),
-    ]);
-
-    const waitlist: WaitlistInfo | null = launchList || getWaitlist
-      ? {
-          position: launchList?.position ?? getWaitlist?.position,
-          referralLink: launchList?.referralLink ?? getWaitlist?.referralLink,
-          referralId: launchList?.referralId ?? getWaitlist?.referralId,
-          provider: launchList?.provider ?? getWaitlist?.provider,
-        }
-      : null;
+    const waitlist = await registerWithLaunchList({ email, name: row.name, fields: row });
 
     const sheetResponse = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({
         ...row,
-        waitlist_provider: waitlist?.provider ?? "",
+        // `ref_id` is only the Google Sheet's existing column key for the
+        // referral code — it is not sent to any waitlist service.
+        ref_id: row.ref,
         waitlist_position: waitlist?.position ? String(waitlist.position) : "",
         referral_link: waitlist?.referralLink ?? "",
         referral_id: waitlist?.referralId ?? "",
-        getlaunchlist_position: launchList?.position ? String(launchList.position) : "",
-        getlaunchlist_referral_link: launchList?.referralLink ?? "",
-        getlaunchlist_referral_id: launchList?.referralId ?? "",
-        getwaitlist_position: getWaitlist?.position ? String(getWaitlist.position) : "",
-        getwaitlist_referral_link: getWaitlist?.referralLink ?? "",
-        getwaitlist_referral_id: getWaitlist?.referralId ?? "",
       }),
       redirect: "follow",
     });

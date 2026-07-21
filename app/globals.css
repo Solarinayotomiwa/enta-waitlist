@@ -955,25 +955,24 @@ select {
   position: absolute;
 }
 
-.history-tick {
-  transform-origin: center;
-  transition: transform 180ms ease-out;
-  will-change: transform;
+/* The waitlist form section is the landing target for LaunchList referral
+   visits and every "Join Waitlist" anchor; the margin keeps it clear of the
+   overlay navbar when scrolled to. */
+#waitlist-form {
+  scroll-margin-top: var(--navbar-height, 84px);
 }
 
-.history-expand {
-  animation: history-expand 420ms cubic-bezier(0.22, 1, 0.36, 1) 80ms backwards;
+/* "Are you interested in our APIs?" — single-choice pills. Native radios stay
+   focusable (arrow-key navigation) while the visible pill carries the state. */
+.api-interest-option input:checked + span {
+  background: #eff8ff;
+  border-color: #175cd3;
+  color: #175cd3;
+  font-weight: 600;
 }
 
-@keyframes history-expand {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.api-interest-option input:focus-visible + span {
+  box-shadow: 0 0 0 4px rgb(23 92 211 / 0.15);
 }
 
 .how-preview-panel {
