@@ -55,7 +55,7 @@ export function IntroSection() {
         "intro-section relative isolate -mt-px overflow-hidden bg-[#0d101d] px-6 pb-24 pt-28 text-white sm:pb-[120px] sm:pt-36 lg:px-0 lg:pt-[200px]",
         shouldAnimate && "motion-active",
       )}
-      id="proof"
+      id="about"
       ref={sectionRef}
     >
       <div aria-hidden="true" className="intro-glow" />

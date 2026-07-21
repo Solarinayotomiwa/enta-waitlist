@@ -15,7 +15,7 @@ const footerPattern = [
 ] as const;
 
 const footerLinks = [
-  { label: "Learn more", href: "/#how-it-works" },
+  { label: "Learn more", href: "/#assets" },
   { label: "How it works", href: "/#how-it-works" },
   { label: "About", href: "/#about" },
   { label: "Join waitlist", href: "/#waitlist-form" },

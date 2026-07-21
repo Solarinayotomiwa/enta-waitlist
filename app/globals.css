@@ -955,11 +955,17 @@ select {
   position: absolute;
 }
 
-/* The waitlist form section is the landing target for LaunchList referral
-   visits and every "Join Waitlist" anchor; the margin keeps it clear of the
-   overlay navbar when scrolled to. */
-#waitlist-form {
+/* Every in-page anchor target clears the overlay navbar when scrolled to —
+   the waitlist form (referral landings), how-it-works, about, and the rest. */
+section[id],
+form[id] {
   scroll-margin-top: var(--navbar-height, 84px);
+}
+
+/* Comparison chart: the smallest result keeps a visible bar, and its value
+   lives below the bar rather than inside it. */
+.comparison-bar {
+  min-height: 8px;
 }
 
 /* "Are you interested in our APIs?" — single-choice pills. Native radios stay

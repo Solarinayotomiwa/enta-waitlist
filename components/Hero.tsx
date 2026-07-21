@@ -404,9 +404,9 @@ export function Hero() {
 function ScrollCue({ shouldAnimate }: { shouldAnimate: boolean }) {
   return (
     <motion.a
-      aria-label="Scroll to proof section"
+      aria-label="Scroll to the about section"
       className="group inline-flex w-fit items-center gap-3 rounded-full border border-white/25 bg-white/18 px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-150 ease-out hover:bg-white/24"
-      href="#proof"
+      href="#about"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35, duration: 0.45, ease: "easeOut" }}
@@ -515,7 +515,7 @@ function GrassBladeField() {
 }
 
 const navLinks = [
-  { label: "Learn More", href: "/#how-it-works" },
+  { label: "Learn More", href: "/#assets" },
   { label: "How it works", href: "/#how-it-works" },
   { label: "About", href: "/#about" },
 ] as const;
@@ -838,7 +838,7 @@ function HeroIntro() {
         </a>
         <a
           className="flex h-12 flex-1 items-center justify-center rounded-lg bg-white/30 px-6 text-base font-semibold capitalize leading-6 text-white backdrop-blur-[2px] transition duration-150 ease-out hover:bg-white/40 active:scale-[0.99]"
-          href="#how-it-works"
+          href="#assets"
         >
           Learn more
         </a>

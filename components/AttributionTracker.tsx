@@ -43,22 +43,40 @@ export function AttributionTracker() {
     /* Attribution is persisted before any scrolling or hash change happens. */
     captureAttribution();
 
-    /* "Join Waitlist" anchors scroll to the form while PRESERVING the current
-       query string, so pending ?ref= / UTM parameters are never erased. */
+    /* Every in-page anchor ("#section" or "/#section") scrolls while
+       PRESERVING the current query string, so pending ?ref= / UTM parameters
+       are never erased by navigation. */
     function onClick(event: MouseEvent) {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
       const link = (event.target as Element | null)?.closest<HTMLAnchorElement>("a[href]");
-      if (!link) return;
+      if (!link || link.target === "_blank") return;
 
       const href = link.getAttribute("href") ?? "";
-      if (href !== "#waitlist-form" && href !== "/#waitlist-form") return;
+      const match = href.match(/^\/?#([a-z][\w-]*)$/i);
+      if (!match) return;
+
+      const targetId = match[1];
+
+      if (window.location.pathname !== "/" && href.startsWith("/")) {
+        /* From the blog pages, go home with the query string intact. */
+        event.preventDefault();
+        window.location.assign(`/${window.location.search}#${targetId}`);
+        return;
+      }
+
+      const target = document.getElementById(targetId);
+      if (!target) return;
 
       event.preventDefault();
-      if (window.location.hash !== `#${formSectionId}`) {
+      if (window.location.hash !== `#${targetId}`) {
         const url = new URL(window.location.href);
-        url.hash = formSectionId;
+        url.hash = targetId;
         window.history.pushState(null, "", url.toString());
       }
-      document.getElementById(formSectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      /* Slight delay lets the closing mobile menu release its scroll lock. */
+      window.setTimeout(() => target.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
     }
 
     document.addEventListener("click", onClick);
