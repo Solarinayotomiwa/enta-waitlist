@@ -6,6 +6,7 @@ import { polyfillCountryFlagEmojis } from "country-flag-emoji-polyfill";
 import { cn } from "@/lib/cn";
 import { dialCodes } from "@/lib/dial-codes";
 import { figmaAssets } from "@/lib/figma-assets";
+import { submitToLaunchList } from "@/lib/launchlist";
 import { getAttribution } from "@/lib/tracking";
 
 /* Windows has no colour flag-emoji font, so 🇳🇬 renders as the letters "NG".
@@ -852,6 +853,38 @@ type WaitlistInfo = {
   referralId?: string;
 };
 
+/* Field names double as the labels shown in the LaunchList dashboard. */
+function buildLaunchListFields(
+  audience: "individual" | "business",
+  data: Record<string, string>,
+): { email: string; name: string; fields: Record<string, string> } {
+  if (audience === "business") {
+    return {
+      email: data.businessEmail ?? "",
+      name: data.contactName ?? "",
+      fields: {
+        Audience: "Business",
+        Company: data.companyName ?? "",
+        Role: data.role ?? "",
+        "Monthly transaction volume": data.volume ?? "",
+        "Interested in APIs": data.interested_in_apis ?? "",
+        WhatsApp: data.whatsapp ?? "",
+        Country: data.country ?? "",
+      },
+    };
+  }
+
+  return {
+    email: data.email ?? "",
+    name: data.name ?? "",
+    fields: {
+      Audience: "Individual",
+      Country: data.country ?? "",
+      "WhatsApp or Telegram": data.contact ?? "",
+    },
+  };
+}
+
 const referralShareText =
   "I just joined the Enta waitlist — one account for USDT, Bitcoin, and gold, straight from your local currency. Join me:";
 const fallbackShareLink = "https://www.entashiga.io";
@@ -1037,22 +1070,28 @@ export function WaitlistForm() {
     const data = Object.fromEntries(
       Array.from(new FormData(form).entries()).map(([key, value]) => [key, String(value)]),
     );
-    const submitPayload = { ...data, ...getAttribution(), audience };
+    const attribution = getAttribution();
 
     setStatus("loading");
 
     try {
+      /* LaunchList must be called from the browser — its Cloudflare protection
+         rejects our server's requests. See lib/launchlist.ts. */
+      const launchList = buildLaunchListFields(audience, data);
+      const waitlist =
+        data.website
+          ? null
+          : await submitToLaunchList({ ...launchList, query: attribution.launchlist_query ?? "" });
+
       const response = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submitPayload),
+        body: JSON.stringify({ ...data, ...attribution, audience, waitlist }),
       });
 
       if (!response.ok) throw new Error(`Request failed: ${response.status}`);
 
-      const payload = (await response.json()) as { waitlist?: WaitlistInfo | null };
-
-      setWaitlistInfo(payload.waitlist ?? null);
+      setWaitlistInfo(waitlist);
       setStatus("success");
       form.reset();
     } catch {
