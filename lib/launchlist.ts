@@ -1,7 +1,5 @@
 import { type StoredAttribution, TRACKING_KEYS, trackingQueryString } from "@/lib/tracking";
 
-const siteUrl = "https://www.entashiga.io";
-
 export type WaitlistInfo = {
   position?: number;
   referralLink?: string;
@@ -40,8 +38,9 @@ function parseThankYouHtml(html: string): WaitlistInfo {
   return {
     position: positionMatch ? Number(positionMatch[1].replace(/,/g, "")) : undefined,
     // LaunchList builds the link from the website URL saved in its dashboard,
-    // which can lag behind the live domain — keep its ref code, use our host.
-    referralLink: referralId ? `${siteUrl}/?ref=${referralId}` : rawLink,
+    // which can lag behind the live domain — keep its ref code, but point the
+    // share link at whatever domain the visitor is actually on.
+    referralLink: referralId ? `${window.location.origin}/?ref=${referralId}` : rawLink,
     referralId,
   };
 }
