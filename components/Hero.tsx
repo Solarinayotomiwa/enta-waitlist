@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
 import { dialCodes } from "@/lib/dial-codes";
 import { figmaAssets } from "@/lib/figma-assets";
 import { submitToLaunchList } from "@/lib/launchlist";
-import { getAttribution } from "@/lib/tracking";
+import { getAttribution, trackingQueryString } from "@/lib/tracking";
 
 /* Windows has no colour flag-emoji font, so 🇳🇬 renders as the letters "NG".
    The polyfill injects the Twemoji Country Flags webfont; the .country-flag
@@ -1079,14 +1079,20 @@ export function WaitlistForm() {
          rejects our server's requests. See lib/launchlist.ts. */
       const launchList = buildLaunchListFields(audience, data);
       const waitlist =
-        data.website
-          ? null
-          : await submitToLaunchList({ ...launchList, query: attribution.launchlist_query ?? "" });
+        data.website ? null : await submitToLaunchList({ ...launchList, tracking: attribution });
 
       const response = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, ...attribution, audience, waitlist }),
+        body: JSON.stringify({
+          ...data,
+          ...attribution,
+          launchlist_query: trackingQueryString(attribution),
+          landing_page: attribution.landingPage ?? "",
+          attribution_captured_at: attribution.capturedAt ?? "",
+          audience,
+          waitlist,
+        }),
       });
 
       if (!response.ok) throw new Error(`Request failed: ${response.status}`);

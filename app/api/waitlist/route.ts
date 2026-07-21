@@ -55,6 +55,8 @@ export async function POST(request: Request) {
     utm_term: field("utm_term"),
     ref: field("ref"),
     launchlist_query: field("launchlist_query"),
+    landing_page: field("landing_page"),
+    attribution_captured_at: field("attribution_captured_at"),
     // `ref_id` is only the Google Sheet's existing column key for the
     // referral code — it is not sent to any waitlist service.
     ref_id: field("ref"),

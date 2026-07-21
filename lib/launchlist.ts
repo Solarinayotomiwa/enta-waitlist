@@ -1,3 +1,5 @@
+import { type StoredAttribution, TRACKING_KEYS, trackingQueryString } from "@/lib/tracking";
+
 const siteUrl = "https://www.entashiga.io";
 
 export type WaitlistInfo = {
@@ -52,14 +54,16 @@ export async function submitToLaunchList(input: {
   email: string;
   name: string;
   fields: Record<string, string>;
-  query: string;
+  tracking: StoredAttribution;
 }): Promise<WaitlistInfo | null> {
   const formKey = process.env.NEXT_PUBLIC_GETLAUNCHLIST_FORM_KEY?.trim() || "S8WkO8";
 
   try {
     const endpoint = new URL(`https://getlaunchlist.com/s/${formKey}`);
 
-    for (const [key, value] of new URLSearchParams(input.query)) {
+    /* `ref` and the UTMs ride the endpoint query for LaunchList's native
+       referral + campaign capture… */
+    for (const [key, value] of new URLSearchParams(trackingQueryString(input.tracking))) {
       endpoint.searchParams.set(key, value);
     }
 
@@ -70,6 +74,18 @@ export async function submitToLaunchList(input: {
     for (const [key, value] of Object.entries(input.fields)) {
       if (value) body.set(key, value);
     }
+
+    /* …and are also submitted as custom fields so every UTM (notably
+       utm_content and utm_term) shows on the signup in the dashboard. */
+    for (const key of TRACKING_KEYS) {
+      if (key === "ref") continue;
+
+      const value = input.tracking[key];
+      if (value) body.set(key, value);
+    }
+
+    if (input.tracking.landingPage) body.set("landing_page", input.tracking.landingPage);
+    if (input.tracking.capturedAt) body.set("attribution_captured_at", input.tracking.capturedAt);
 
     const response = await fetch(endpoint, {
       method: "POST",
