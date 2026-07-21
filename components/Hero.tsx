@@ -1096,7 +1096,13 @@ export function WaitlistForm() {
         }),
       });
 
-      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      /* The LaunchList registration is the signup of record. If it succeeded,
+         a failed sheet write must not show the visitor an error — log it for
+         us and let them through. */
+      if (!response.ok) {
+        if (!waitlist) throw new Error(`Request failed: ${response.status}`);
+        console.error("Sheet recording failed", response.status);
+      }
 
       setWaitlistInfo(waitlist);
       setStatus("success");
