@@ -467,10 +467,6 @@ export function CalculatorSection() {
                     market data from {startDateLabel}.
                   </p>
                 ) : null}
-                <p>
-                  Illustrative market comparison only. Prices may vary by provider, fees, spread,
-                  and time of execution. This is not financial advice.
-                </p>
               </div>
             </div>
           </div>

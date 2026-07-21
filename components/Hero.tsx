@@ -22,13 +22,14 @@ const reveal = {
 };
 
 const formFields = [
-  { id: "name", label: "Name", type: "text", autoComplete: "name" },
+  { id: "name", label: "Name", type: "text", autoComplete: "name", required: true },
   { id: "email", label: "Email address", type: "email", autoComplete: "email", required: true },
   {
     id: "contact",
-    label: "WhatsApp or Telegram (optional)",
+    label: "WhatsApp or Telegram",
     type: "text",
     autoComplete: "tel",
+    required: true,
   },
 ] as const;
 
