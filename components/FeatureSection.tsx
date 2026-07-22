@@ -22,7 +22,7 @@ const assetCards: AssetCard[] = [
     background: figmaAssets.featureUsdtBg,
     token: figmaAssets.featureUsdtToken,
     className: "lg:translate-y-4 lg:hover:translate-y-2",
-    tokenClassName: "",
+    tokenClassName: "feature-token-usdt",
   },
   {
     title: "Bitcoin",
@@ -71,14 +71,25 @@ function WalletIllustration({ animate }: { animate: boolean }) {
    and no base transform pulling it back. Leaving hover animates it back to 0.
    Thickness comes from stacked, darkened silhouette layers between a front and
    a mirrored back face; reduced motion swaps the spin for a subtle highlight. */
-function AssetCoin({ active, image }: { active: boolean; image: string }) {
+function AssetCoin({
+  active,
+  image,
+  className,
+}: {
+  active: boolean;
+  image: string;
+  className?: string;
+}) {
   const reducedMotion = useReducedMotion();
 
   if (reducedMotion) {
     return (
       <motion.div
         animate={{ scale: active ? 1.03 : 1, filter: active ? "brightness(1.08)" : "brightness(1)" }}
-        className="feature-coin-scene relative grid h-[105.6%] w-[105.6%] place-items-center"
+        className={cn(
+          "feature-coin-scene relative grid h-[105.6%] w-[105.6%] place-items-center",
+          className,
+        )}
         transition={{ duration: 0.25, ease: "easeOut" }}
       >
         <img alt="" className="size-full object-contain" src={image} />
@@ -87,7 +98,12 @@ function AssetCoin({ active, image }: { active: boolean; image: string }) {
   }
 
   return (
-    <div className="feature-coin-scene relative grid h-[105.6%] w-[105.6%] place-items-center">
+    <div
+      className={cn(
+        "feature-coin-scene relative grid h-[105.6%] w-[105.6%] place-items-center",
+        className,
+      )}
+    >
       <motion.div
         animate={active ? { rotateY: 360, scale: [1, 0.985, 1] } : { rotateY: 0, scale: 1 }}
         className="feature-coin-3d relative size-full"
@@ -151,7 +167,7 @@ function FeatureAssetCard({
         {/* Static at rest; hover/focus plays one faux-3D coin revolution and
             holds at 360deg while active. Only the coin rotates. */}
         <div className="absolute inset-0 grid place-items-center [perspective:900px]">
-          <AssetCoin active={active} image={card.token} />
+          <AssetCoin active={active} className={card.tokenClassName} image={card.token} />
         </div>
         <div className="absolute inset-x-0 bottom-[-1px] h-[90px] bg-gradient-to-b from-[rgba(56,79,130,0)] to-[#0c111c] to-[75%]" />
       </div>
