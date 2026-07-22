@@ -38,8 +38,8 @@ const assetMeta: AssetMeta[] = [
   },
   {
     key: "usdt",
-    label: "Held in USDT",
-    symbol: "USDT",
+    label: "Held in USD₮",
+    symbol: "USD₮",
     icon: figmaAssets.calculatorChartUsdt,
     accent: "#00e56b",
     quantityDigits: 2,
@@ -59,7 +59,7 @@ const assetMeta: AssetMeta[] = [
   {
     key: "xaut",
     label: "Held in Gold",
-    symbol: "XAUT",
+    symbol: "XAU₮",
     icon: figmaAssets.calculatorChartXaut,
     accent: "#f9bd03",
     quantityDigits: 3,

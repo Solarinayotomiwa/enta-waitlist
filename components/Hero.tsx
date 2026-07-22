@@ -339,9 +339,9 @@ function countryCodeToFlag(code: string) {
 /* The cycling hero pill: fixed token names + the icons already shipped in the
    project. Order is USD₮ → Bitcoin → XAU₮ → repeat. */
 const heroAssets = [
-  { label: "USDT", token: figmaAssets.tokenUsdtExport },
+  { label: "USD₮", token: figmaAssets.tokenUsdtExport },
   { label: "Bitcoin", token: figmaAssets.tokenBtcExport },
-  { label: "XAUT", token: figmaAssets.tokenXautExport },
+  { label: "XAU₮", token: figmaAssets.tokenXautExport },
 ] as const;
 
 const grassBlades = [
@@ -887,7 +887,7 @@ function buildLaunchListFields(
 }
 
 const referralShareText =
-  "I just joined the Enta waitlist — one account for USDT, Bitcoin, and gold, straight from your local currency. Join me:";
+  "I just joined the Enta waitlist — one account for USD₮, Bitcoin, and gold, straight from your local currency. Join me:";
 const fallbackShareLink = "https://www.entashiga.io";
 const telegramChannelUrl = "https://t.me/AfriSignal";
 

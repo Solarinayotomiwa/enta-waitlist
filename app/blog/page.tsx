@@ -278,7 +278,7 @@ export default function BlogPage() {
             <div className="mt-[29px]">
               <QuoteList
                 items={[
-                  "Convert half of every naira deposit into USDT the moment it lands",
+                  "Convert half of every naira deposit into USD₮ the moment it lands",
                   "This business allocates revenue by region, not branch — split it across these six accounts",
                   "If the rate moves more than 2%, stop and pull me in before converting",
                 ]}

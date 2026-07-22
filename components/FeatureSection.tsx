@@ -27,7 +27,7 @@ const assetCards: AssetCard[] = [
   {
     title: "Bitcoin",
     description:
-      "Access it from your local currency or USDT at the best rates, with the deepest liquidity in the market. No markup. No runaround.",
+      "Access it from your local currency or USD₮ at the best rates, with the deepest liquidity in the market. No markup. No runaround.",
     background: figmaAssets.featureBitcoinBg,
     token: figmaAssets.featureBitcoinToken,
     className: "lg:translate-y-32 lg:hover:translate-y-[120px]",

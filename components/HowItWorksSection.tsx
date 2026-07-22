@@ -42,7 +42,7 @@ const entryCards = [
   },
   {
     heading: "Already hold dollars?",
-    body: "Bring your USDT or USDC straight in and put it to work right away.",
+    body: "Bring your USD₮ or USDC straight in and put it to work right away.",
     image: figmaAssets.howEntryDollars,
     panelBg: "#ebe9fe",
   },
@@ -395,7 +395,7 @@ export function HowItWorksSection() {
               How it works
             </h2>
             <p className="max-w-[419px] pb-1 text-pretty text-xl leading-[30px] text-white/80">
-              Start with local fiat or USDT and move into any supported asset in a few steps.
+              Start with local fiat or USD₮ and move into any supported asset in a few steps.
             </p>
           </div>
           <div className="mt-12 flex flex-col gap-6 pb-6 lg:mt-0">
