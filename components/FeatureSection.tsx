@@ -22,7 +22,9 @@ const assetCards: AssetCard[] = [
     background: figmaAssets.featureUsdtBg,
     token: figmaAssets.featureUsdtToken,
     className: "lg:translate-y-4 lg:hover:translate-y-2",
-    tokenClassName: "feature-token-usdt",
+    /* The teal render has more transparent padding than the Bitcoin/Gold
+       PNGs — the scale equalises the visible coin diameters. */
+    tokenClassName: "scale-[1.17]",
   },
   {
     title: "Bitcoin",

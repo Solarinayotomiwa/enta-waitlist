@@ -968,20 +968,6 @@ form[id] {
   min-height: 8px;
 }
 
-/* Nudges the green 3D coin toward the USD₮ brand teal (#009393) so it matches
-   the updated asset icons. Applied per image layer so the coin's own
-   depth/darkening filters keep working. */
-.feature-token-usdt img {
-  filter: hue-rotate(68deg) saturate(0.85);
-}
-
-.feature-token-usdt .feature-coin-face-back {
-  filter: hue-rotate(68deg) saturate(0.85) brightness(0.82);
-}
-
-.feature-token-usdt .feature-coin-edge {
-  filter: hue-rotate(68deg) brightness(0.4) saturate(0.97);
-}
 
 /* "Are you interested in our APIs?" — single-choice pills. Native radios stay
    focusable (arrow-key navigation) while the visible pill carries the state. */
