@@ -153,7 +153,7 @@ Then manually check:
 - Footer CTA hover treatment.
 - No horizontal overflow on mobile.
 
-### Packaging notes
+## Packaging notes
 
 A transfer zip should include source, assets, lockfile, and documentation.
 
