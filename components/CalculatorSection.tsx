@@ -41,7 +41,7 @@ const assetMeta: AssetMeta[] = [
     label: "Held in USD₮",
     symbol: "USD₮",
     icon: figmaAssets.calculatorChartUsdt,
-    accent: "#00e56b",
+    accent: "#009393",
     quantityDigits: 2,
     summary:
       "A digital dollar that holds its value. Your savings, shielded from naira devaluation.",
