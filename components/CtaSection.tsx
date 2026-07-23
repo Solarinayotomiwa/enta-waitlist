@@ -23,7 +23,7 @@ export function CtaSection() {
       <motion.a
         animate={contentVisible ? "visible" : "hidden"}
         aria-label="Join our waitlist"
-        className="footer-cta-card group relative mx-auto block w-full max-w-[1200px] overflow-hidden rounded-[30px] outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        className="footer-cta-card group relative mx-auto block w-full max-w-[1200px] overflow-hidden rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white/70 sm:rounded-[30px]"
         href="/#waitlist-form"
         initial="hidden"
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
@@ -31,7 +31,12 @@ export function CtaSection() {
       >
         <img
           alt="Ready to move money differently? Thousands of businesses and individuals across Africa and the GCC are already waiting. Join them."
-          className="footer-cta-image block aspect-[4/1] min-h-[180px] w-full object-cover object-center"
+          className="footer-cta-image aspect-[111/78] w-full object-cover object-center sm:hidden"
+          src="/images/cta/cta-section-mobile.png"
+        />
+        <img
+          alt="Ready to move money differently? Thousands of businesses and individuals across Africa and the GCC are already waiting. Join them."
+          className="footer-cta-image hidden aspect-[4/1] min-h-[180px] w-full object-cover object-center sm:block"
           src="/images/cta/cta-section.png"
         />
       </motion.a>
