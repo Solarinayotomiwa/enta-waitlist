@@ -108,8 +108,8 @@ function EntryPointsPanel() {
               className={cn(
                 "flex w-full items-stretch overflow-hidden bg-white outline-none",
                 isActive
-                  ? "z-10 gap-6 rounded-xl"
-                  : "gap-[21.12px] rounded-[10.56px] lg:w-[487.52px]",
+                  ? "z-10 gap-3 rounded-xl sm:gap-6"
+                  : "gap-3 rounded-[10.56px] sm:gap-[21.12px] lg:w-[487.52px]",
               )}
               key={card.heading}
               layout
@@ -121,16 +121,19 @@ function EntryPointsPanel() {
               <motion.div
                 className={cn(
                   "relative shrink-0 self-stretch overflow-hidden",
-                  isActive ? "w-[104px] sm:w-[142px]" : "w-[92px] sm:w-[124.96px]",
+                  isActive ? "w-[76px] sm:w-[142px]" : "w-[68px] sm:w-[124.96px]",
                 )}
                 layout
                 style={{ backgroundColor: card.panelBg }}
               >
+                {/* Mobile: the illustration fills the panel so a tall card never
+                    leaves empty colour beside the text. sm+ keeps the exact
+                    Figma floating placement. */}
                 <motion.img
                   alt=""
                   className={cn(
-                    "absolute left-1/2 top-1/2 max-w-none -translate-x-[calc(50%+2.5px)] -translate-y-1/2 object-cover",
-                    isActive ? "h-[169px] w-[136px]" : "h-[148.72px] w-[119.35px]",
+                    "absolute inset-0 size-full object-cover object-center sm:inset-auto sm:left-1/2 sm:top-1/2 sm:size-auto sm:max-w-none sm:-translate-x-[calc(50%+2.5px)] sm:-translate-y-1/2",
+                    isActive ? "sm:h-[169px] sm:w-[136px]" : "sm:h-[148.72px] sm:w-[119.35px]",
                   )}
                   layout
                   src={card.image}
@@ -139,7 +142,7 @@ function EntryPointsPanel() {
               <motion.div
                 className={cn(
                   "flex min-w-0 flex-1 flex-col",
-                  isActive ? "gap-1 py-6 pr-6" : "gap-[3.52px] py-[21.12px] pr-[21.12px]",
+                  isActive ? "gap-1 py-4 pr-4 sm:py-6 sm:pr-6" : "gap-[3.52px] py-4 pr-4 sm:py-[21.12px] sm:pr-[21.12px]",
                 )}
                 layout
               >
@@ -147,8 +150,8 @@ function EntryPointsPanel() {
                   className={cn(
                     "font-medium text-[#53b1fd]",
                     isActive
-                      ? "text-lg leading-[27px] sm:text-xl sm:leading-[30px]"
-                      : "text-base leading-6 sm:text-[17.6px] sm:leading-[26.4px]",
+                      ? "text-base leading-[22px] sm:text-xl sm:leading-[30px]"
+                      : "text-sm leading-5 sm:text-[17.6px] sm:leading-[26.4px]",
                   )}
                   layout
                 >
@@ -158,8 +161,8 @@ function EntryPointsPanel() {
                   className={cn(
                     "font-medium text-[#101828]",
                     isActive
-                      ? "text-lg leading-[27px] sm:text-xl sm:leading-[30px]"
-                      : "text-base leading-6 sm:text-[17.6px] sm:leading-[26.4px]",
+                      ? "text-sm leading-5 sm:text-xl sm:leading-[30px]"
+                      : "text-sm leading-5 sm:text-[17.6px] sm:leading-[26.4px]",
                   )}
                   layout
                 >
@@ -194,16 +197,16 @@ function DashboardPanel() {
 function ActionsPanel() {
   return (
     <div className="flex size-full items-center justify-center p-5 lg:p-0">
-      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:absolute lg:left-[38px] lg:top-[94px] lg:h-[432px] lg:w-[643px] lg:gap-x-3 lg:gap-y-4">
+      <div className="grid w-full grid-cols-2 gap-3 lg:absolute lg:left-[38px] lg:top-[94px] lg:h-[432px] lg:w-[643px] lg:gap-x-3 lg:gap-y-4">
         {actionCards.map((card) => (
           <div
-            className="flex min-h-[160px] flex-col justify-between rounded-[9.862px] bg-white px-5 py-6 outline-none transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.025] focus-visible:-translate-y-1 focus-visible:scale-[1.025] focus-visible:ring-2 focus-visible:ring-[#53b1fd] lg:h-[208px] lg:min-h-0"
+            className="flex min-h-[140px] flex-col justify-between gap-4 rounded-[9.862px] bg-white px-4 py-5 outline-none transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.025] focus-visible:-translate-y-1 focus-visible:scale-[1.025] focus-visible:ring-2 focus-visible:ring-[#53b1fd] sm:min-h-[160px] sm:px-5 sm:py-6 lg:h-[208px] lg:min-h-0"
             key={card.title}
             tabIndex={0}
           >
             <img alt="" className="size-8" src={card.icon} />
             <div>
-              <p className="text-lg font-medium leading-7 text-[#101828]">{card.title}</p>
+              <p className="text-base font-medium leading-6 text-[#101828] sm:text-lg sm:leading-7">{card.title}</p>
               <p className="text-sm leading-5 text-[#101828]">{card.body}</p>
             </div>
           </div>
