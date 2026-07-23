@@ -1,6 +1,6 @@
 import { Hero } from "@/components/Hero";
 import { IntroSection } from "@/components/IntroSection";
-import { CalculatorSection } from "@/components/CalculatorSection";
+import { SavingsCalculator } from "@/components/SavingsCalculator";
 import { FeatureSection } from "@/components/FeatureSection";
 import { HowItWorksSection } from "@/components/HowItWorksSection";
 import { BuiltForSection } from "@/components/BuiltForSection";
@@ -16,7 +16,7 @@ export default function Home() {
     <main>
       <Hero />
       <IntroSection />
-      <CalculatorSection />
+      <SavingsCalculator />
       <FeatureSection />
       <HowItWorksSection />
       <BuiltForSection />

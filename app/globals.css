@@ -59,22 +59,6 @@ select {
   font: inherit;
 }
 
-/* The global `font: inherit` reset above outranks Tailwind's layered
-   utilities, so the calculator amount input sizes live here. */
-[data-calculator-amount-input] {
-  font-size: 36px;
-  font-weight: 600;
-  letter-spacing: -0.96px;
-  line-height: 1;
-}
-
-@media (min-width: 640px) {
-  [data-calculator-amount-input] {
-    font-size: 48px;
-    line-height: 60px;
-  }
-}
-
 .hero-sky {
   transform: scale(1.04) translate3d(-1.4%, 0, 0);
   animation: sky-drift 20s linear infinite alternate;
@@ -917,17 +901,6 @@ select {
   animation-play-state: running;
 }
 
-.calculator-orb {
-  background: radial-gradient(circle, rgba(75, 139, 255, 0.22) 0%, rgba(75, 139, 255, 0.1) 38%, rgba(13, 16, 29, 0) 72%);
-  height: 28rem;
-  left: 50%;
-  pointer-events: none;
-  position: absolute;
-  top: 10rem;
-  transform: translate3d(-50%, 0, 0);
-  width: 36rem;
-}
-
 .feature-ambient-frame {
   -webkit-mask-image: radial-gradient(60% 60% at 50% 50%, #000 35%, transparent 95%);
   mask-image: radial-gradient(60% 60% at 50% 50%, #000 35%, transparent 95%);
@@ -962,10 +935,41 @@ form[id] {
   scroll-margin-top: var(--navbar-height, 84px);
 }
 
-/* Comparison chart: the smallest result keeps a visible bar, and its value
-   lives below the bar rather than inside it. */
-.comparison-bar {
-  min-height: 8px;
+/* Savings-calculator duration slider — 14px pill track (fill painted via an
+   inline gradient) with a 24px white thumb for a comfortable touch target. */
+.savings-range {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 14px;
+  border-radius: 1000px;
+  outline: none;
+  cursor: pointer;
+}
+
+.savings-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
+  cursor: pointer;
+}
+
+.savings-range::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
+  cursor: pointer;
+}
+
+.savings-range:focus-visible {
+  box-shadow: 0 0 0 4px rgb(21 112 239 / 0.35);
 }
 
 
