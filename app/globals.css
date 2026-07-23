@@ -935,6 +935,28 @@ form[id] {
   scroll-margin-top: var(--navbar-height, 84px);
 }
 
+/* The global `font: inherit` reset outranks Tailwind's layered utilities on
+   form elements, so the savings-calculator input and mode select get their
+   type set here. */
+#savings-amount {
+  font-size: 38px;
+  font-weight: 500;
+  letter-spacing: -0.72px;
+  line-height: 1;
+}
+
+#savings-calculator select {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 30px;
+}
+
+@media (min-width: 640px) {
+  #savings-amount {
+    font-size: 44px;
+  }
+}
+
 /* Savings-calculator duration slider — 14px pill track (fill painted via an
    inline gradient) with a 24px white thumb for a comfortable touch target. */
 .savings-range {

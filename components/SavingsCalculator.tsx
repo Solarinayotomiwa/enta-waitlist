@@ -229,9 +229,9 @@ export function SavingsCalculator() {
                 </label>
                 <div className="flex flex-col gap-2">
                   <div className="flex h-[68px] w-full items-center gap-2 border-b-2 border-[#98a2b3] py-3 pr-4">
-                    <span className="text-[40px] font-medium leading-none tracking-[-0.8px] text-white">₦</span>
+                    <span className="text-[44px] font-medium leading-none tracking-[-0.8px] text-white sm:text-[48px]">₦</span>
                     <input
-                      className="w-full bg-transparent text-[32px] font-medium leading-none tracking-[-0.72px] text-white outline-none placeholder:text-white/30 sm:text-[36px]"
+                      className="w-full bg-transparent text-[38px] font-medium leading-none tracking-[-0.72px] text-white outline-none placeholder:text-white/30 sm:text-[44px]"
                       id="savings-amount"
                       inputMode="numeric"
                       onChange={onAmountChange}
@@ -390,12 +390,7 @@ export function SavingsCalculator() {
               Illustrative figures using historical prices. Past performance does not predict
               future results. Not investment advice.
             </p>
-            {data?.mode === "sample" ? (
-              <p className="text-[13px] leading-5 text-white/40">
-                Prototype calculations use the approved sample dataset pending production
-                market-data integration.
-              </p>
-            ) : data ? (
+            {data && data.mode !== "sample" ? (
               <p className="text-[13px] leading-5 text-white/40">
                 Market data updated {new Date(data.current.capturedAt).toLocaleString("en-GB")}
                 {[data.sources.fx?.name, data.sources.bitcoin?.name, data.sources.gold?.name].some(
