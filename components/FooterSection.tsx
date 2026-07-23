@@ -84,9 +84,8 @@ export function FooterSection() {
           </a>
           <p className="mt-8 max-w-[680px] text-base leading-6 text-[#8f9fa3]">
             Enta is a product of Shiga Digital Limited, incorporated in the DIFC, United Arab
-            Emirates. Company number 11065. Licensed as a Virtual Asset Service Provider in the
-            European Union. Enta offers its products and services in partnership with licensed
-            transmitters in their respective jurisdictions.
+            Emirates. Company number 11065. Enta offers its products and services in partnership
+            with licensed transmitters in their respective jurisdictions.
           </p>
           <div className="mt-16 flex items-end gap-6 lg:mt-20">
             {socialLinks.map((social) => (
