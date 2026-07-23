@@ -140,7 +140,7 @@ export function SavingsCalculator() {
 
     return [
       ...sortable,
-      { key: "naira", name: "Held in Naira", icon: assetIcons.naira, barColor: "#f04438", valueUsd: result.nairaUsd },
+      { key: "naira", name: "Held in Naira (T-bills)", icon: assetIcons.naira, barColor: "#f04438", valueUsd: result.nairaUsd },
     ];
   }, [result]);
 
