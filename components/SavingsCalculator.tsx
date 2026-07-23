@@ -157,7 +157,12 @@ export function SavingsCalculator() {
     return currency === "USD" ? formatUsd(valueUsd) : formatNgn(valueUsd * result.ngnPerUsdNow);
   }
 
-  const sliderPercent = ((months - MIN_MONTHS) / (MAX_MONTHS - MIN_MONTHS)) * 100;
+  const sliderFraction = (months - MIN_MONTHS) / (MAX_MONTHS - MIN_MONTHS);
+  const sliderPercent = sliderFraction * 100;
+  /* The 24px thumb's centre travels 12px in from each track end, so the fill
+     boundary is offset to sit under the thumb centre (matches the tick
+     positioning below). */
+  const sliderFillCss = `calc(${sliderPercent.toFixed(3)}% + ${(12 - sliderFraction * 24).toFixed(2)}px)`;
 
   return (
     <section
@@ -268,17 +273,27 @@ export function SavingsCalculator() {
                   min={MIN_MONTHS}
                   onChange={(event) => setMonths(Number(event.target.value))}
                   style={{
-                    background: `linear-gradient(to right, #1570ef ${sliderPercent}%, #475467 ${sliderPercent}%)`,
+                    background: `linear-gradient(to right, #1570ef ${sliderFillCss}, #475467 ${sliderFillCss})`,
                   }}
                   type="range"
                   value={months}
                 />
-                <div className="flex items-center justify-between text-sm font-medium leading-[30px] text-white sm:text-xl">
-                  <span>1 yr</span>
-                  <span>2 yrs</span>
-                  <span>3 yrs</span>
-                  <span>4 yrs</span>
-                  <span>5 yrs</span>
+                {/* Each tick sits at its true position on the 12–66 month
+                    scale (the thumb centre travels 12px in from both track
+                    ends), so the labels line up with the thumb. */}
+                <div className="relative h-[30px] text-sm font-medium leading-[30px] text-white sm:text-xl">
+                  {[1, 2, 3, 4, 5].map((year) => {
+                    const p = (year * 12 - MIN_MONTHS) / (MAX_MONTHS - MIN_MONTHS);
+                    return (
+                      <span
+                        className="absolute -translate-x-1/2 whitespace-nowrap"
+                        key={year}
+                        style={{ left: `calc(${(p * 100).toFixed(3)}% + ${(12 - p * 24).toFixed(1)}px)` }}
+                      >
+                        {year} {year === 1 ? "yr" : "yrs"}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             </div>
