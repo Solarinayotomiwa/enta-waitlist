@@ -852,6 +852,9 @@ type WaitlistInfo = {
   position?: number;
   referralLink?: string;
   referralId?: string;
+  /* Opaque, server-signed survey link. Absent when the session could not be
+     created — the modal then shows its recoverable message instead. */
+  surveyUrl?: string;
 };
 
 /* Field names double as the labels shown in the LaunchList dashboard. */
@@ -901,11 +904,20 @@ function WaitlistSuccessDialog({
   open: boolean;
 }) {
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
+  const [surveyError, setSurveyError] = useState(false);
   const launchListPosition = info?.position;
+  /* Only the user's OWN referral link is offered — never the incoming
+     referredByCode of whoever referred them, and never an invented code. */
+  const hasReferral = Boolean(info?.referralLink);
   const shareLink = info?.referralLink ?? fallbackShareLink;
 
   useEffect(() => {
-    if (!open) setCopied(false);
+    if (!open) {
+      setCopied(false);
+      setShared(false);
+      setSurveyError(false);
+    }
   }, [open]);
 
   async function copyReferralLink() {
@@ -916,6 +928,29 @@ function WaitlistSuccessDialog({
     } catch {
       // Clipboard can be unavailable (permissions/older browsers); the link stays selectable.
     }
+  }
+
+  /* Native share sheet where it exists, clipboard everywhere else. A cancelled
+     share is not an error, so it stays silent. */
+  async function shareReferral() {
+    if (!info?.referralLink) return;
+
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({
+          title: "Join the ENTA waitlist",
+          text: "Join me on the ENTA early-access waitlist.",
+          url: info.referralLink,
+        });
+        return;
+      } catch {
+        return;
+      }
+    }
+
+    await copyReferralLink();
+    setShared(true);
+    window.setTimeout(() => setShared(false), 2200);
   }
 
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -1018,26 +1053,59 @@ function WaitlistSuccessDialog({
                   </span>
                 </p>
                 <div className="flex flex-col gap-8">
-                  <div className="flex h-[54px] items-center gap-2 rounded-lg border border-[#d0d5dd] bg-[#f9fafb] py-[7px] pl-3 pr-[7px]">
-                    <span className="min-w-0 flex-1 truncate text-sm leading-5 text-[#475467]">
-                      {shareLink}
-                    </span>
-                    <button
-                      className="flex h-10 w-24 shrink-0 items-center justify-center rounded-md bg-[#101828] text-base leading-6 text-white transition duration-150 ease-out hover:bg-[#182230] active:scale-[0.98]"
-                      onClick={copyReferralLink}
-                      type="button"
+                  {hasReferral ? (
+                    <div className="flex h-[54px] items-center gap-2 rounded-lg border border-[#d0d5dd] bg-[#f9fafb] py-[7px] pl-3 pr-[7px]">
+                      <span className="min-w-0 flex-1 truncate text-sm leading-5 text-[#475467]">
+                        {shareLink}
+                      </span>
+                      <button
+                        className="flex h-10 w-24 shrink-0 items-center justify-center rounded-md bg-[#101828] text-base leading-6 text-white transition duration-150 ease-out hover:bg-[#182230] active:scale-[0.98]"
+                        onClick={copyReferralLink}
+                        type="button"
+                      >
+                        {copied ? "Copied!" : "Copy link"}
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-sm leading-5 text-[#475467]">
+                      Your referral link is still being set up — we&rsquo;ll email it to you shortly.
+                    </p>
+                  )}
+                  <div className="flex flex-col gap-3">
+                    {/* Survey is the primary action; sharing stays secondary. */}
+                    <a
+                      autoFocus
+                      className="flex h-12 w-full items-center justify-center rounded-lg bg-[#175cd3] text-base leading-6 text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.99]"
+                      href={info?.surveyUrl ?? "#"}
+                      onClick={(event) => {
+                        if (!info?.surveyUrl) {
+                          event.preventDefault();
+                          setSurveyError(true);
+                        }
+                      }}
                     >
-                      {copied ? "Copied!" : "Copy link"}
-                    </button>
+                      Answer a few quick questions
+                    </a>
+                    <p className="text-center text-sm leading-5 text-[#475467]">
+                      Help us shape ENTA around how you actually manage money. It takes about 90
+                      seconds.
+                    </p>
+                    {surveyError ? (
+                      <p className="text-center text-sm leading-5 text-[#b42318]" role="alert">
+                        Your spot is confirmed, but we could not open the survey just yet. Please try
+                        again.
+                      </p>
+                    ) : null}
+                    {hasReferral ? (
+                      <button
+                        className="flex h-12 w-full items-center justify-center rounded-lg border border-[#d0d5dd] text-base leading-6 text-[#101828] transition duration-150 ease-out hover:bg-[#f9fafb] active:scale-[0.99]"
+                        onClick={shareReferral}
+                        type="button"
+                      >
+                        {shared ? "Link copied" : "Share your referral link"}
+                      </button>
+                    ) : null}
                   </div>
-                  <button
-                    autoFocus
-                    className="flex h-12 w-full items-center justify-center rounded-lg bg-[#175cd3] text-base leading-6 text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.99]"
-                    onClick={onClose}
-                    type="button"
-                  >
-                    Done
-                  </button>
                 </div>
               </div>
             </div>
@@ -1104,7 +1172,20 @@ export function WaitlistForm() {
         console.error("Sheet recording failed", response.status);
       }
 
-      setWaitlistInfo(waitlist);
+      /* The server mints the ENTA userId and the signed survey link; the
+         referral values stay exactly as LaunchList issued them. */
+      let surveyUrl: string | undefined;
+
+      try {
+        const result = (await response.clone().json()) as {
+          survey?: { surveyUrl?: string } | null;
+        };
+        surveyUrl = result.survey?.surveyUrl;
+      } catch {
+        /* An unreadable body still leaves a confirmed signup. */
+      }
+
+      setWaitlistInfo({ ...(waitlist ?? {}), surveyUrl });
       setStatus("success");
       form.reset();
     } catch {

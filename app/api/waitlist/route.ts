@@ -1,4 +1,14 @@
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
+import { firstNameOf } from "@/lib/survey/surveyEngine";
+import { isSurveyStoreConfigured, upsertSignupRow } from "@/lib/survey/surveyStore";
+import {
+  createSurveyToken,
+  hashSurveyToken,
+  newSurveySessionId,
+  surveyUrl,
+} from "@/lib/survey/surveyToken";
+import type { SurveyAudience } from "@/lib/survey/surveyTypes";
 
 const emailPattern = /^\S+@\S+\.\S+$/;
 
@@ -38,7 +48,15 @@ export async function POST(request: Request) {
       : {};
   const waitlistField = (key: string) => String(waitlist[key] ?? "").trim().slice(0, 500);
 
+  /* ENTA's own canonical id for this signup — opaque, server-generated, and the
+     key that links the LaunchList submission, the sheet row, the survey session
+     and the survey response. Never the email address. */
+  const userId = randomUUID();
+  const surveySessionId = newSurveySessionId();
+
   const row = {
+    user_id: userId,
+    survey_session_id: surveySessionId,
     audience,
     name: audience === "business" ? field("contactName") : field("name"),
     company: field("companyName"),
@@ -84,7 +102,58 @@ export async function POST(request: Request) {
       throw new Error(`Sheets webhook responded ${sheetResponse.status}`);
     }
 
-    return NextResponse.json({ ok: true });
+    /* Mint the survey session only after the signup itself is safely recorded,
+       so a survey link never exists for a signup that failed. */
+    let survey: { surveySessionId: string; surveyUrl: string } | null = null;
+
+    try {
+      const token = createSurveyToken({
+        userId,
+        surveySessionId,
+        audience: audience as SurveyAudience,
+      });
+
+      survey = {
+        surveySessionId,
+        surveyUrl: surveyUrl(new URL(request.url).origin, token),
+      };
+
+      /* Records the identity + referral columns against the row and stores the
+         hashed token so the session can be resolved and revoked later. No-op
+         until the extended Apps Script is configured. */
+      if (isSurveyStoreConfigured()) {
+        await upsertSignupRow({
+          userId,
+          email,
+          launchListSubmissionId: waitlistField("submissionId"),
+          referredByCode: row.ref,
+          referralCode: waitlistField("referralId"),
+          referralUrl: waitlistField("referralLink"),
+          surveyStatus: "not_started",
+          surveySessionId,
+          surveyTokenHash: hashSurveyToken(token),
+        });
+      }
+    } catch (error) {
+      /* A missing SURVEY_TOKEN_SECRET must not fail a good signup — the modal
+         shows its "couldn't open the survey just yet" state instead. */
+      console.error("Survey session could not be created", error);
+    }
+
+    return NextResponse.json({
+      ok: true,
+      user: {
+        userId,
+        firstName: firstNameOf(row.name),
+        audience,
+      },
+      referral: {
+        referredByCode: row.ref || undefined,
+        referralCode: waitlistField("referralId") || undefined,
+        referralUrl: waitlistField("referralLink") || undefined,
+      },
+      survey,
+    });
   } catch (error) {
     console.error("Waitlist submission failed", error);
     return NextResponse.json({ error: "Submission failed, please try again" }, { status: 502 });
