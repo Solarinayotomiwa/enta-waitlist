@@ -143,6 +143,27 @@ function doPost(e) {
 Keeping the `default` branch on the existing append means one script can serve
 both the current signup webhook and the survey protocol.
 
+## The /thankyou landing page
+
+`/thankyou` is the post-signup landing page. It accepts:
+
+| URL | Greeting | Referral link | Survey CTA |
+| --- | --- | --- | --- |
+| `/thankyou?t=<signed token>` | by first name | yes | yes |
+| `/thankyou?ref=<code>` | generic | yes | no |
+| `/thankyou` | generic | no | no |
+
+The signed token is what authorises the survey. A referral code cannot stand in
+for it: referral codes are *published* by design — anyone holding someone's
+share link would otherwise be able to open that person's survey and answer as
+them. So the `?ref=` path offers the share link only and tells the visitor their
+survey link will arrive by email.
+
+In the LaunchList dashboard, set the thank-you/redirect URL to
+`https://entashiga.io/thankyou`. LaunchList appends its own referral parameter,
+which the page uses for the share link. Signups through ENTA's own form get the
+fully personalised `?t=` variant, because the server mints that token itself.
+
 ## After deploying
 
 1. Deploy the script as a **web app**, execute as *me*, access *anyone*.

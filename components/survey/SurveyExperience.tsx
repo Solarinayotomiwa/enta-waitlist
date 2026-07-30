@@ -231,16 +231,33 @@ function SurveyShell({
 }) {
   const accent = instruments[instrumentKey];
 
+  /* ENTA's dark surface, matching the site's waitlist section (#0d101d) rather
+     than the prototype's light sky. Every child reads these tokens, so the
+     palette is declared once here. */
   return (
     <div
-      className="flex min-h-dvh flex-col bg-[linear-gradient(180deg,#CFE8F6_0%,#E8F4FA_42%,#FAFCF7_100%)] text-[#0B2036]"
+      className="relative isolate flex min-h-dvh flex-col overflow-hidden bg-[#0d101d] text-[color:var(--survey-text)]"
       style={
         {
           "--survey-accent": accent.accent,
           "--survey-accent-wash": accent.accentWash,
+          /* The solid accent is a button fill; on the dark surface small text
+             and hairlines need a lighter blue to stay legible. */
+          "--survey-accent-text": "#a9e0fb",
+          "--survey-surface": "#141a2c",
+          "--survey-border": "#1f242f",
+          "--survey-border-strong": "#2c3560",
+          "--survey-text": "#f9fafb",
+          "--survey-text-soft": "#d0d5dd",
+          "--survey-muted": "#8794ab",
         } as React.CSSProperties
       }
     >
+      {/* A single accent glow keeps the dark canvas from reading as flat black. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px] bg-[radial-gradient(80%_100%_at_50%_0%,color-mix(in_srgb,var(--survey-accent)_26%,transparent)_0%,transparent_72%)]"
+      />
       <SurveyHeader chip={chip} progress={progress} />
       <main className="flex flex-1 items-center justify-center px-[18px] pb-14 pt-[80px] sm:px-[26px] sm:pt-[104px]">
         <div className="w-full max-w-[610px]">{children}</div>
@@ -301,21 +318,21 @@ function StepAnswers({ commit, step }: { commit: (value: SurveyAnswerValue) => v
 
   if (step.type === "say") {
     return (
-      <div className="mt-[26px] flex flex-wrap items-center gap-4" ref={firstOptionRef}>
+      <div className="survey-rise mt-[26px] flex flex-wrap items-center gap-4" ref={firstOptionRef}>
         <button className={goClass} onClick={() => commit(true as unknown as SurveyAnswerValue)} type="button">
           {step.cta ?? "Continue"}
         </button>
-        <span className="text-[12.5px] text-[#7A93A5]">or press Enter</span>
+        <span className="text-[12.5px] text-[color:var(--survey-muted)]">or press Enter</span>
       </div>
     );
   }
 
   if (step.type === "open") {
     return (
-      <div className="mt-[26px] flex flex-col gap-4" ref={firstOptionRef}>
+      <div className="survey-rise mt-[26px] flex flex-col gap-4" ref={firstOptionRef}>
         <textarea
           aria-label={typeof step.q === "string" ? step.q : "Your answer"}
-          className="w-full resize-none rounded-[14px] border border-[#D7E7F0] bg-white px-[17px] py-4 text-base leading-[1.55] text-[#0B2036] shadow-[0_1px_2px_rgba(11,32,54,.04),0_8px_28px_-12px_rgba(11,32,54,.14)] outline-none focus:border-[color:var(--survey-accent)]"
+          className="w-full resize-none rounded-[14px] border border-[color:var(--survey-border)] bg-[color:var(--survey-surface)] px-[17px] py-4 text-base leading-[1.55] text-[color:var(--survey-text)] shadow-[0_1px_2px_rgba(0,0,0,.24),0_10px_30px_-16px_rgba(0,0,0,.6)] outline-none placeholder:text-[color:var(--survey-muted)] focus:border-[color:var(--survey-accent-text)]"
           onChange={(event) => setText(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey && text.trim().length >= 2) {
@@ -337,7 +354,7 @@ function StepAnswers({ commit, step }: { commit: (value: SurveyAnswerValue) => v
             Send this
           </button>
           <button
-            className="text-[14.5px] font-medium text-[#39566B] underline underline-offset-4 outline-none hover:text-[#0B2036] focus-visible:ring-2 focus-visible:ring-[color:var(--survey-accent)]"
+            className="text-[14.5px] font-medium text-[color:var(--survey-text-soft)] underline underline-offset-4 outline-none hover:text-[color:var(--survey-text)] focus-visible:ring-2 focus-visible:ring-[color:var(--survey-accent-text)]"
             onClick={() => commit(null)}
             type="button"
           >
@@ -358,21 +375,31 @@ function StepAnswers({ commit, step }: { commit: (value: SurveyAnswerValue) => v
         role={multi ? "group" : undefined}
       >
         {options.map((option, optionIndex) => (
-          <SurveyOption
-            dimmed={Boolean(step.exclusive) && picked.includes(step.exclusive as string) && option !== step.exclusive}
-            index={optionIndex}
+          <div
+            className="survey-rise"
             key={option}
-            label={option}
-            multi={multi}
-            onSelect={() =>
-              multi ? setPicked((current) => toggle(current, option, step)) : commit(option)
-            }
-            selected={picked.includes(option)}
-          />
+            style={{ animationDelay: `${optionIndex * 38}ms` }}
+          >
+            <SurveyOption
+              dimmed={
+                Boolean(step.exclusive) && picked.includes(step.exclusive as string) && option !== step.exclusive
+              }
+              index={optionIndex}
+              label={option}
+              multi={multi}
+              onSelect={() =>
+                multi ? setPicked((current) => toggle(current, option, step)) : commit(option)
+              }
+              selected={picked.includes(option)}
+            />
+          </div>
         ))}
       </div>
       {multi ? (
-        <div className="mt-2 flex flex-wrap items-center gap-4">
+        <div
+          className="survey-rise mt-2 flex flex-wrap items-center gap-4"
+          style={{ animationDelay: `${options.length * 38}ms` }}
+        >
           <button
             className={goClass}
             disabled={picked.length === 0}
@@ -381,7 +408,7 @@ function StepAnswers({ commit, step }: { commit: (value: SurveyAnswerValue) => v
           >
             Continue
           </button>
-          <span className="text-[12.5px] text-[#7A93A5]">Tap any that apply</span>
+          <span className="text-[12.5px] text-[color:var(--survey-muted)]">Tap any that apply</span>
         </div>
       ) : null}
     </div>
@@ -389,7 +416,7 @@ function StepAnswers({ commit, step }: { commit: (value: SurveyAnswerValue) => v
 }
 
 const goClass =
-  "rounded-[11px] bg-[color:var(--survey-accent)] px-6 py-3.5 text-[15px] font-semibold text-white shadow-[0_8px_20px_-10px_rgba(8,145,178,.7)] outline-none transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[#0B2036] disabled:cursor-not-allowed disabled:opacity-30 disabled:shadow-none disabled:hover:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0";
+  "rounded-[11px] bg-[color:var(--survey-accent)] px-6 py-3.5 text-[15px] font-semibold text-white shadow-[0_10px_24px_-12px_rgba(23,92,211,.9)] outline-none transition hover:-translate-y-0.5 hover:brightness-110 focus-visible:ring-2 focus-visible:ring-[color:var(--survey-accent-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d101d] disabled:cursor-not-allowed disabled:opacity-30 disabled:shadow-none disabled:hover:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0";
 
 function toggle(current: string[], option: string, step: SurveyStep): string[] {
   if (current.includes(option)) return current.filter((value) => value !== option);

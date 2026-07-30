@@ -5,8 +5,8 @@ const EXCLUSIVE = "We’d rather manage all this ourselves";
 export const businessInstrument: SurveyInstrument = {
   key: "business",
   label: "Business",
-  accent: "#0891B2",
-  accentWash: "rgba(8,145,178,.10)",
+  accent: "#1570ef",
+  accentWash: "rgba(21,112,239,.18)",
   chip: "Closed pilot",
   steps: [
     {

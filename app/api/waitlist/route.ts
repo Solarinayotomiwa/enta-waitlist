@@ -4,6 +4,7 @@ import { firstNameOf } from "@/lib/survey/surveyEngine";
 import { isSurveyStoreConfigured, upsertSignupRow } from "@/lib/survey/surveyStore";
 import {
   createSurveyToken,
+  thankYouUrl,
   hashSurveyToken,
   newSurveySessionId,
   surveyUrl,
@@ -104,18 +105,30 @@ export async function POST(request: Request) {
 
     /* Mint the survey session only after the signup itself is safely recorded,
        so a survey link never exists for a signup that failed. */
-    let survey: { surveySessionId: string; surveyUrl: string } | null = null;
+    let survey: {
+      surveySessionId: string;
+      surveyUrl: string;
+      thankYouUrl: string;
+    } | null = null;
 
     try {
+      /* The first name and the user's own referral code travel inside the signed
+         token, so /thankyou and /interview can greet the signup and offer their
+         share link without either value appearing in a URL. */
       const token = createSurveyToken({
         userId,
         surveySessionId,
         audience: audience as SurveyAudience,
+        firstName: firstNameOf(row.name),
+        referralCode: waitlistField("referralId"),
       });
+
+      const origin = new URL(request.url).origin;
 
       survey = {
         surveySessionId,
-        surveyUrl: surveyUrl(new URL(request.url).origin, token),
+        surveyUrl: surveyUrl(origin, token),
+        thankYouUrl: thankYouUrl(origin, token),
       };
 
       /* Records the identity + referral columns against the row and stores the

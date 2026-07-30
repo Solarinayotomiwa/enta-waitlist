@@ -8,16 +8,24 @@ import { useReducedMotion } from "motion/react";
    technology, so nothing is announced character by character. Reduced-motion
    users get the finished sentence immediately. */
 
+/* Reading pace. The duration is the target and the per-character delay is
+   derived from it, so a long question doesn't drag. Tuned so a typical question
+   lands in well under a second and the longest note screen caps at 2s — the
+   earlier ladder let a long prompt run past six seconds before its options
+   appeared. Punctuation still gets a slight pause, just a subtler one. */
 const PACE = {
-  base: 900,
-  perChar: 60,
-  min: 2500,
-  max: 11000,
-  ackPerChar: 34,
-  ackMin: 900,
-  ackMax: 1900,
-  punctuationWeight: 9,
+  base: 200,
+  perChar: 15,
+  min: 520,
+  max: 1900,
+  ackPerChar: 11,
+  ackMin: 240,
+  ackMax: 560,
+  punctuationWeight: 4,
 };
+
+/* Beat between the spoken acknowledgement and the question typing in. */
+const ACK_GAP_MS = 130;
 
 function clamp(value: number, low: number, high: number) {
   return Math.max(low, Math.min(high, value));
@@ -30,6 +38,14 @@ export function useTypedText(text: string, kind: "question" | "ack", onDone?: ()
   doneRef.current = onDone;
 
   useEffect(() => {
+    /* An empty string is the "not my turn yet" state — the question is held back
+       until the acknowledgement finishes typing. Reporting completion for it
+       would release the answer options before the question had been asked. */
+    if (!text) {
+      setShown("");
+      return;
+    }
+
     if (reducedMotion) {
       setShown(text);
       doneRef.current?.();
@@ -82,18 +98,23 @@ export function SurveyPrompt({
   stepLabel: string;
 }) {
   const [ackDone, setAckDone] = useState(!ack);
-  const ackTyped = useTypedText(ack ?? "", "ack", () => window.setTimeout(() => setAckDone(true), 420));
+  const ackTyped = useTypedText(ack ?? "", "ack", () =>
+    window.setTimeout(() => setAckDone(true), ACK_GAP_MS),
+  );
   const questionTyped = useTypedText(ackDone ? question : "", "question", onReady);
 
   return (
     <>
       {ack ? (
-        <p aria-hidden="true" className="mb-3 min-h-[1.4em] text-[15px] font-medium text-[#39566B]">
+        <p
+          aria-hidden="true"
+          className="mb-3 min-h-[1.4em] text-[15px] font-medium text-[color:var(--survey-text-soft)]"
+        >
           {ackTyped.shown}
         </p>
       ) : null}
 
-      <p className="mb-3.5 text-[11px] font-semibold uppercase tracking-[.13em] text-[color:var(--survey-accent)]">
+      <p className="mb-3.5 text-[11px] font-semibold uppercase tracking-[.13em] text-[color:var(--survey-accent-text)]">
         {stepLabel}
       </p>
 
@@ -104,13 +125,15 @@ export function SurveyPrompt({
         <span aria-hidden="true">
           {questionTyped.shown}
           {!questionTyped.complete && ackDone ? (
-            <span className="ml-[3px] inline-block h-[.95em] w-0.5 -translate-y-[.1em] animate-pulse bg-[color:var(--survey-accent)] align-[-.1em]" />
+            <span className="ml-[3px] inline-block h-[.95em] w-0.5 -translate-y-[.1em] animate-pulse bg-[color:var(--survey-accent-text)] align-[-.1em]" />
           ) : null}
         </span>
       </h1>
 
       {hint && questionTyped.complete ? (
-        <p className="mt-3.5 max-w-[54ch] text-[15px] leading-[1.55] text-[#39566B]">{hint}</p>
+        <p className="mt-3.5 max-w-[54ch] text-[15px] leading-[1.55] text-[color:var(--survey-text-soft)]">
+          {hint}
+        </p>
       ) : null}
     </>
   );

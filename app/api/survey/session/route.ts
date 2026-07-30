@@ -17,6 +17,9 @@ export async function GET(request: Request) {
 
   const participant: SurveyParticipant = {
     userId: payload.userId,
+    /* The first name comes from the signed token, so personalisation works even
+       before the Sheet store exists. Still the only personal field returned. */
+    firstName: firstNameOf(payload.firstName) || undefined,
     audience: payload.audience,
     surveyStatus: "not_started",
   };
@@ -42,7 +45,7 @@ export async function GET(request: Request) {
     store: "ok",
     participant: {
       userId: payload.userId,
-      firstName: firstNameOf(stored.firstName) || undefined,
+      firstName: firstNameOf(stored.firstName) || firstNameOf(payload.firstName) || undefined,
       audience: stored.audience ?? payload.audience,
       country: stored.country,
       surveyStatus: stored.surveyStatus ?? "not_started",

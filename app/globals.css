@@ -1397,3 +1397,28 @@ form[id] {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Survey answer options rise in just after the question finishes typing. Kept
+   short and lightly staggered so the screen feels responsive — the reveal
+   should read as "the options just arrived", not as a choreographed sequence. */
+@keyframes survey-rise {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.survey-rise {
+  animation: survey-rise 0.26s var(--ease-out-quart) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .survey-rise {
+    animation: none;
+  }
+}

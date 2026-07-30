@@ -1,11 +1,18 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import type { SurveyAudience } from "@/lib/survey/surveyTypes";
 
-/* Survey links carry an opaque, signed token — never a name, email, country or
-   LaunchList id. The payload holds only ENTA's own opaque userId, the audience,
-   the session id and an expiry, all covered by an HMAC so it cannot be edited
-   or forged. Identity therefore resolves without a database round-trip, while
-   the Sheet keeps the hashed token for session state and revocation. */
+/* Survey links carry an opaque, signed token — never an email, phone number,
+   country or LaunchList id. The payload holds ENTA's own opaque userId, the
+   audience, the session id, an expiry and the participant's first name, all
+   covered by an HMAC so it cannot be edited or forged. Identity therefore
+   resolves without a database round-trip, while the Sheet keeps the hashed
+   token for session state and revocation.
+
+   On firstName: it rides in the token so the survey can greet people before the
+   Sheet store exists. The token body is base64url, so a leaked link reveals a
+   first name to whoever holds it — accepted deliberately, since the link is
+   already a bearer credential for that person's own survey and a first name is
+   the least identifying field we hold. Nothing else personal is included. */
 
 const TOKEN_TTL_DAYS = 30;
 const TOKEN_VERSION = "v1";
@@ -14,6 +21,8 @@ export type SurveyTokenPayload = {
   userId: string;
   surveySessionId: string;
   audience?: SurveyAudience;
+  firstName?: string;
+  referralCode?: string;
   expiresAt: number;
 };
 
@@ -49,6 +58,8 @@ export function createSurveyToken(input: {
   userId: string;
   surveySessionId: string;
   audience?: SurveyAudience;
+  firstName?: string;
+  referralCode?: string;
   ttlDays?: number;
 }): string {
   const expiresAt = Date.now() + (input.ttlDays ?? TOKEN_TTL_DAYS) * 24 * 60 * 60 * 1000;
@@ -56,6 +67,8 @@ export function createSurveyToken(input: {
     userId: input.userId,
     surveySessionId: input.surveySessionId,
     audience: input.audience,
+    firstName: input.firstName || undefined,
+    referralCode: input.referralCode || undefined,
     expiresAt,
   };
 
@@ -108,4 +121,10 @@ export function newResponseId(surveySessionId: string): string {
 
 export function surveyUrl(origin: string, token: string): string {
   return `${origin}/interview?t=${encodeURIComponent(token)}`;
+}
+
+/* The post-signup landing page. Same opaque token as the survey, so the page can
+   greet the signup and hand them onward without any identifier in the URL. */
+export function thankYouUrl(origin: string, token: string): string {
+  return `${origin}/thankyou?t=${encodeURIComponent(token)}`;
 }

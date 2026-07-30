@@ -5,8 +5,8 @@ const EXCLUSIVE = "I’d rather do it all myself";
 export const individualInstrument: SurveyInstrument = {
   key: "individual",
   label: "Individual",
-  accent: "#0D9488",
-  accentWash: "rgba(13,148,136,.10)",
+  accent: "#175cd3",
+  accentWash: "rgba(23,92,211,.18)",
   chip: "Early access",
   steps: [
     {

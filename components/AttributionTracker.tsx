@@ -6,11 +6,18 @@ import { captureAttribution } from "@/lib/tracking";
 
 const formSectionId = "waitlist-form";
 
-/* Scrolling to the form right after load competes with images and animated
-   sections still expanding the page, which can strand a smooth scroll partway.
-   Re-assert the position a couple of times until the form has settled near the
-   top — but back off the moment the visitor scrolls or types themselves. */
-function scrollFormIntoView(initialBehavior: ScrollBehavior) {
+/* Scrolling to a section competes with images and animated sections still
+   expanding the page, which can strand a smooth scroll partway — the form sits
+   ~7,800px down, so a click from the navbar crosses every animated section on
+   the way. Re-assert the position a couple of times until the target has
+   settled near the top, but back off the moment the visitor scrolls or types
+   themselves. The follow-ups are instant, so they also rescue the landing if
+   the smooth scroll never ran at all. */
+function scrollTargetIntoView(
+  targetId: string,
+  initialBehavior: ScrollBehavior,
+  startDelay = 0,
+) {
   let cancelled = false;
   const cancel = () => {
     cancelled = true;
@@ -21,11 +28,11 @@ function scrollFormIntoView(initialBehavior: ScrollBehavior) {
     window.addEventListener(type, cancel, { once: true, passive: true });
   }
 
-  const timers = [0, 700, 1600].map((delay, index) =>
+  const timers = [startDelay, startDelay + 700, startDelay + 1600].map((delay, index) =>
     window.setTimeout(() => {
       if (cancelled) return;
 
-      const target = document.getElementById(formSectionId);
+      const target = document.getElementById(targetId);
       if (!target) return;
       if (index > 0 && Math.abs(target.getBoundingClientRect().top) < 140) return;
 
@@ -81,8 +88,8 @@ export function AttributionTracker() {
         url.hash = targetId;
         window.history.pushState(null, "", url.toString());
       }
-      /* Slight delay lets the closing mobile menu release its scroll lock. */
-      window.setTimeout(() => target.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+      /* The 80ms start lets a closing mobile menu release its scroll lock. */
+      scrollTargetIntoView(targetId, "smooth", 80);
     }
 
     document.addEventListener("click", onClick);
@@ -100,7 +107,7 @@ export function AttributionTracker() {
 
     if (hasReferral) {
       const settle = window.setTimeout(() => {
-        releaseScroll = scrollFormIntoView("instant");
+        releaseScroll = scrollTargetIntoView(formSectionId, "instant");
       }, 300);
       return () => {
         window.clearTimeout(settle);
@@ -112,7 +119,7 @@ export function AttributionTracker() {
 
     if (hasFormHash) {
       const settle = window.setTimeout(() => {
-        releaseScroll = scrollFormIntoView("smooth");
+        releaseScroll = scrollTargetIntoView(formSectionId, "smooth");
       }, 350);
       return () => {
         window.clearTimeout(settle);
