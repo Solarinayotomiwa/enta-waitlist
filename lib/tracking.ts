@@ -16,8 +16,32 @@ export type StoredAttribution = TrackingData & {
   capturedAt?: string;
 };
 
+import { hasTrackingConsent } from "@/lib/consent";
+
 const STORAGE_KEY = "enta_first_touch_attribution";
 const LEGACY_STORAGE_KEY = "enta-attribution";
+
+/* Without consent nothing is persisted, but a visitor who arrives on a
+   referral link and signs up in the same visit should still credit the
+   referrer — so read the campaign straight off the current URL instead. */
+function liveAttribution(): StoredAttribution {
+  try {
+    const current = getTrackingData(new URLSearchParams(window.location.search));
+
+    if (Object.keys(current).length === 0) return {};
+
+    return {
+      ...current,
+      landingPage: `${window.location.origin}${window.location.pathname}${window.location.search}`.slice(
+        0,
+        500,
+      ),
+      capturedAt: new Date().toISOString(),
+    };
+  } catch {
+    return {};
+  }
+}
 
 export function getTrackingData(searchParams: URLSearchParams): TrackingData {
   return TRACKING_KEYS.reduce<TrackingData>((result, key) => {
@@ -43,6 +67,8 @@ export function trackingQueryString(tracking: TrackingData): string {
 }
 
 export function getAttribution(): StoredAttribution {
+  if (!hasTrackingConsent()) return liveAttribution();
+
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}") as StoredAttribution;
   } catch {
@@ -79,6 +105,10 @@ function migrateLegacyAttribution() {
    last-touch so a shared referral link gets credit even if the visitor has
    been here before. */
 export function captureAttribution(): StoredAttribution {
+  /* Marketing attribution is non-essential storage, so it only persists once
+     the visitor has accepted cookies. */
+  if (!hasTrackingConsent()) return liveAttribution();
+
   try {
     migrateLegacyAttribution();
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Instrument_Sans, Inter } from "next/font/google";
 import { AttributionTracker } from "@/components/AttributionTracker";
+import { CookieConsent } from "@/components/CookieConsent";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import "./globals.css";
 
@@ -39,6 +40,7 @@ export default function RootLayout({
         <AttributionTracker />
         <ScrollToTop />
         {children}
+        <CookieConsent />
       </body>
     </html>
   );

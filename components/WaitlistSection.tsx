@@ -3,6 +3,9 @@
 import { WaitlistForm } from "./Hero";
 import { figmaAssets } from "@/lib/figma-assets";
 
+/* The 16px (mobile) / 24px (web) gap above this section when a "Join waitlist"
+   anchor lands on it is set on #waitlist-form in globals.css — see the note
+   there about why a Tailwind scroll-mt-* class can't win. */
 export function WaitlistSection() {
   return (
     <section

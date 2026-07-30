@@ -935,6 +935,23 @@ form[id] {
   scroll-margin-top: var(--navbar-height, 84px);
 }
 
+/* The "Join waitlist" anchors are the exception: they land with a small
+   breathing gap rather than the navbar offset — 16px on mobile, 24px from
+   640px up. Declared here (unlayered) because unlayered CSS outranks
+   Tailwind's layered utilities, so a scroll-mt-* class on the section would
+   lose to the rule above. */
+#waitlist-form,
+#waitlist {
+  scroll-margin-top: 16px;
+}
+
+@media (min-width: 640px) {
+  #waitlist-form,
+  #waitlist {
+    scroll-margin-top: 24px;
+  }
+}
+
 /* The global `font: inherit` reset outranks Tailwind's layered utilities on
    form elements, so the savings-calculator input and mode select get their
    type set here. */

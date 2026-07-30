@@ -833,7 +833,7 @@ function HeroIntro() {
       <motion.div className="hero-cta-row mt-12 flex w-full max-w-[453px] gap-4" variants={reveal}>
         <a
           className="flex h-12 flex-1 items-center justify-center rounded-lg bg-white px-[18px] text-base font-semibold capitalize leading-6 text-[#0c111d] transition duration-150 ease-out hover:bg-white/90 active:scale-[0.99]"
-          href="#waitlist-form"
+          href="/#waitlist-form"
         >
           Join our waitlist
         </a>

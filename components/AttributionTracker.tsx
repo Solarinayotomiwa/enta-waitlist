@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { CONSENT_EVENT } from "@/lib/consent";
 import { captureAttribution } from "@/lib/tracking";
 
 const formSectionId = "waitlist-form";
@@ -40,8 +41,13 @@ function scrollFormIntoView(initialBehavior: ScrollBehavior) {
 
 export function AttributionTracker() {
   useEffect(() => {
-    /* Attribution is persisted before any scrolling or hash change happens. */
+    /* Attribution is persisted before any scrolling or hash change happens —
+       but only with consent (captureAttribution enforces that). Accepting the
+       banner later re-runs it while the campaign is still in the URL. */
     captureAttribution();
+
+    const onConsent = () => captureAttribution();
+    window.addEventListener(CONSENT_EVENT, onConsent);
 
     /* Every in-page anchor ("#section" or "/#section") scrolls while
        PRESERVING the current query string, so pending ?ref= / UTM parameters
@@ -100,6 +106,7 @@ export function AttributionTracker() {
         window.clearTimeout(settle);
         releaseScroll?.();
         document.removeEventListener("click", onClick);
+        window.removeEventListener(CONSENT_EVENT, onConsent);
       };
     }
 
@@ -111,10 +118,14 @@ export function AttributionTracker() {
         window.clearTimeout(settle);
         releaseScroll?.();
         document.removeEventListener("click", onClick);
+        window.removeEventListener(CONSENT_EVENT, onConsent);
       };
     }
 
-    return () => document.removeEventListener("click", onClick);
+    return () => {
+      document.removeEventListener("click", onClick);
+      window.removeEventListener(CONSENT_EVENT, onConsent);
+    };
   }, []);
 
   return null;
