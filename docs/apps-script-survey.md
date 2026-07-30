@@ -53,13 +53,18 @@ Fields sent (write only those present, leave others untouched):
 `referralUrl`, `surveyStatus`, `surveySessionId`, `surveyTokenHash`,
 `surveyResponseId`, `surveyStartedAt`, `surveyCompletedAt`
 
-New columns to add to the signup sheet:
+Columns added to the signup sheet (the script appends any that are missing on
+first use, so there is nothing to create by hand):
 
 ```
 UserId | LaunchListSubmissionId | ReferredByCode | ReferralCode | ReferralUrl |
 SurveyStatus | SurveySessionId | SurveyTokenHash | SurveyResponseId |
+SurveyAudience | SurveyCurrentStep | SurveyAnswersJson |
 SurveyStartedAt | SurveyCompletedAt
 ```
+
+Headers are matched with case, spaces and underscores ignored, so an existing
+`user_id` column is recognised as `UserId` and is not duplicated.
 
 Return `{ "ok": true, "data": { "updated": true } }`.
 
@@ -101,13 +106,18 @@ makes double submission safe — the site sends the same `ResponseId` on retry.
 Fixed column order (do not derive it from object keys):
 
 ```
-ResponseId | UserId | LaunchListSubmissionId | ReferredByCode | ReferralCode |
-Audience | RoutedBy | FirstName | Email | Country |
+ResponseId | UserId | SurveySessionId | LaunchListSubmissionId |
+ReferredByCode | ReferralCode | Audience | RoutedBy |
+Name | FirstName | Email | Country |
 UTM Source | UTM Medium | UTM Campaign | UTM Content | UTM Term |
 Currency Used | Readiness | Timing | Cohort | Pay Intent | Concept Flag |
 Intelligence Priority | Custody Verbatim | Cost Verbatim | Answers JSON |
 Started At | Completed At
 ```
+
+`Name`, `Email` and `Country` are read from the signup row rather than taken
+from the request, so the tab is readable on its own and cannot be told an
+identity that disagrees with the signup record.
 
 Incoming field names map 1:1 in camelCase (`responseId`, `userId`,
 `launchListSubmissionId`, `referredByCode`, `referralCode`, `audience`,
@@ -121,27 +131,20 @@ while the individual columns exist for filtering.
 
 Return `{ "ok": true, "data": { "created": true } }`.
 
-## Sketch
+## The script
 
-```js
-function doPost(e) {
-  const body = JSON.parse(e.postData.contents);
-  const reply = (data) =>
-    ContentService.createTextOutput(JSON.stringify({ ok: true, data: data || {} }))
-      .setMimeType(ContentService.MimeType.JSON);
+The complete implementation is [`apps-script-survey.gs`](./apps-script-survey.gs)
+— paste it in whole, no editing required. It is standalone: it only reads and
+updates rows, so the script currently appending signups keeps working untouched.
 
-  switch (body.action) {
-    case 'signup.upsert':          return reply(upsertSignup(body));
-    case 'survey.session.get':     return replySession(body);
-    case 'survey.progress.save':   return reply(saveProgress(body));
-    case 'survey.response.upsert': return reply(upsertResponse(body));
-    default:                       return appendLegacySignupRow(body); // unchanged behaviour
-  }
-}
-```
+To run both from one URL instead, paste this file into the existing signup
+script, set `ENABLE_LEGACY_APPEND: true` in its `CONFIG`, and move that script's
+original append code into `legacyAppend_()`.
 
-Keeping the `default` branch on the existing append means one script can serve
-both the current signup webhook and the survey protocol.
+The script was verified against a mock Spreadsheet service before release —
+30 checks covering row matching, the token-hash pairing, resume, idempotent
+completion, `completed` never reverting to `in_progress`, and adopting a legacy
+row that has an email but no UserId.
 
 ## The /thankyou landing page
 
