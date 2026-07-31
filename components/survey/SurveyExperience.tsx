@@ -40,7 +40,9 @@ export function SurveyExperience({
   const [answers, setAnswers] = useState<Answers>(participant.answers ?? {});
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(participant.surveyStatus === "completed");
-  const [saved, setSaved] = useState(true);
+  /* null = save still in flight; the completion screen renders immediately and
+     only admits a problem once the request has actually failed. */
+  const [saved, setSaved] = useState<boolean | null>(true);
   const [ready, setReady] = useState(false);
   const completingRef = useRef(false);
 
@@ -175,6 +177,10 @@ export function SurveyExperience({
 
       if (nextIndex >= total) {
         setIndex(nextIndex);
+        /* Show the completion screen at once — the save round-trips through
+           Apps Script and can take seconds; waiting rendered a blank page. */
+        setSaved(null);
+        setDone(true);
         void complete(nextAnswers);
         return;
       }

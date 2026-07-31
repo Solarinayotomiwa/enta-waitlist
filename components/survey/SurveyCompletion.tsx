@@ -10,7 +10,8 @@ export function SurveyCompletion({
 }: {
   closing: string;
   label: string;
-  saved: boolean;
+  /* null while the save is still in flight — treated as fine unless it fails. */
+  saved: boolean | null;
 }) {
   return (
     <div>
@@ -29,7 +30,7 @@ export function SurveyCompletion({
           Back to ENTA
         </a>
       </div>
-      {!saved ? (
+      {saved === false ? (
         <p className="mt-5 text-[13px] text-[color:var(--survey-muted)]">
           Your answers reached us, but we couldn&rsquo;t file them just yet. Nothing more is needed
           from you.

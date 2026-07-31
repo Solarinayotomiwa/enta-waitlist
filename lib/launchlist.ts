@@ -30,9 +30,22 @@ type LaunchListPayload = Record<string, unknown>;
 /* The paid plan answers the submission endpoint with JSON. Its exact field
    names aren't documented, so look for every plausible spelling — shallow
    first, then one level into a `data`/`user`/`signup` style wrapper. */
+/* Verified live 2026-07-31: the paid JSON endpoint answers
+   {"ok":true,"position":2002,"usersReferred":0,"referralLink":"…?ref=EIYeJU",
+    "statusPage":"…","embeddedLink":"…"} — camelCase. The snake_case spellings
+   stay as a hedge since the shape is undocumented. */
 const POSITION_KEYS = ["position", "priority", "rank", "current_position", "waitlist_position"];
-const LINK_KEYS = ["referral_link", "referral_url", "ref_link", "share_link", "share_url"];
-const CODE_KEYS = ["ref_id", "referral_code", "referral_id", "ref", "code"];
+const LINK_KEYS = [
+  "referralLink",
+  "referral_link",
+  "referralUrl",
+  "referral_url",
+  "ref_link",
+  "shareLink",
+  "share_link",
+  "share_url",
+];
+const CODE_KEYS = ["refId", "ref_id", "referralCode", "referral_code", "referralId", "referral_id", "ref", "code"];
 
 function findValue(payload: LaunchListPayload, keys: readonly string[]) {
   for (const key of keys) {
@@ -51,7 +64,9 @@ function findValue(payload: LaunchListPayload, keys: readonly string[]) {
   return undefined;
 }
 
-function parseJsonPayload(payload: LaunchListPayload): WaitlistInfo {
+/* Exported only so the parser can be exercised against captured payloads
+   without a live signup. */
+export function parseJsonPayload(payload: LaunchListPayload): WaitlistInfo {
   const positionValue = Number(findValue(payload, POSITION_KEYS));
   const linkValue = findValue(payload, LINK_KEYS);
   const codeValue = findValue(payload, CODE_KEYS);

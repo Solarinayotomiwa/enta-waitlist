@@ -904,7 +904,6 @@ function WaitlistSuccessDialog({
   open: boolean;
 }) {
   const [copied, setCopied] = useState(false);
-  const [shared, setShared] = useState(false);
   const [surveyError, setSurveyError] = useState(false);
   const launchListPosition = info?.position;
   /* Only the user's OWN referral link is offered — never the incoming
@@ -915,7 +914,6 @@ function WaitlistSuccessDialog({
   useEffect(() => {
     if (!open) {
       setCopied(false);
-      setShared(false);
       setSurveyError(false);
     }
   }, [open]);
@@ -928,29 +926,6 @@ function WaitlistSuccessDialog({
     } catch {
       // Clipboard can be unavailable (permissions/older browsers); the link stays selectable.
     }
-  }
-
-  /* Native share sheet where it exists, clipboard everywhere else. A cancelled
-     share is not an error, so it stays silent. */
-  async function shareReferral() {
-    if (!info?.referralLink) return;
-
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share({
-          title: "Join the ENTA waitlist",
-          text: "Join me on the ENTA early-access waitlist.",
-          url: info.referralLink,
-        });
-        return;
-      } catch {
-        return;
-      }
-    }
-
-    await copyReferralLink();
-    setShared(true);
-    window.setTimeout(() => setShared(false), 2200);
   }
 
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -1046,7 +1021,7 @@ function WaitlistSuccessDialog({
               </h3>
               <div className="flex flex-col gap-[26px]">
                 <p className="text-xl leading-[30px] text-[#475467]">
-                  Thank you for joining. We will be in touch soon with your onboarding details.{" "}
+                  Thank you for joining.{" "}
                   <span className="font-bold">
                     Want to move up the waitlist? Copy your link below and share it. Every friend
                     who joins bumps you up.
@@ -1095,15 +1070,6 @@ function WaitlistSuccessDialog({
                         Your spot is confirmed, but we could not open the survey just yet. Please try
                         again.
                       </p>
-                    ) : null}
-                    {hasReferral ? (
-                      <button
-                        className="flex h-12 w-full items-center justify-center rounded-lg border border-[#d0d5dd] text-base leading-6 text-[#101828] transition duration-150 ease-out hover:bg-[#f9fafb] active:scale-[0.99]"
-                        onClick={shareReferral}
-                        type="button"
-                      >
-                        {shared ? "Link copied" : "Share your referral link"}
-                      </button>
                     ) : null}
                   </div>
                 </div>
