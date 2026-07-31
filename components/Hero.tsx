@@ -907,9 +907,16 @@ function WaitlistSuccessDialog({
   const [surveyError, setSurveyError] = useState(false);
   const launchListPosition = info?.position;
   /* Only the user's OWN referral link is offered — never the incoming
-     referredByCode of whoever referred them, and never an invented code. */
-  const hasReferral = Boolean(info?.referralLink);
-  const shareLink = info?.referralLink ?? fallbackShareLink;
+     referredByCode of whoever referred them, and never an invented code. When
+     LaunchList returns a code but no share URL, the site's own ?ref= link is
+     the same referral, so the copy box still appears. */
+  const ownReferralLink =
+    info?.referralLink ||
+    (info?.referralId
+      ? `${typeof window === "undefined" ? fallbackShareLink : window.location.origin}/?ref=${encodeURIComponent(info.referralId)}`
+      : null);
+  const hasReferral = Boolean(ownReferralLink);
+  const shareLink = ownReferralLink ?? fallbackShareLink;
 
   useEffect(() => {
     if (!open) {

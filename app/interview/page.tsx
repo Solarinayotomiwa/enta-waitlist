@@ -24,8 +24,7 @@ export default async function InterviewPage({
   if (!payload || !t) return <InvalidLink />;
 
   /* The signed token already carries the first name, so the greeting is
-     personalised even before the Sheet store is configured. A stored session
-     still wins when it exists — it is the newer record. */
+     personalised even before the Sheet store is configured. */
   let participant: SurveyParticipant = {
     userId: payload.userId,
     firstName: firstNameOf(payload.firstName) || undefined,
@@ -42,8 +41,12 @@ export default async function InterviewPage({
     if (session.ok) {
       participant = {
         userId: payload.userId,
+        /* The token's name comes from the form THIS link was minted for, so it
+           wins; the stored row is the fallback. A duplicate-email signup adopts
+           the older sheet row, and preferring the row would greet the new
+           signup with the old row's name. */
         firstName:
-          firstNameOf(session.data.firstName) || firstNameOf(payload.firstName) || undefined,
+          firstNameOf(payload.firstName) || firstNameOf(session.data.firstName) || undefined,
         audience: session.data.audience ?? payload.audience,
         country: session.data.country,
         surveyStatus: session.data.surveyStatus ?? "not_started",

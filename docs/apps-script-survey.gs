@@ -180,8 +180,17 @@ function upsertSignup_(body) {
       Email: body.email || '',
     });
   } else if (located.matchedBy === 'email' && body.userId) {
-    /* Migration path: an older row keyed only by email gets its UserId. */
-    writeCells_(sheet, row, { UserId: body.userId });
+    var existingId = String(readCell_(sheet, row, 'UserId') || '');
+
+    if (!existingId) {
+      /* Migration path: an older row keyed only by email gets its UserId. */
+      writeCells_(sheet, row, { UserId: body.userId });
+    } else if (existingId !== String(body.userId)) {
+      /* Same email signing up again with a fresh identity: keep the original
+         row exactly as it is — re-keying it would break the first signup's
+         survey link and let the new one read the old session. */
+      return { updated: false, existing: true };
+    }
   }
 
   writeCells_(sheet, row, {

@@ -199,7 +199,18 @@ export function SurveyExperience({
     );
   }
 
-  if (!step) return null;
+  /* Between the last answer and the completion response there is no step —
+     rendering nothing here flashed a blank page while /api/survey/complete was
+     in flight, so hold the shell with the progress bar full instead. */
+  if (!step) {
+    return (
+      <SurveyShell chip={instrument.chip} instrumentKey={instrument.key} progress={{ ...progress, percent: 100 }}>
+        <p aria-live="polite" className="text-[15px] font-medium text-[color:var(--survey-text-soft)]">
+          Sending your answers&hellip;
+        </p>
+      </SurveyShell>
+    );
+  }
 
   const prompt = step.dynamic
     ? instrument.intelligenceLead(rateExample(instrument.key, participant.country, answers))

@@ -218,8 +218,11 @@ export function newResponseId(surveySessionId: string): string {
   return `sr_${createHash("sha256").update(surveySessionId).digest("hex").slice(0, 20)}`;
 }
 
+/* The survey lives at /thankyou — the friendlier post-signup address the team
+   asked for. /interview still renders it too, so links already issued keep
+   working. */
 export function surveyUrl(origin: string, token: string): string {
-  return `${origin}/interview?t=${encodeURIComponent(token)}`;
+  return `${origin}/thankyou?t=${encodeURIComponent(token)}`;
 }
 
 /* The post-signup landing page. Same opaque token as the survey, so the page can
