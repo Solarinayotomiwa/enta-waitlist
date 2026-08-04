@@ -1027,17 +1027,16 @@ function WaitlistSuccessDialog({
                   ? `Congratulations! You are #${launchListPosition.toLocaleString("en-US")} on the waitlist!`
                   : "Congratulations! You are on the waitlist!"}
               </h3>
+              {/* Figma node 1009:38618 — body copy, referral input with attached
+                  Copy button, then the 90-seconds line ABOVE the survey CTA. */}
               <div className="flex flex-col gap-[26px]">
                 <p className="text-xl leading-[30px] text-[#475467]">
-                  Thank you for joining.{" "}
-                  <span className="font-bold">
-                    Want to move up the waitlist? Copy your link below and share it. Every friend
-                    who joins bumps you up.
-                  </span>
+                  Thanks for joining! Share your link below to move up the waitlist. Each friend
+                  who joins helps you.
                 </p>
-                <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-6">
                   {hasReferral ? (
-                    <div className="flex h-[54px] items-center gap-2 rounded-lg border border-[#d0d5dd] bg-[#f9fafb] py-[7px] pl-3 pr-[7px]">
+                    <div className="flex h-[54px] items-center gap-2 rounded-lg border border-[#d0d5dd] bg-white py-[7px] pl-3 pr-[7px] shadow-[0_1px_2px_rgba(16,24,40,0.05)]">
                       <span className="min-w-0 flex-1 truncate text-sm leading-5 text-[#475467]">
                         {shareLink}
                       </span>
@@ -1055,6 +1054,10 @@ function WaitlistSuccessDialog({
                     </p>
                   )}
                   <div className="flex flex-col gap-3">
+                    <p className="text-xl leading-[30px] text-[#475467]">
+                      Help us shape ENTA around how you actually manage money. It takes about 90
+                      seconds.
+                    </p>
                     {/* Survey is the primary action; sharing stays secondary. */}
                     <a
                       autoFocus
@@ -1069,12 +1072,8 @@ function WaitlistSuccessDialog({
                     >
                       Answer a few quick questions
                     </a>
-                    <p className="text-center text-sm leading-5 text-[#475467]">
-                      Help us shape ENTA around how you actually manage money. It takes about 90
-                      seconds.
-                    </p>
                     {surveyError ? (
-                      <p className="text-center text-sm leading-5 text-[#b42318]" role="alert">
+                      <p className="text-sm leading-5 text-[#b42318]" role="alert">
                         Your spot is confirmed, but we could not open the survey just yet. Please try
                         again.
                       </p>
