@@ -6,6 +6,7 @@ import { polyfillCountryFlagEmojis } from "country-flag-emoji-polyfill";
 import { cn } from "@/lib/cn";
 import { dialCodes } from "@/lib/dial-codes";
 import { figmaAssets } from "@/lib/figma-assets";
+import { trackWaitlistJoined } from "@/lib/gtm";
 import { submitToLaunchList } from "@/lib/launchlist";
 import { getAttribution, trackingQueryString } from "@/lib/tracking";
 
@@ -1159,6 +1160,13 @@ export function WaitlistForm() {
       }
 
       setWaitlistInfo({ ...(waitlist ?? {}), surveyUrl });
+      /* GTM: fired exactly where the success popup is triggered, with the same
+         first-touch attribution the signup row records. */
+      trackWaitlistJoined({
+        audience,
+        utmSource: attribution.utm_source,
+        utmCampaign: attribution.utm_campaign,
+      });
       setStatus("success");
       form.reset();
     } catch {
