@@ -993,16 +993,36 @@ function WaitlistSuccessDialog({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             aria-labelledby="waitlist-success-title"
             aria-modal="true"
-            className="relative flex max-h-[calc(100dvh-40px)] w-full max-w-[960px] overflow-hidden rounded-[17px] bg-white text-left text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.2)]"
+            className="relative max-h-[calc(100dvh-40px)] w-full max-w-[984px] overflow-hidden overflow-y-auto rounded-[16px] bg-[#2f80ed] text-left text-[#344054] shadow-[0_0_0_12px_rgba(255,255,255,0.2)]"
             exit={{ opacity: 0, scale: 0.985, y: 12 }}
             initial={{ opacity: 0, scale: 0.985, y: 16 }}
             ref={dialogRef}
             role="dialog"
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
           >
+            {/* Figma 1009:38618 — the whole modal is the sky scene: clouds, the
+                glass "e" upper right, meadow along the bottom, with the white
+                content card floating on top. */}
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+              <img
+                alt=""
+                className="absolute inset-0 size-full object-cover object-top"
+                src={figmaAssets.heroSky}
+              />
+              <img
+                alt=""
+                className="absolute inset-x-0 bottom-0 h-[190px] w-full object-cover object-top"
+                src={figmaAssets.heroGrass}
+              />
+              <img
+                alt=""
+                className="absolute -right-4 top-8 hidden w-[330px] object-contain sm:block"
+                src={figmaAssets.heroEntaLogo}
+              />
+            </div>
             <button
               aria-label="Close dialog"
-              className="absolute right-4 top-4 z-10 flex size-9 items-center justify-center rounded-full bg-black/10 text-[#101828] transition duration-150 ease-out hover:bg-black/20 md:bg-white/40 md:hover:bg-white/60"
+              className="absolute right-4 top-4 z-20 flex size-9 items-center justify-center rounded-full bg-white/50 text-[#101828] transition duration-150 ease-out hover:bg-white/70"
               onClick={onClose}
               type="button"
             >
@@ -1018,30 +1038,53 @@ function WaitlistSuccessDialog({
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
             </button>
-            <div className="flex min-h-[480px] w-full flex-col justify-between gap-8 overflow-y-auto p-6 sm:p-10 md:w-[55%] md:min-h-[654px]">
-              <h3
-                className="text-[32px] font-medium leading-[1.25] tracking-[-0.96px] text-[#101828] sm:text-[48px] sm:leading-[60px]"
-                id="waitlist-success-title"
-              >
-                {typeof launchListPosition === "number"
-                  ? `Congratulations! You are #${launchListPosition.toLocaleString("en-US")} on the waitlist!`
-                  : "Congratulations! You are on the waitlist!"}
-              </h3>
-              {/* Figma node 1009:38618 — body copy, referral input with attached
-                  Copy button, then the 90-seconds line ABOVE the survey CTA. */}
-              <div className="flex flex-col gap-[26px]">
-                <p className="text-xl leading-[30px] text-[#475467]">
-                  Thanks for joining! Share your link below to move up the waitlist. Each friend
-                  who joins helps you.
+            <div className="relative z-10 flex flex-col gap-8 p-5 pt-10 sm:gap-10 sm:p-8 sm:pt-12 lg:p-10">
+              <div className="max-w-[620px] sm:pr-24">
+                <h3
+                  className="text-[32px] font-medium leading-[1.2] tracking-[-0.96px] text-white sm:text-[48px] sm:leading-[56px]"
+                  id="waitlist-success-title"
+                >
+                  {typeof launchListPosition === "number"
+                    ? `Congratulations! You are #${launchListPosition.toLocaleString("en-US")} on the waitlist!`
+                    : "Congratulations! You are on the waitlist!"}
+                </h3>
+                <p className="mt-5 max-w-[520px] text-lg leading-7 text-white sm:text-xl sm:leading-8">
+                  Waiting doesn&rsquo;t move you up. Inviting does. Every friend who joins bumps you
+                  10 places closer to launch day!
                 </p>
-                <div className="flex flex-col gap-6">
+              </div>
+              <div className="grid gap-8 rounded-[20px] bg-white p-6 shadow-[0_12px_40px_-12px_rgba(11,32,54,0.35)] sm:p-8 md:grid-cols-2 md:gap-0">
+                <div className="min-w-0 md:border-r md:border-[#e4e7ec] md:pr-8">
+                  <h4 className="text-[22px] font-semibold leading-[30px] tracking-[-0.4px] text-[#101828]">
+                    Share your link. Skip the line.
+                  </h4>
+                  <ul className="mt-5 flex flex-col gap-3.5">
+                    {[
+                      "1 referral moves you up 10 spots",
+                      "3 referrals unlocks priority beta access.",
+                      "Top 100 get a voice note from our founder.",
+                    ].map((benefit, benefitIndex) => (
+                      <li className="flex items-center gap-3" key={benefit}>
+                        <span
+                          aria-hidden="true"
+                          className="flex size-6 shrink-0 items-center justify-center rounded-md bg-[#eff8ff] text-[13px] font-semibold text-[#175cd3]"
+                        >
+                          {benefitIndex + 1}
+                        </span>
+                        <span className="text-base leading-6 text-[#101828]">{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-6 text-sm leading-5 text-[#667085]">
+                    Your unique link, copy it, send it anywhere:
+                  </p>
                   {hasReferral ? (
-                    <div className="flex h-[54px] items-center gap-2 rounded-lg border border-[#d0d5dd] bg-white py-[7px] pl-3 pr-[7px] shadow-[0_1px_2px_rgba(16,24,40,0.05)]">
+                    <div className="mt-2 flex h-[52px] items-center gap-2 rounded-lg border border-[#d0d5dd] bg-white py-[6px] pl-3 pr-[6px] shadow-[0_1px_2px_rgba(16,24,40,0.05)]">
                       <span className="min-w-0 flex-1 truncate text-sm leading-5 text-[#475467]">
                         {shareLink}
                       </span>
                       <button
-                        className="flex h-10 w-24 shrink-0 items-center justify-center rounded-md bg-[#101828] text-base leading-6 text-white transition duration-150 ease-out hover:bg-[#182230] active:scale-[0.98]"
+                        className="flex h-10 w-24 shrink-0 items-center justify-center rounded-md bg-[#0c111d] text-[15px] leading-6 text-white transition duration-150 ease-out hover:bg-[#182230] active:scale-[0.98]"
                         onClick={copyReferralLink}
                         type="button"
                       >
@@ -1049,19 +1092,24 @@ function WaitlistSuccessDialog({
                       </button>
                     </div>
                   ) : (
-                    <p className="text-sm leading-5 text-[#475467]">
+                    <p className="mt-2 text-sm leading-5 text-[#475467]">
                       Your referral link is still being set up — we&rsquo;ll email it to you shortly.
                     </p>
                   )}
-                  <div className="flex flex-col gap-3">
-                    <p className="text-xl leading-[30px] text-[#475467]">
-                      Help us shape ENTA around how you actually manage money. It takes about 90
-                      seconds.
-                    </p>
-                    {/* Survey is the primary action; sharing stays secondary. */}
+                </div>
+                <div className="flex min-w-0 flex-col md:pl-8">
+                  <h4 className="max-w-[24ch] text-[22px] font-semibold leading-[30px] tracking-[-0.4px] text-[#101828]">
+                    Help us build the ENTA you actually need.
+                  </h4>
+                  <p className="mt-4 text-base leading-6 text-[#475467] sm:text-[17px] sm:leading-7">
+                    Tell us how you manage your money today. It takes just 90 seconds, and it
+                    directly shapes what we build next.
+                  </p>
+                  <div className="mt-6 flex flex-1 flex-col justify-end gap-3">
+                    {/* Survey stays the primary action; only the presentation changed. */}
                     <a
                       autoFocus
-                      className="flex h-12 w-full items-center justify-center rounded-lg bg-[#175cd3] text-base leading-6 text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.99]"
+                      className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#175cd3] text-base font-medium leading-6 text-white transition duration-150 ease-out hover:bg-[#164caa] active:scale-[0.99]"
                       href={info?.surveyUrl ?? "#"}
                       onClick={(event) => {
                         if (!info?.surveyUrl) {
@@ -1070,29 +1118,29 @@ function WaitlistSuccessDialog({
                         }
                       }}
                     >
-                      Answer a few quick questions
+                      Shape ENTA with me
+                      <svg
+                        aria-hidden="true"
+                        className="size-5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.8"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M4 12h16m0 0-6-6m6 6-6 6" />
+                      </svg>
                     </a>
                     {surveyError ? (
                       <p className="text-sm leading-5 text-[#b42318]" role="alert">
-                        Your spot is confirmed, but we could not open the survey just yet. Please try
-                        again.
+                        Your spot is confirmed, but we could not open the survey just yet. Please
+                        try again.
                       </p>
                     ) : null}
                   </div>
                 </div>
               </div>
-            </div>
-            <div aria-hidden="true" className="relative hidden md:block md:w-[45%]">
-              <img
-                alt=""
-                className="absolute inset-0 size-full object-cover object-bottom"
-                src={figmaAssets.heroSky}
-              />
-              <img
-                alt=""
-                className="absolute left-1/2 top-1/2 size-[364px] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain"
-                src={figmaAssets.heroEntaLogo}
-              />
             </div>
           </motion.div>
         </motion.div>
