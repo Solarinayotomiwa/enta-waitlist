@@ -131,6 +131,26 @@ while the individual columns exist for filtering.
 
 Return `{ "ok": true, "data": { "created": true } }`.
 
+## Email-link actions (welcome-email flow)
+
+The generic survey link in the LaunchList welcome email needs two extra,
+**key-gated** actions — they can identify a person from just an email address,
+so the script refuses them unless the caller presents a shared key:
+
+- `survey.session.byemail` — `{ email, apiKey }` → minimal identity
+  (`userId`, `surveySessionId`, `firstName`, `audience`) used by the site's
+  server to mint that person's link. Never exposed to a browser.
+- `survey.email.send` — `{ email, surveyUrl, firstName?, apiKey }` → sends the
+  personal link TO THAT INBOX via MailApp, with a 10-minute per-address
+  cooldown (`SurveyLinkSentAt` column) so a form can't bomb an inbox.
+
+Setup for these two (in addition to the usual deploy):
+
+1. In the Apps Script editor: **Project Settings → Script properties → Add**
+   `API_KEY` = the same value the site holds as `SHEETS_SURVEY_API_KEY`.
+   (Script properties survive re-pasting the code file.)
+2. Until the property is set, both actions refuse and everything else works.
+
 ## The script
 
 The complete implementation is [`apps-script-survey.gs`](./apps-script-survey.gs)

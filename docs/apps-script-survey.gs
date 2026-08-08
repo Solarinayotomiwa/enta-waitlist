@@ -36,7 +36,33 @@ var CONFIG = {
   // into the EXISTING signup script, in which case put that script's original
   // append code inside legacyAppend_() below so one URL can serve both.
   ENABLE_LEGACY_APPEND: false,
+
+  // Minutes a person must wait between "email me my link" sends, so nobody can
+  // bomb an inbox by re-submitting the form.
+  EMAIL_COOLDOWN_MINUTES: 10,
+
+  // From-name on the survey-link email.
+  EMAIL_SENDER_NAME: 'ENTA',
 };
+
+/* The email-lookup and email-send actions identify a person from just an
+   address, so they require a shared key. Set it once under Project Settings →
+   Script properties → API_KEY (properties survive re-pasting this file), and
+   give the site the same value as SHEETS_SURVEY_API_KEY. While unset, those
+   two actions simply refuse — everything else keeps working. */
+function apiKey_() {
+  try {
+    return PropertiesService.getScriptProperties().getProperty('API_KEY') || '';
+  } catch (err) {
+    return '';
+  }
+}
+
+function requireApiKey_(body) {
+  var key = apiKey_();
+  if (!key) throw new Error('api_key_not_configured');
+  if (String(body.apiKey || '') !== key) throw new Error('forbidden');
+}
 
 /* Fixed column order for the Survey Responses tab. Written positionally from
    this list — never from object key order — so inserting a field here is the
@@ -89,6 +115,7 @@ var SIGNUP_SURVEY_COLUMNS = [
   'SurveyAnswersJson',
   'SurveyStartedAt',
   'SurveyCompletedAt',
+  'SurveyLinkSentAt',
 ];
 
 /* Header aliases for columns the signup webhook already writes. The first one
@@ -99,6 +126,7 @@ var SIGNUP_ALIASES = {
   name: ['Name', 'name', 'Full Name', 'Contact Name', 'contact_name'],
   country: ['Country', 'country'],
   audience: ['Audience', 'audience', 'Type', 'type'],
+  surveySessionId: ['SurveySessionId', 'survey_session_id'],
   referredByCode: ['ReferredByCode', 'ref', 'Ref', 'ref_id'],
   referralCode: ['ReferralCode', 'referral_id', 'Referral Id'],
   referralUrl: ['ReferralUrl', 'referral_link', 'Referral Link'],
@@ -145,6 +173,10 @@ function doPost(e) {
         return json({ ok: true, data: saveProgress_(body) });
       case 'survey.response.upsert':
         return json({ ok: true, data: upsertResponse_(body) });
+      case 'survey.session.byemail':
+        return json(getSessionByEmail_(body));
+      case 'survey.email.send':
+        return json({ ok: true, data: sendSurveyLinkEmail_(body) });
       default:
         if (CONFIG.ENABLE_LEGACY_APPEND) return legacyAppend_(body, e);
         return json({ ok: false, error: 'unknown_action' });
@@ -357,6 +389,94 @@ function upsertResponse_(body) {
 
   responses.appendRow(ordered);
   return { created: true, updated: false };
+}
+
+/* Key-gated: resolves a waitlist email to the identity the site needs to mint
+   that person's survey link. Called only by the website's server — the reply
+   goes back over that server-to-server call, never to a browser. */
+function getSessionByEmail_(body) {
+  requireApiKey_(body);
+
+  var email = String(body.email || '').trim();
+  if (!email) return { ok: false, error: 'not_found' };
+
+  var sheet = signupSheet_();
+  ensureColumns_(sheet, SIGNUP_SURVEY_COLUMNS);
+
+  var located = findSignupRow_(sheet, '', email);
+  if (!located.row) return { ok: false, error: 'not_found' };
+
+  var row = located.row;
+  var userId = String(readCell_(sheet, row, 'UserId') || '');
+
+  /* A legacy row that predates UserId gets one now, so the link the site is
+     about to mint stays resolvable forever. */
+  if (!userId) {
+    userId = Utilities.getUuid();
+    writeCells_(sheet, row, { UserId: userId });
+  }
+
+  return {
+    ok: true,
+    data: {
+      userId: userId,
+      surveySessionId: String(
+        readCell_(sheet, row, 'SurveySessionId') || aliasValue_(sheet, row, 'surveySessionId') || ''
+      ),
+      firstName: firstWord_(aliasValue_(sheet, row, 'name')),
+      audience: String(
+        readCell_(sheet, row, 'SurveyAudience') || aliasValue_(sheet, row, 'audience') || ''
+      ),
+    },
+  };
+}
+
+/* Key-gated: emails a person THEIR OWN survey link. The cooldown column keeps
+   repeated form submissions from flooding an inbox. */
+function sendSurveyLinkEmail_(body) {
+  requireApiKey_(body);
+
+  var email = String(body.email || '').trim();
+  var surveyUrl = String(body.surveyUrl || '');
+  if (!email || surveyUrl.indexOf('http') !== 0) throw new Error('bad_request');
+
+  var sheet = signupSheet_();
+  var located = findSignupRow_(sheet, '', email);
+  if (!located.row) return { sent: false };
+
+  var last = String(readCell_(sheet, located.row, 'SurveyLinkSentAt') || '');
+  if (last) {
+    var elapsedMs = Date.now() - new Date(last).getTime();
+    if (elapsedMs >= 0 && elapsedMs < CONFIG.EMAIL_COOLDOWN_MINUTES * 60 * 1000) {
+      return { sent: false, cooldown: true };
+    }
+  }
+
+  var firstName = String(body.firstName || '').trim();
+  var greeting = firstName ? 'Hi ' + firstName + ',' : 'Hi,';
+
+  MailApp.sendEmail({
+    to: email,
+    name: CONFIG.EMAIL_SENDER_NAME,
+    subject: 'Your ENTA survey link',
+    body:
+      greeting +
+      '\n\nHere is your personal link to the ENTA survey:\n\n' +
+      surveyUrl +
+      '\n\nIt takes about 90 seconds, and your answers directly shape what we build next.' +
+      '\nThis link is yours alone and expires in 30 days.\n\nThe ENTA Team',
+    htmlBody:
+      '<p>' + greeting + '</p>' +
+      '<p>Here is your personal link to the ENTA survey:</p>' +
+      '<p><a href="' + surveyUrl + '" style="display:inline-block;background:#175cd3;color:#ffffff;' +
+      'padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">Tell Us About You &rarr;</a></p>' +
+      '<p>It takes about 90 seconds, and your answers directly shape what we build next.<br>' +
+      'This link is yours alone and expires in 30 days.</p>' +
+      '<p>The ENTA Team</p>',
+  });
+
+  writeCells_(sheet, located.row, { SurveyLinkSentAt: new Date().toISOString() });
+  return { sent: true };
 }
 
 /* Only reached when ENABLE_LEGACY_APPEND is true. Paste the body of the
