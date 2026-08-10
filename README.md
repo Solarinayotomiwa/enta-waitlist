@@ -1,4 +1,4 @@
-## Enta Waitlist
+### Enta Waitlist
 
 A polished animated landing page for the Enta waitlist experience. The site is built as a Next.js App Router project with React, Tailwind CSS, and Motion animations.
 
