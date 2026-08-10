@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { SurveyExperience } from "@/components/survey/SurveyExperience";
-import { SurveyLinkRequest } from "@/components/survey/SurveyLinkRequest";
 import { firstNameOf } from "@/lib/survey/surveyEngine";
 import { getSurveySession, isSurveyStoreConfigured } from "@/lib/survey/surveyStore";
 import { hashSurveyToken, verifySurveyToken } from "@/lib/survey/surveyToken";
@@ -21,25 +19,9 @@ export default async function InterviewPage({
   searchParams: Promise<{ t?: string }>;
 }) {
   const { t } = await searchParams;
+  const payload = verifySurveyToken(t);
 
-  /* Resolution order: explicit link token first, then the signup cookie — so
-     the GENERIC link in the welcome email opens the right survey in the
-     browser the person signed up in, and an expired emailed link still works
-     on that browser. With neither, offer to email a personal link. */
-  let token = t;
-  let payload = verifySurveyToken(token);
-
-  if (!payload) {
-    const cookieToken = (await cookies()).get("enta_survey")?.value;
-    const cookiePayload = verifySurveyToken(cookieToken);
-
-    if (cookiePayload) {
-      token = cookieToken;
-      payload = cookiePayload;
-    }
-  }
-
-  if (!payload || !token) return <SurveyLinkRequest hadToken={Boolean(t)} />;
+  if (!payload || !t) return <InvalidLink />;
 
   /* The signed token already carries the first name, so the greeting is
      personalised even before the Sheet store is configured. */
@@ -53,7 +35,7 @@ export default async function InterviewPage({
   if (isSurveyStoreConfigured()) {
     const session = await getSurveySession({
       userId: payload.userId,
-      surveyTokenHash: hashSurveyToken(token),
+      surveyTokenHash: hashSurveyToken(t),
     });
 
     if (session.ok) {
@@ -74,6 +56,32 @@ export default async function InterviewPage({
     }
   }
 
-  return <SurveyExperience participant={participant} token={token} />;
+  return <SurveyExperience participant={participant} token={t} />;
 }
 
+function InvalidLink() {
+  return (
+    <main className="relative isolate flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-[#0d101d] px-6 text-center text-[#f9fafb]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] bg-[radial-gradient(80%_100%_at_50%_0%,rgba(23,92,211,.3)_0%,transparent_72%)]"
+      />
+      <p className="text-[19px] font-semibold tracking-[-.02em]">
+        ent<span className="text-[#a9e0fb]">a</span>
+      </p>
+      <h1 className="mt-6 max-w-[28ch] text-[clamp(24px,4vw,32px)] font-semibold leading-[1.22] tracking-[-.025em]">
+        This survey link is no longer valid.
+      </h1>
+      <p className="mt-3 max-w-[46ch] text-[15px] leading-[1.55] text-[#d0d5dd]">
+        Links expire after 30 days. If you joined the waitlist and still want to answer, rejoin from
+        the site and we&rsquo;ll send you a fresh link.
+      </p>
+      <a
+        className="mt-8 rounded-[11px] bg-[#175cd3] px-6 py-3.5 text-[15px] font-semibold text-white outline-none transition hover:-translate-y-0.5 hover:brightness-110 focus-visible:ring-2 focus-visible:ring-[#a9e0fb] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d101d] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+        href="/"
+      >
+        Back to ENTA
+      </a>
+    </main>
+  );
+}

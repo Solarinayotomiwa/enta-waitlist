@@ -21,19 +21,6 @@ export function isSurveyStoreConfigured(): boolean {
   return endpoint() !== null;
 }
 
-/* The email-lookup and email-send actions can identify a person from just an
-   address, so unlike the token-paired actions they are gated behind a shared
-   key: the Apps Script rejects them unless the caller presents the same value
-   it holds in its Script Properties. */
-function surveyApiKey(): string | null {
-  const value = process.env.SHEETS_SURVEY_API_KEY?.replace(/^﻿/, "").trim();
-  return value || null;
-}
-
-export function isSurveyEmailConfigured(): boolean {
-  return endpoint() !== null && surveyApiKey() !== null;
-}
-
 type SheetResult<T> = { ok: true; data: T } | { ok: false; reason: "unavailable" | "error" };
 
 async function callSheet<T>(action: string, data: Record<string, unknown>): Promise<SheetResult<T>> {
@@ -116,35 +103,6 @@ export type StoredSurveySession = {
    row can only be read by someone holding a valid signed link for it. */
 export function getSurveySession(input: { userId: string; surveyTokenHash: string }) {
   return callSheet<StoredSurveySession>("survey.session.get", input);
-}
-
-/* Email-link flow (server-side only; key-gated). The identity returned here is
-   used to mint a fresh token which is then EMAILED to that address — it is
-   never handed to the browser that typed the email, which is what keeps one
-   person's link from ever opening another person's data. */
-export type EmailLookup = {
-  userId: string;
-  surveySessionId?: string;
-  firstName?: string;
-  audience?: SurveyAudience;
-};
-
-export function getSessionByEmail(email: string) {
-  return callSheet<EmailLookup>("survey.session.byemail", {
-    email,
-    apiKey: surveyApiKey() ?? "",
-  });
-}
-
-export function sendSurveyLinkEmail(input: {
-  email: string;
-  surveyUrl: string;
-  firstName?: string;
-}) {
-  return callSheet<{ sent: boolean; cooldown?: boolean }>("survey.email.send", {
-    ...input,
-    apiKey: surveyApiKey() ?? "",
-  });
 }
 
 export function saveSurveyProgress(input: {

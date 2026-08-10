@@ -111,8 +111,6 @@ export async function POST(request: Request) {
       thankYouUrl: string;
     } | null = null;
 
-    let issuedToken: string | null = null;
-
     try {
       /* The first name and the user's own referral code travel inside the signed
          token, so /thankyou and /interview can greet the signup and offer their
@@ -127,7 +125,6 @@ export async function POST(request: Request) {
 
       const origin = new URL(request.url).origin;
 
-      issuedToken = token;
       survey = {
         surveySessionId,
         surveyUrl: surveyUrl(origin, token),
@@ -156,7 +153,7 @@ export async function POST(request: Request) {
       console.error("Survey session could not be created", error);
     }
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       ok: true,
       user: {
         userId,
@@ -170,22 +167,6 @@ export async function POST(request: Request) {
       },
       survey,
     });
-
-    /* Same-browser recognition for the generic survey link in the welcome
-       email: /interview with no ?t= falls back to this cookie, so a signup
-       who skipped the popup can still open their own survey later. HttpOnly —
-       scripts on the page can never read the token. */
-    if (issuedToken) {
-      response.cookies.set("enta_survey", issuedToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 30,
-        path: "/",
-      });
-    }
-
-    return response;
   } catch (error) {
     console.error("Waitlist submission failed", error);
     return NextResponse.json({ error: "Submission failed, please try again" }, { status: 502 });
