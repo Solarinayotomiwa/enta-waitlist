@@ -13,9 +13,10 @@ export const businessInstrument: SurveyInstrument = {
       id: "role",
       theme: "behaviour",
       step: "Your role",
-      type: "single",
+      type: "multi",
       ack: (name) => (name ? `First things first, ${name}.` : "First things first."),
       q: "What’s your role there?",
+      hint: "Pick any that apply.",
       opts: [
         "Founder or CEO",
         "CFO or Finance Director",
@@ -43,9 +44,10 @@ export const businessInstrument: SurveyInstrument = {
       id: "q2_value",
       theme: "value",
       step: "What matters most",
-      type: "single",
+      type: "multi",
       ack: (name) => (name ? `This one tells us the most, ${name}.` : "This one tells us the most."),
       q: "For your business right now, what matters most?",
+      hint: "Pick any that apply.",
       opts: [
         "Getting paid easily — including dollars or stablecoins",
         "Protecting balances from losing value",

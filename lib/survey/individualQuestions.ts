@@ -43,13 +43,14 @@ export const individualInstrument: SurveyInstrument = {
       id: "q2_value",
       theme: "value",
       step: "What matters most",
-      type: "single",
+      type: "multi",
       ack: (name) =>
         name
           ? `Here’s the one I really want your answer on, ${name}.`
           : "Here’s the one I really want your answer on.",
       q: (name) =>
         `When it comes to your money right now${name ? `, ${name}` : ""} — what matters most to you?`,
+      hint: "Pick any that apply.",
       opts: [
         "Protecting it from losing value",
         "Moving and spending it freely",

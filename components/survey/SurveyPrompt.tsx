@@ -8,24 +8,23 @@ import { useReducedMotion } from "motion/react";
    technology, so nothing is announced character by character. Reduced-motion
    users get the finished sentence immediately. */
 
-/* Reading pace. The duration is the target and the per-character delay is
-   derived from it, so a long question doesn't drag. Tuned so a typical question
-   lands in well under a second and the longest note screen caps at 2s — the
-   earlier ladder let a long prompt run past six seconds before its options
-   appeared. Punctuation still gets a slight pause, just a subtler one. */
+/* Reading pace — the prototype's original values: a question lands in the
+   3–5s window regardless of length (the duration is the target and the
+   per-character delay is derived from it), and punctuation gets a weighted
+   pause. Deliberately unhurried so it reads as conversation, not loading. */
 const PACE = {
-  base: 200,
-  perChar: 15,
-  min: 520,
-  max: 1900,
-  ackPerChar: 11,
-  ackMin: 240,
-  ackMax: 560,
-  punctuationWeight: 4,
+  base: 900,
+  perChar: 60,
+  min: 2500,
+  max: 11000,
+  ackPerChar: 34,
+  ackMin: 900,
+  ackMax: 1900,
+  punctuationWeight: 9,
 };
 
 /* Beat between the spoken acknowledgement and the question typing in. */
-const ACK_GAP_MS = 130;
+const ACK_GAP_MS = 420;
 
 function clamp(value: number, low: number, high: number) {
   return Math.max(low, Math.min(high, value));
