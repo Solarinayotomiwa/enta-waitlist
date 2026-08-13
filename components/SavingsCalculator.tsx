@@ -30,7 +30,7 @@ const MAX_BAR_PERCENT = 70;
 const MIN_BAR_PERCENT = 4.5;
 
 type AssetRow = {
-  key: "bitcoin" | "gold" | "usdt" | "naira";
+  key: "bitcoin" | "gold" | "usdt" | "tbill" | "naira";
   name: string;
   icon: string;
   barColor: string;
@@ -41,8 +41,19 @@ const assetIcons = {
   bitcoin: "/images/savings-calculator/bitcoin.png",
   gold: "/images/savings-calculator/xaut.png",
   usdt: "/images/savings-calculator/usdt.png",
-  naira: "/images/savings-calculator/naira.png",
+  /* Same ₦ glyph, green circle for the interest-earning row, red for idle. */
+  tbill: "/images/savings-calculator/naira.png",
+  naira: "/images/savings-calculator/naira-red.png",
 } as const;
+
+const TBILL_GREEN = "#22a35a";
+
+/* Signed-percentage formatting for the T-bills sub-line: sub-1% gaps show one
+   decimal ("0.6"), never a clamped "0" — founder-confirmed fix. */
+function formatPercentGap(pct: number): string {
+  const magnitude = Math.abs(pct);
+  return magnitude >= 1 ? String(Math.round(magnitude)) : magnitude.toFixed(1);
+}
 
 function parseAmountInput(value: string) {
   const next = Number(value.replace(/[^\d]/g, ""));
@@ -120,7 +131,9 @@ export function SavingsCalculator() {
 
     const timer = window.setTimeout(() => {
       setAnnouncement(
-        `Over ${formatDuration(months)}: Bitcoin ${formatUsd(result.bitcoinUsd)}, gold ${formatUsd(result.goldUsd)}, USDT ${formatUsd(result.usdtUsd)}, naira ${formatUsd(result.nairaUsd)}.`,
+        `Over ${formatDuration(months)}: Bitcoin ${formatUsd(result.bitcoinUsd)}, gold ${formatUsd(result.goldUsd)}, USDT ${formatUsd(result.usdtUsd)}${
+          result.tbillUsd !== null ? `, T-bills ${formatUsd(result.tbillUsd)}` : ""
+        }, naira ${formatUsd(result.nairaUsd)}.`,
       );
     }, 400);
     return () => window.clearTimeout(timer);
@@ -132,16 +145,38 @@ export function SavingsCalculator() {
   const rows: AssetRow[] = useMemo(() => {
     if (!result) return [];
 
-    const sortable: AssetRow[] = [
-      { key: "bitcoin" as const, name: "Held in Bitcoin", icon: assetIcons.bitcoin, barColor: "#f8bd03", valueUsd: result.bitcoinUsd },
-      { key: "gold" as const, name: "Held in Gold", icon: assetIcons.gold, barColor: "#ec8502", valueUsd: result.goldUsd },
-      { key: "usdt" as const, name: "Held in USD₮", icon: assetIcons.usdt, barColor: "#11b4b4", valueUsd: result.usdtUsd },
-    ].sort((a, b) => b.valueUsd - a.valueUsd);
-
-    return [
-      ...sortable,
-      { key: "naira", name: "Held in T-Bills", icon: assetIcons.naira, barColor: "#f04438", valueUsd: result.nairaUsd },
+    const all: AssetRow[] = [
+      { key: "bitcoin", name: "Held in Bitcoin", icon: assetIcons.bitcoin, barColor: "#f8bd03", valueUsd: result.bitcoinUsd },
+      { key: "gold", name: "Held in Gold", icon: assetIcons.gold, barColor: "#ec8502", valueUsd: result.goldUsd },
+      { key: "usdt", name: "Held in USD₮", icon: assetIcons.usdt, barColor: "#11b4b4", valueUsd: result.usdtUsd },
+      { key: "naira", name: "Held in Naira", icon: assetIcons.naira, barColor: "#f04438", valueUsd: result.nairaUsd },
     ];
+
+    if (result.tbillUsd !== null) {
+      all.push({
+        key: "tbill",
+        name: "In Nigerian T-Bills",
+        icon: assetIcons.tbill,
+        barColor: TBILL_GREEN,
+        valueUsd: result.tbillUsd,
+      });
+    }
+
+    /* Strictly by value — T-bills can legitimately out-earn the dollar in
+       high-rate windows and must be allowed to re-sort above USD₮. */
+    return all.sort((a, b) => b.valueUsd - a.valueUsd);
+  }, [result]);
+
+  /* Leadership requirement: no invented rates. When the series is absent the
+     row hides and we say so once in the console instead of failing silently. */
+  const tbillWarnedRef = useRef(false);
+  useEffect(() => {
+    if (result && result.tbillUsd === null && !tbillWarnedRef.current) {
+      tbillWarnedRef.current = true;
+      console.warn(
+        "Savings calculator: T-bill rate series missing from market data — hiding the T-Bills row.",
+      );
+    }
   }, [result]);
 
   const maxValue = rows.length ? Math.max(...rows.map((row) => row.valueUsd)) : 0;
@@ -375,6 +410,34 @@ export function SavingsCalculator() {
                             />
                           ) : row.key === "usdt" ? (
                             <p className="text-base leading-6 text-white">your dollars, preserved</p>
+                          ) : row.key === "tbill" && result.tbillUsd !== null ? (
+                            (() => {
+                              /* Signed gap vs the dollar: + is behind, − is
+                                 ahead. Never clamped — "0% behind" while
+                                 actually ahead was the founder-flagged bug. */
+                              const pctRaw =
+                                ((result.usdtUsd - result.tbillUsd) / result.usdtUsd) * 100;
+
+                              if (pctRaw <= -0.05) {
+                                /* Genuinely ahead: adopt the winners' pattern
+                                   and styling exactly, like Bitcoin/Gold. */
+                                return (
+                                  <ComparisonLine
+                                    currency={currency}
+                                    deltaUsd={result.tbillUsd - result.usdtUsd}
+                                    fxNow={result.ngnPerUsdNow}
+                                  />
+                                );
+                              }
+
+                              return (
+                                <p className="text-base leading-6 text-[#d0d5dd]">
+                                  {pctRaw >= 0.05
+                                    ? `earned interest, still ${formatPercentGap(pctRaw)}% behind the dollar`
+                                    : "earned interest, level with the dollar"}
+                                </p>
+                              );
+                            })()
                           ) : (
                             <p className="text-base leading-6 text-[#f04438]">
                               you lost{" "}
@@ -402,19 +465,23 @@ export function SavingsCalculator() {
 
           <div className="flex flex-col gap-1.5">
             <p className="text-base leading-6 text-white/60">
-              Illustrative figures using historical prices. Past performance does not predict
-              future results. Not investment advice.
+              Illustrative figures using historical prices and Nigerian 364-day T-bill stop rates.
+              Past performance does not predict future results. Not investment advice.
             </p>
             {data && data.mode !== "sample" ? (
               <p className="text-[13px] leading-5 text-white/40">
                 Market data updated {new Date(data.current.capturedAt).toLocaleString("en-GB")}
-                {[data.sources.fx?.name, data.sources.bitcoin?.name, data.sources.gold?.name].some(
-                  Boolean,
-                )
+                {[
+                  data.sources.fx?.name,
+                  data.sources.bitcoin?.name,
+                  data.sources.gold?.name,
+                  data.sources.tbills?.name,
+                ].some(Boolean)
                   ? `. Sources: ${[
                       data.sources.fx?.name,
                       data.sources.bitcoin?.name,
                       data.sources.gold?.name,
+                      data.sources.tbills?.name,
                     ]
                       .filter(Boolean)
                       .join(", ")}.`

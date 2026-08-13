@@ -4,6 +4,11 @@ export type HistoricalPoint = {
   ngnPerUsd: number;
   btcUsd: number;
   goldUsdPerOz: number;
+  /* Nigerian 364-day T-bill stop rate, annualized %. Optional until the
+     production market-data API supplies it (TODO(Lekan)); while any month in
+     the selected window lacks it, the T-Bills row hides rather than showing
+     invented numbers — leadership-stated requirement. */
+  tbillRatePct?: number;
 };
 
 export type SavingsMarketData = {
@@ -18,6 +23,7 @@ export type SavingsMarketData = {
     fx?: { name: string; url?: string };
     bitcoin?: { name: string; url?: string };
     gold?: { name: string; url?: string };
+    tbills?: { name: string; url?: string };
   };
   mode: "sample" | "live" | "cached";
 };
@@ -38,6 +44,9 @@ export type SavingsResult = {
   goldUsd: number;
   usdtUsd: number;
   nairaUsd: number;
+  /* Rolling-reinvestment T-bill balance at today's FX; null when the rate
+     series is missing for any month in the window (row hides). */
+  tbillUsd: number | null;
   /* Comparisons, in USD. */
   bitcoinVsUsdt: number;
   goldVsUsdt: number;

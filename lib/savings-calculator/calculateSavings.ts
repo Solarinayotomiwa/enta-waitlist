@@ -96,6 +96,34 @@ export function calculateSavings(
   const usdtUsd = usdSum;
   const nairaUsd = totalNgn / nowPoint.ngnPerUsd;
 
+  /* T-bills: rolling reinvestment. Deposits join a naira balance, and every
+     month the whole balance compounds at that month's prevailing annualized
+     stop rate ÷ 12 — a saver continuously rolling 1-year bills. The deposit
+     compounds in its own deposit month (added BEFORE that month's rate is
+     applied; approved-artifact ordering), and conversion to USD happens once,
+     at today's rate, after the loop. If any month in the window lacks a rate,
+     the result is null and the row hides — never approximated. */
+  let tbillUsd: number | null = null;
+  const windowRates: number[] = [];
+
+  for (let i = start; i < start + months; i++) {
+    const rate = data.historical[i]?.tbillRatePct;
+    if (typeof rate !== "number" || !Number.isFinite(rate) || rate < 0) break;
+    windowRates.push(rate);
+  }
+
+  if (windowRates.length === months) {
+    let balance = 0;
+
+    for (let offset = 0; offset < months; offset++) {
+      if (mode === "monthly" || offset === 0) balance += amountNgn;
+      balance *= 1 + windowRates[offset] / 100 / 12;
+    }
+
+    tbillUsd = balance / nowPoint.ngnPerUsd;
+    if (!Number.isFinite(tbillUsd)) tbillUsd = null;
+  }
+
   const values = [bitcoinUsd, goldUsd, usdtUsd, nairaUsd];
   if (values.some((value) => !Number.isFinite(value))) {
     return { error: "The calculation produced an invalid result." };
@@ -106,6 +134,7 @@ export function calculateSavings(
     goldUsd,
     usdtUsd,
     nairaUsd,
+    tbillUsd,
     bitcoinVsUsdt: bitcoinUsd - usdtUsd,
     goldVsUsdt: goldUsd - usdtUsd,
     nairaLossUsd: usdtUsd - nairaUsd,
