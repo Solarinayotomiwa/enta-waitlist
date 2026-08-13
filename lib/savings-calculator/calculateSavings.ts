@@ -96,13 +96,20 @@ export function calculateSavings(
   const usdtUsd = usdSum;
   const nairaUsd = totalNgn / nowPoint.ngnPerUsd;
 
-  /* T-bills: rolling reinvestment. Deposits join a naira balance, and every
-     month the whole balance compounds at that month's prevailing annualized
-     stop rate ÷ 12 — a saver continuously rolling 1-year bills. The deposit
-     compounds in its own deposit month (added BEFORE that month's rate is
-     applied; approved-artifact ordering), and conversion to USD happens once,
-     at today's rate, after the loop. If any month in the window lacks a rate,
-     the result is null and the row hides — never approximated. */
+  /* T-bills, per the approved artifact — the two modes deliberately use
+     DIFFERENT compounding models (founder-validated; do not harmonize without
+     a founder decision — open question flagged for Dami):
+
+     - Monthly (DCA): each deposit LOCKS its deposit-month annualized stop
+       rate and compounds at that fixed rate ÷ 12 until today, like actually
+       buying a 364-day bill. Early deposits never benefit from later rate
+       rises.
+     - Lump sum: the single deposit re-prices monthly, rolling at each
+       month's prevailing rate across the window.
+
+     A deposit earns in its own deposit month, conversion to USD happens once
+     at today's rate after accumulation, and if any month in the window lacks
+     a rate the result is null and the row hides — never approximated. */
   let tbillUsd: number | null = null;
   const windowRates: number[] = [];
 
@@ -113,14 +120,20 @@ export function calculateSavings(
   }
 
   if (windowRates.length === months) {
-    let balance = 0;
+    let grownNaira = 0;
 
-    for (let offset = 0; offset < months; offset++) {
-      if (mode === "monthly" || offset === 0) balance += amountNgn;
-      balance *= 1 + windowRates[offset] / 100 / 12;
+    if (mode === "monthly") {
+      for (let offset = 0; offset < months; offset++) {
+        const monthsHeld = months - offset;
+        grownNaira += amountNgn * Math.pow(1 + windowRates[offset] / 100 / 12, monthsHeld);
+      }
+    } else {
+      let factor = 1;
+      for (const rate of windowRates) factor *= 1 + rate / 100 / 12;
+      grownNaira = amountNgn * factor;
     }
 
-    tbillUsd = balance / nowPoint.ngnPerUsd;
+    tbillUsd = grownNaira / nowPoint.ngnPerUsd;
     if (!Number.isFinite(tbillUsd)) tbillUsd = null;
   }
 
