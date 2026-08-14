@@ -11,3 +11,6 @@ dist/
 public/reference/
 .vercel
 
+
+# Never commit env value lists
+variables to add.txt
