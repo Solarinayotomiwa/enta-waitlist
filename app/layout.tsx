@@ -28,7 +28,12 @@ const plexMono = IBM_Plex_Mono({
    OG image URL is absolute and public on any deployment — never a localhost
    or vercel.app preview address. The card artwork is the approved Figma
    frame (Shiga Social media designs, node 2008:8125) at public/og.jpg. */
-const siteUrl = "https://www.entashiga.io";
+/* Defaults to the production domain; a deployment that serves a different
+   host (e.g. the personal Vercel project) sets NEXT_PUBLIC_SITE_URL so its
+   share cards reference images that actually resolve on that host. The
+   entashiga.io project leaves it unset and gets the canonical URLs. */
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://www.entashiga.io";
 const socialTitle = "Enta — Money that works everywhere you do";
 const socialDescription =
   "Preserve it. Move it. Own it. Hold dollars, Bitcoin, and gold with Enta.";
