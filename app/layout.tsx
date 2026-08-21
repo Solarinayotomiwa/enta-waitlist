@@ -23,11 +23,43 @@ const plexMono = IBM_Plex_Mono({
   variable: "--font-plex-mono",
 });
 
+/* Social link previews (WhatsApp, Slack, LinkedIn, X, iMessage, Discord…).
+   metadataBase pins every relative asset to the production domain, so the
+   OG image URL is absolute and public on any deployment — never a localhost
+   or vercel.app preview address. The card artwork is the approved Figma
+   frame (Shiga Social media designs, node 2008:8125) at public/og.jpg. */
+const siteUrl = "https://www.entashiga.io";
+const socialTitle = "Enta — Money that works everywhere you do";
+const socialDescription =
+  "Preserve it. Move it. Own it. Hold dollars, Bitcoin, and gold with Enta.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Enta Waitlist",
   description: "Buy Bitcoin, hold Gold, and move money from your local currency.",
   icons: {
     icon: "/favicon.svg",
+  },
+  openGraph: {
+    type: "website",
+    url: `${siteUrl}/`,
+    siteName: "Enta",
+    title: socialTitle,
+    description: socialDescription,
+    images: [
+      {
+        url: "/og.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Enta — Money that works everywhere you do. Join our waitlist.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: socialTitle,
+    description: socialDescription,
+    images: ["/og.jpg"],
   },
 };
 
