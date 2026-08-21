@@ -1,14 +1,28 @@
 "use client";
 
+/* ARCHIVED — the pre-Monierate calculator, kept for comparison only. Rendered
+   nowhere; app/page.tsx uses components/SavingsCalculator.tsx.
+
+   This version runs on the synthetic sampleData.ts series (calibrated so the
+   approved Figma acceptance figures fall out of the math), supports the
+   lump-sum mode and the idle-naira row, hides T-Bills unless
+   NEXT_PUBLIC_TBILL_STOP_RATES is set, and accrues T-bill interest with the
+   per-deposit locked-rate model. The live component replaced all of that with
+   the real 68-month series in monthlySeries.ts.
+
+   Safe to delete once the new calculator is signed off — this file and
+   calculateSavings.ts / sampleData.ts / marketData.ts / sampleData's tests are
+   the only remaining users of the old path, and git retains them. */
+
 import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/cn";
 import {
   MAX_MONTHS,
   MIN_MONTHS,
-  computeSavings,
+  calculateSavings,
   isSavingsError,
-} from "@/lib/savings-calculator/computeSavings";
+} from "@/lib/savings-calculator/calculateSavings";
 import {
   formatDuration,
   formatMonthLabel,
@@ -16,7 +30,12 @@ import {
   formatPlainNumber,
   formatUsd,
 } from "@/lib/savings-calculator/formatters";
-import { LATEST_POINT } from "@/lib/savings-calculator/monthlySeries";
+import { getSavingsMarketData } from "@/lib/savings-calculator/marketData";
+import type {
+  SavingsMarketData,
+  SavingsMode,
+  SavingsResult,
+} from "@/lib/savings-calculator/types";
 
 const DEFAULT_AMOUNT = 100_000;
 const MAX_AMOUNT = 1_000_000_000;
@@ -25,7 +44,7 @@ const MAX_BAR_PERCENT = 70;
 const MIN_BAR_PERCENT = 4.5;
 
 type AssetRow = {
-  key: "bitcoin" | "gold" | "usdt" | "tbill";
+  key: "bitcoin" | "gold" | "usdt" | "tbill" | "naira";
   name: string;
   icon: string;
   barColor: string;
@@ -36,7 +55,9 @@ const assetIcons = {
   bitcoin: "/images/savings-calculator/bitcoin.png",
   gold: "/images/savings-calculator/xaut.png",
   usdt: "/images/savings-calculator/usdt.png",
+  /* Same ₦ glyph, green circle for the interest-earning row, red for idle. */
   tbill: "/images/savings-calculator/naira.png",
+  naira: "/images/savings-calculator/naira-red.png",
 } as const;
 
 const TBILL_GREEN = "#22a35a";
@@ -86,26 +107,36 @@ function ComparisonLine({
   );
 }
 
-export function SavingsCalculator() {
+export function SavingsCalculatorOld() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const reducedMotion = useReducedMotion();
   const isInView = useInView(sectionRef, { margin: "0px 0px -35% 0px", once: true });
   const contentVisible = Boolean(reducedMotion || isInView);
 
+  const [data, setData] = useState<SavingsMarketData | null>(null);
+  const [mode, setMode] = useState<SavingsMode>("monthly");
   const [amount, setAmount] = useState(DEFAULT_AMOUNT);
   const [amountInput, setAmountInput] = useState(DEFAULT_AMOUNT.toLocaleString("en-NG"));
   const [months, setMonths] = useState(MAX_MONTHS);
   const [currency, setCurrency] = useState<"USD" | "NGN">("USD");
   const [announcement, setAnnouncement] = useState("");
 
-  /* The series is static and committed, so there is nothing to fetch — the
-     first render already has real figures. */
+  useEffect(() => {
+    let cancelled = false;
+    getSavingsMarketData().then((marketData) => {
+      if (!cancelled) setData(marketData);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const outcome = useMemo(
-    () => computeSavings({ amountNgn: amount, months }),
-    [amount, months],
+    () => (data ? calculateSavings({ mode, amountNgn: amount, months }, data) : null),
+    [data, mode, amount, months],
   );
-  const result = isSavingsError(outcome) ? null : outcome;
-  const calcError = isSavingsError(outcome) ? outcome.error : null;
+  const result: SavingsResult | null = outcome && !isSavingsError(outcome) ? outcome : null;
+  const calcError = outcome && isSavingsError(outcome) ? outcome.error : null;
 
   /* Debounced screen-reader announcement so slider drags don't announce
      every pixel. */
@@ -114,15 +145,16 @@ export function SavingsCalculator() {
 
     const timer = window.setTimeout(() => {
       setAnnouncement(
-        `Over ${formatDuration(months)}: Bitcoin ${formatUsd(result.bitcoinUsd)}, gold ${formatUsd(result.goldUsd)}, dollars ${formatUsd(result.usdtUsd)}, T-bills ${formatUsd(result.tbillUsd)}.`,
+        `Over ${formatDuration(months)}: Bitcoin ${formatUsd(result.bitcoinUsd)}, gold ${formatUsd(result.goldUsd)}, USDT ${formatUsd(result.usdtUsd)}${
+          result.tbillUsd !== null ? `, T-bills ${formatUsd(result.tbillUsd)}` : ""
+        }, naira ${formatUsd(result.nairaUsd)}.`,
       );
     }, 400);
     return () => window.clearTimeout(timer);
   }, [result, months]);
 
   const startLabel = result ? formatMonthLabel(result.startMonth) : "";
-  const endLabel = formatMonthLabel(LATEST_POINT.month);
-  const headlineTotal = amount * months;
+  const headlineTotal = mode === "monthly" ? amount * months : amount;
 
   const rows: AssetRow[] = useMemo(() => {
     if (!result) return [];
@@ -130,13 +162,35 @@ export function SavingsCalculator() {
     const all: AssetRow[] = [
       { key: "bitcoin", name: "Held in Bitcoin", icon: assetIcons.bitcoin, barColor: "#f8bd03", valueUsd: result.bitcoinUsd },
       { key: "gold", name: "Held in Gold", icon: assetIcons.gold, barColor: "#ec8502", valueUsd: result.goldUsd },
-      { key: "usdt", name: "Held in dollars", icon: assetIcons.usdt, barColor: "#11b4b4", valueUsd: result.usdtUsd },
-      { key: "tbill", name: "Held in T-Bills", icon: assetIcons.tbill, barColor: TBILL_GREEN, valueUsd: result.tbillUsd },
+      { key: "usdt", name: "Held in USD₮", icon: assetIcons.usdt, barColor: "#11b4b4", valueUsd: result.usdtUsd },
+      { key: "naira", name: "Held in Naira", icon: assetIcons.naira, barColor: "#f04438", valueUsd: result.nairaUsd },
     ];
 
+    if (result.tbillUsd !== null) {
+      all.push({
+        key: "tbill",
+        name: "In Nigerian T-Bills",
+        icon: assetIcons.tbill,
+        barColor: TBILL_GREEN,
+        valueUsd: result.tbillUsd,
+      });
+    }
+
     /* Strictly by value — T-bills can legitimately out-earn the dollar in
-       high-rate windows and must be allowed to re-sort above it. */
+       high-rate windows and must be allowed to re-sort above USD₮. */
     return all.sort((a, b) => b.valueUsd - a.valueUsd);
+  }, [result]);
+
+  /* Leadership requirement: no invented rates. When the series is absent the
+     row hides and we say so once in the console instead of failing silently. */
+  const tbillWarnedRef = useRef(false);
+  useEffect(() => {
+    if (result && result.tbillUsd === null && !tbillWarnedRef.current) {
+      tbillWarnedRef.current = true;
+      console.warn(
+        "Savings calculator: T-bill rate series missing from market data — hiding the T-Bills row.",
+      );
+    }
   }, [result]);
 
   const maxValue = rows.length ? Math.max(...rows.map((row) => row.valueUsd)) : 0;
@@ -183,7 +237,9 @@ export function SavingsCalculator() {
               </h2>
               <p className="max-w-[522px] text-xl leading-[1.37] tracking-[-0.32px] sm:text-2xl">
                 <span className="font-semibold text-white">
-                  {`Saving ${formatNgn(amount)} every month since ${startLabel} (${months} deposits) `}
+                  {mode === "monthly"
+                    ? `Saving ${formatNgn(amount)} every month since ${startLabel} (${months} deposits) `
+                    : `Putting away ${formatNgn(amount)} at once in ${startLabel} `}
                 </span>
                 <span className="text-[#d0d5dd]">
                   — this is what it would be worth today, depending on what you held it in.
@@ -193,27 +249,57 @@ export function SavingsCalculator() {
           </div>
 
           <div className="flex w-full max-w-[545px] flex-col gap-10">
-            <div className="flex flex-col gap-0.5">
-              <label
-                className="text-base leading-6 text-[#d0d5dd]"
-                htmlFor="savings-amount"
-              >
-                How much do you save each month?
-              </label>
-              <div className="flex flex-col gap-2">
-                <div className="flex h-[68px] w-full items-center gap-2 border-b-2 border-[#98a2b3] py-3 pr-4">
-                  <span className="text-[44px] font-medium leading-none tracking-[-0.8px] text-white sm:text-[48px]">₦</span>
-                  <input
-                    className="w-full bg-transparent text-[38px] font-medium leading-none tracking-[-0.72px] text-white outline-none placeholder:text-white/30 sm:text-[44px]"
-                    id="savings-amount"
-                    inputMode="numeric"
-                    onChange={onAmountChange}
-                    value={amountInput}
-                  />
+            <div className="flex flex-col gap-7">
+              <div className="relative w-fit">
+                <select
+                  aria-label="Savings frequency"
+                  className="cursor-pointer appearance-none rounded-lg border-2 border-[#344054] bg-transparent py-3 pl-4 pr-11 text-[22px] font-medium capitalize leading-[30px] text-white outline-none transition duration-150 ease-out focus-visible:border-[#1570ef] [&>option]:bg-[#141a2c]"
+                  onChange={(event) => setMode(event.target.value as SavingsMode)}
+                  value={mode}
+                >
+                  <option value="monthly">Saved monthly</option>
+                  <option value="once">Saved at once</option>
+                </select>
+                <svg
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M4.5 7.5 10 13l5.5-5.5" />
+                </svg>
+              </div>
+
+              <div className="flex flex-col gap-0.5">
+                <label
+                  className="text-base leading-6 text-[#d0d5dd]"
+                  htmlFor="savings-amount"
+                >
+                  {mode === "monthly" ? "How much do you save each month?" : "How much did you put away?"}
+                </label>
+                <div className="flex flex-col gap-2">
+                  <div className="flex h-[68px] w-full items-center gap-2 border-b-2 border-[#98a2b3] py-3 pr-4">
+                    <span className="text-[44px] font-medium leading-none tracking-[-0.8px] text-white sm:text-[48px]">₦</span>
+                    <input
+                      className="w-full bg-transparent text-[38px] font-medium leading-none tracking-[-0.72px] text-white outline-none placeholder:text-white/30 sm:text-[44px]"
+                      id="savings-amount"
+                      inputMode="numeric"
+                      onChange={onAmountChange}
+                      value={amountInput}
+                    />
+                  </div>
+                  <p className="text-base leading-6 text-[#d0d5dd]">
+                    {amount > 0
+                      ? mode === "monthly"
+                        ? `${formatNgn(amount)} / month`
+                        : `${formatNgn(amount)}, one time`
+                      : "Enter an amount"}
+                  </p>
                 </div>
-                <p className="text-base leading-6 text-[#d0d5dd]">
-                  {amount > 0 ? `${formatNgn(amount)} / month` : "Enter an amount"}
-                </p>
               </div>
             </div>
 
@@ -223,7 +309,7 @@ export function SavingsCalculator() {
                   className="flex-1 text-2xl font-medium leading-8 text-white"
                   htmlFor="savings-duration"
                 >
-                  How long have you saved for?
+                  {mode === "monthly" ? "How long have you saved for?" : "How long ago?"}
                 </label>
                 <p className="text-base leading-6 text-[#d0d5dd]">{formatDuration(months)}</p>
               </div>
@@ -300,7 +386,9 @@ export function SavingsCalculator() {
 
           {calcError ? (
             <p className="text-lg leading-6 text-white/70">{calcError}</p>
-          ) : !result ? null : (
+          ) : !result ? (
+            <p className="text-base leading-6 text-white/50">Loading market data…</p>
+          ) : (
             <div className="flex flex-col gap-5">
               {rows.map((row, index) => {
                 const ratio = maxValue > 0 ? row.valueUsd / maxValue : 0;
@@ -336,15 +424,11 @@ export function SavingsCalculator() {
                             />
                           ) : row.key === "usdt" ? (
                             <p className="text-base leading-6 text-white">your dollars, preserved</p>
-                          ) : (
+                          ) : row.key === "tbill" && result.tbillUsd !== null ? (
                             (() => {
                               /* Signed gap vs the dollar: + is behind, − is
                                  ahead. Never clamped — "0% behind" while
-                                 actually ahead was the founder-flagged bug.
-                                 A trailing T-bill row says "earned interest,
-                                 still X% behind" rather than the losing-row
-                                 copy: the money did earn, it just lost the
-                                 race to depreciation. */
+                                 actually ahead was the founder-flagged bug. */
                               const pctRaw =
                                 ((result.usdtUsd - result.tbillUsd) / result.usdtUsd) * 100;
 
@@ -354,7 +438,7 @@ export function SavingsCalculator() {
                                 return (
                                   <ComparisonLine
                                     currency={currency}
-                                    deltaUsd={result.tbillVsUsdt}
+                                    deltaUsd={result.tbillUsd - result.usdtUsd}
                                     fxNow={result.ngnPerUsdNow}
                                   />
                                 );
@@ -368,6 +452,14 @@ export function SavingsCalculator() {
                                 </p>
                               );
                             })()
+                          ) : (
+                            <p className="text-base leading-6 text-[#f04438]">
+                              you lost{" "}
+                              {currency === "USD"
+                                ? formatUsd(result.nairaLossUsd)
+                                : formatNgn(result.nairaLossUsd * result.ngnPerUsdNow)}{" "}
+                              of value to depreciation
+                            </p>
                           )}
                         </div>
                         <p className="shrink-0 text-right text-xl font-semibold leading-8 tabular-nums text-white sm:text-2xl">
@@ -386,19 +478,30 @@ export function SavingsCalculator() {
           )}
 
           <div className="flex flex-col gap-1.5">
-            {result ? (
-              <p className="text-base leading-6 text-white/60">
-                Window: {startLabel} – {endLabel}.
+            <p className="text-base leading-6 text-white/60">
+              Illustrative figures using historical prices and Nigerian 364-day T-bill stop rates.
+              Past performance does not predict future results. Not investment advice.
+            </p>
+            {data && data.mode !== "sample" ? (
+              <p className="text-[13px] leading-5 text-white/40">
+                Market data updated {new Date(data.current.capturedAt).toLocaleString("en-GB")}
+                {[
+                  data.sources.fx?.name,
+                  data.sources.bitcoin?.name,
+                  data.sources.gold?.name,
+                  data.sources.tbills?.name,
+                ].some(Boolean)
+                  ? `. Sources: ${[
+                      data.sources.fx?.name,
+                      data.sources.bitcoin?.name,
+                      data.sources.gold?.name,
+                      data.sources.tbills?.name,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}.`
+                  : "."}
               </p>
             ) : null}
-            {/* Provenance is stated on the page, not just in the repo — the FX
-                series is real Monierate data only from Sep 2023 onward. */}
-            <p className="text-[13px] leading-5 text-white/40">
-              FX: real Monierate USD₮/NGN composite from Sep 2023; 2021 – early 2023
-              interpolated between real dated anchors. Bitcoin and gold real throughout.
-              CBN 364-day T-bill rates. Past performance does not predict future results.
-              Not investment advice.
-            </p>
           </div>
 
           <p aria-live="polite" className="sr-only">
